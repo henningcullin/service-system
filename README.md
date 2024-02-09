@@ -17,4 +17,3 @@ This project is a service system where you can do the following:
 #### Frontend
 
 - Svelte
-- Htmx
