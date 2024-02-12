@@ -7,11 +7,16 @@ use axum::{ // Framework
     }, Router // The Router
 };
 
+mod facility;
+mod machine;
+mod user;
+mod task;
+
 #[tokio::main]
 async fn main() {
 
     let app = Router::new()
-        .route("/car", get(cars::details))
+        .route("/facility", get(facility::details))
         .route("/cars", get(cars::index))
         .route("/car", post(cars::create))
         .route("/car", put(cars::update))
