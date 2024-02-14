@@ -13,6 +13,8 @@ This project is a service system where you can do the following:
 
 - Rust (language)
 - Axum (framework)
+- MySQL (database)
+- sqlx (database driver)
 
 #### Frontend
 
