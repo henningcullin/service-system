@@ -3,5 +3,6 @@ CREATE TABLE machine (
     name VARCHAR(255) NOT NULL,
     type VARCHAR(255),
     status ENUM('Active', 'Inactive') DEFAULT 'Inactive',
-    location INT NOT NULL REFERENCES facility(facility_id)
+    location INT NOT NULL,
+    CONSTRAINT fk_location FOREIGN KEY (location) REFERENCES facility(facility_id)
 );
