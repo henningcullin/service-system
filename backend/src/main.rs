@@ -1,14 +1,18 @@
 use axum::{ // Framework
     routing::{ // HTTP Methods
-        get,
+        get/* ,
         post,
         put,
-        delete
-    }, Router // The Router
+        delete */
+    }, 
+    Router, // The Router
 };
-
-use std::env;
+use std::{
+    env, 
+    time::Duration
+};
 use dotenv::dotenv;
+use sqlx::mysql::MySqlPoolOptions;
 
 mod facility;
 mod machine;
@@ -22,10 +26,18 @@ async fn main() {
 
     let database_url = env::var("DATABASE_URL").unwrap();
 
-    println!("{}", database_url);
+    let pool = MySqlPoolOptions::new()
+        .max_connections(7)
+        .acquire_timeout(Duration::from_secs(3))
+        .connect(&database_url)
+        .await
+        .expect("Can't connect to Database");
 
     let app = Router::new()
-        .route("/facility", get(facility::details));
+        // api
+        .route("/api/facility", get(facility::details))
+        .route("/api/facilities", get(facility::index))
+        .with_state(pool);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:80").await.unwrap();
     axum::serve(listener, app).await.unwrap();
