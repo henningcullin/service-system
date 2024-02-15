@@ -1,9 +1,9 @@
 use axum::{ // Framework
     routing::{ // HTTP Methods
-        get/* ,
+        get,
         post,
         put,
-        delete */
+        delete
     }, 
     Router, // The Router
 };
@@ -14,7 +14,6 @@ use std::{
 use dotenv::dotenv;
 use sqlx::mysql::MySqlPoolOptions;
 
-mod facility;
 mod machine;
 mod user;
 mod task;
@@ -34,11 +33,16 @@ async fn main() {
         .expect("Can't connect to Database");
 
     let app = Router::new()
-        // api
-        .route("/api/facility", get(facility::details))
-        .route("/api/facilities", get(facility::index))
-        .with_state(pool);
+        // API
 
+        // MACHINE
+
+        .route("/api/machine", get(machine::details))
+        .route("/api/machines", get(machine::index))
+        .route("/api/machine", post(machine::create))
+
+        .with_state(pool);
+        
     let listener = tokio::net::TcpListener::bind("0.0.0.0:80").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
