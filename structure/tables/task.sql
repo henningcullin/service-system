@@ -8,7 +8,7 @@ CREATE TABLE task (
     creator INT UNSIGNED NOT NULL,
     executor INT UNSIGNED,
     machine INT UNSIGNED,
-    CONSTRAINT fk_creator FOREIGN KEY (creator) REFERENCES user(user_id),
-    CONSTRAINT fk_executor FOREIGN KEY (executor) REFERENCES user(user_id),
-    CONSTRAINT fk_machine FOREIGN KEY (machine) REFERENCES machine(machine_id)
+    CONSTRAINT fk_creator FOREIGN KEY (creator) REFERENCES user(id),
+    CONSTRAINT fk_executor FOREIGN KEY (executor) REFERENCES user(id),
+    CONSTRAINT fk_machine FOREIGN KEY (machine) REFERENCES machine(id)
 );
