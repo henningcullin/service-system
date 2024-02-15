@@ -1,5 +1,5 @@
 CREATE TABLE task (
-    task_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     status ENUM('Pending', 'In Progress', 'Completed') DEFAULT 'Pending',
