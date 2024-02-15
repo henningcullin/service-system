@@ -38,7 +38,7 @@ foreach ($tableFile in $tableFilesArr) {
 
 # CREATE COMPANY USER
 $createUserQuery = "CREATE USER '$company_user_name'@'%' IDENTIFIED BY '$company_user_password';"
-$grantQuery = "GRANT INSERT, UPDATE, DELETE ON $company_name.* TO '$company_user_name'@'%';"
+$grantQuery = "GRANT SELECT, INSERT, UPDATE, DELETE ON $company_name.* TO '$company_user_name'@'%';"
 
 & $mysql -u "$root_username" -p"$root_password" -h "$server" -D "$company_name" -e "$createUserQuery"
 & $mysql -u "$root_username" -p"$root_password" -h "$server" -D "$company_name" -e "$grantQuery"
