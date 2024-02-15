@@ -11,8 +11,8 @@ $company_name = Read-Host "Enter company name"
 $company_user_name = $company_name
 $company_user_password = Read-Host "Enter company password"
 
-# MYSQL COMMAND LINE CLIENT PATH
-$mysql = "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql"
+# MYSQL COMMAND LINE CLIENT PATH <____________________________________________________________ CHANGE MYSQL PATH HERE
+$mysql = "E:\Program Files\MySQL\MySQL Server 8.0\bin\mysql"
 
 # CREATE DATABASE
 $createDatabaseQuery = "CREATE DATABASE IF NOT EXISTS $company_name;"
@@ -22,11 +22,10 @@ $createDatabaseQuery = "CREATE DATABASE IF NOT EXISTS $company_name;"
 $tableFilesPath = Join-Path (Get-Location).Path -ChildPath "structure\tables"
 $tableFilesArr = Get-ChildItem $tableFilesPath -Filter *.sql | Sort-Object {
     $order = @{
-        'facility' = 1
-        'user'     = 2
-        'worker'   = 3
-        'machine'  = 4
-        'task'     = 5
+        'user'     = 1
+        'worker'   = 2
+        'machine'  = 3
+        'task'     = 4
     }
     $order[$_.BaseName.ToLower()]
 }
