@@ -8,19 +8,26 @@ use axum::{
 use sqlx::{
     MySqlPool,
     FromRow,
+    Type
 };
 use serde_derive::{
     Serialize,
     Deserialize
 };
 
+#[derive(Serialize, Deserialize, Type)]
+#[repr(i32)]
+pub enum MachineStatus {
+    Active = 1,
+    Inactive = 2,
+}
 
 #[derive(Serialize, Deserialize, FromRow)]
 pub struct Machine {
     id: u64,
     name: String,
     machine_type: Option<String>,
-    status: String
+    status: MachineStatus
 }
 
 #[derive(Serialize, Deserialize)]
@@ -32,14 +39,14 @@ pub struct QueryMachine {
 pub struct NewMachine {
     name: String,
     machine_type: Option<String>,
-    status: String
+    status: MachineStatus
 }
 
 pub async fn details(
         State(pool): State<MySqlPool>,
         Query(query): Query<QueryMachine>,
     ) -> Result<Json<Machine>, StatusCode> {
-        let facility = sqlx::query_as::<_, Machine>("SELECT * FROM machine WHERE id = ?")
+        let facility = sqlx::query_as::<_, Machine>("SELECT id, name, machine_type, CAST(status AS SIGNED) status FROM machine WHERE id = ?")
             .bind(query.id)
             .fetch_one(&pool)
             .await
@@ -59,7 +66,7 @@ pub async fn details(
 pub async fn index(
         State(pool): State<MySqlPool>
     ) -> Result<Json<Vec<Machine>>, StatusCode> {
-        let machines = sqlx::query_as::<_, Machine>("SELECT * FROM machine")
+        let machines = sqlx::query_as::<_, Machine>("SELECT id, name, machine_type, CAST(status AS SIGNED) status FROM machine")
             .fetch_all(&pool)
             .await
             .map_err(|e| {
@@ -74,9 +81,6 @@ pub async fn create(
     State(pool): State<MySqlPool>,
     Json(input): Json<NewMachine>,
 ) -> Result<Json<QueryMachine>, StatusCode> {
-    if input.status != "Active" && input.status != "Inactive" {
-        return Err(StatusCode::BAD_REQUEST);
-    }
 
     // Execute the INSERT statement with a prepared statement
     let last_inserted_id:u64 = sqlx::query!(
