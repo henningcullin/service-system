@@ -40,6 +40,7 @@ async fn main() {
         .route("/api/machine", get(machine::details))
         .route("/api/machines", get(machine::index))
         .route("/api/machine", post(machine::create))
+        .route("/api/machine", delete(machine::delete))
 
         .with_state(pool);
         

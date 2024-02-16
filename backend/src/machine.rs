@@ -17,7 +17,7 @@ use serde_derive::{
 
 #[derive(Serialize, Deserialize, FromRow)]
 pub struct Machine {
-    id: u32,
+    id: u64,
     name: String,
     machine_type: Option<String>,
     status: String
@@ -25,7 +25,7 @@ pub struct Machine {
 
 #[derive(Serialize, Deserialize)]
 pub struct QueryMachine {
-    id: u32
+    id: u64
 }
 
 #[derive(Deserialize)]
@@ -79,7 +79,7 @@ pub async fn create(
     }
 
     // Execute the INSERT statement with a prepared statement
-    let last_inserted_id:u32 = sqlx::query!(
+    let last_inserted_id:u64 = sqlx::query!(
         "INSERT INTO machine (name, machine_type, status) VALUES (?, ?, ?)",
         input.name,
         input.machine_type,
@@ -91,15 +91,33 @@ pub async fn create(
             eprintln!("Error executing query for machine::create: {:?}", e);
             StatusCode::INTERNAL_SERVER_ERROR
         })?
-        .last_insert_id()
-        .try_into()
-        .map_err(|e| {
-            eprintln!("Error getting last insert id for machine::create: {:?}", e);
-            StatusCode::INTERNAL_SERVER_ERROR
-        })?;
+        .last_insert_id();
 
             // Create and return the response struct
     let id = QueryMachine { id: last_inserted_id };
 
     Ok(Json(id))
+}
+
+pub async fn delete(
+    State(pool): State<MySqlPool>,
+    Query(query): Query<QueryMachine>
+) -> Result<StatusCode, StatusCode> {
+
+    let result = sqlx::query!(
+        "DELETE FROM machine WHERE id = ?",
+        query.id
+    )
+    .execute(&pool)
+    .await
+    .map_err(|e| {
+        eprintln!("Error executing query for machine::create: {:?}", e);
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
+
+    if result.rows_affected() > 0 {
+        Ok(StatusCode::NO_CONTENT)
+    } else {
+        Ok(StatusCode::NOT_FOUND)
+    }
 }
