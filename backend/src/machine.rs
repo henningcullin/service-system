@@ -145,17 +145,30 @@ pub async fn update(
     ) -> Result<StatusCode, StatusCode> {
 
         let mut query = sqlx::QueryBuilder::new("UPDATE machine SET");
+        let mut first = true;
 
         if let Some(name) = input.name {
+            if !first {
+                query.push(",");
+            }
             query.push(" name = ").push_bind(name);
+            first = false;
         }
 
         if let Some(machine_type) = input.machine_type {
-            query.push(", machine_type = ").push_bind(machine_type);
+            if !first {
+                query.push(",");
+            }
+            query.push(" machine_type = ").push_bind(machine_type);
+            first = false;
         }
 
         if let Some(status) = input.status {
-            query.push(", status = ").push_bind(status);
+            if !first {
+                query.push(",");
+            }
+            query.push(" status = ").push_bind(status);
+            first = false;
         }
 
         query.push(" WHERE id = ").push_bind(input.id);
