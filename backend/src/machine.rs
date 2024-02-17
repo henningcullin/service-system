@@ -1,19 +1,22 @@
 use axum::{
     extract::{
-        Query, State
+        Query, 
+        State
     },
     Json,
     http::StatusCode
 };
 use sqlx::{
-    MySqlPool,
-    FromRow,
+    MySqlPool, 
+    FromRow, 
     Type
 };
 use serde_derive::{
     Serialize,
     Deserialize
 };
+
+// ______________________________________ STRUCTS ______________________________________
 
 #[derive(Serialize, Deserialize, Type)]
 #[repr(i32)]
@@ -42,11 +45,21 @@ pub struct NewMachine {
     status: MachineStatus
 }
 
+#[derive(Deserialize)]
+pub struct UpdateMachine {
+    id: u64,
+    name: Option<String>,
+    machine_type: Option<String>,
+    status: Option<MachineStatus>
+}
+
+// ___________________________________ FUNCTIONS ___________________________________
+
 pub async fn details(
         State(pool): State<MySqlPool>,
         Query(query): Query<QueryMachine>,
     ) -> Result<Json<Machine>, StatusCode> {
-        let facility = sqlx::query_as::<_, Machine>("SELECT id, name, machine_type, CAST(status AS SIGNED) status FROM machine WHERE id = ?")
+        let machine = sqlx::query_as::<_, Machine>("SELECT id, name, machine_type, CAST(status AS SIGNED) status FROM machine WHERE id = ?")
             .bind(query.id)
             .fetch_one(&pool)
             .await
@@ -60,7 +73,7 @@ pub async fn details(
                 StatusCode::INTERNAL_SERVER_ERROR
             })?;
 
-        Ok(Json(facility)) 
+        Ok(Json(machine)) 
 }
 
 pub async fn index(
@@ -78,50 +91,87 @@ pub async fn index(
 }
 
 pub async fn create(
-    State(pool): State<MySqlPool>,
-    Json(input): Json<NewMachine>,
-) -> Result<Json<QueryMachine>, StatusCode> {
+        State(pool): State<MySqlPool>,
+        Json(input): Json<NewMachine>,
+    ) -> Result<Json<QueryMachine>, StatusCode> {
 
-    // Execute the INSERT statement with a prepared statement
-    let last_inserted_id:u64 = sqlx::query!(
-        "INSERT INTO machine (name, machine_type, status) VALUES (?, ?, ?)",
-        input.name,
-        input.machine_type,
-        input.status
-    )
-        .execute(&pool)
-        .await
-        .map_err(|e| {
-            eprintln!("Error executing query for machine::create: {:?}", e);
-            StatusCode::INTERNAL_SERVER_ERROR
-        })?
-        .last_insert_id();
+        // Execute the INSERT statement with a prepared statement
+        let last_inserted_id:u64 = sqlx::query!(
+            "INSERT INTO machine (name, machine_type, status) VALUES (?, ?, ?)",
+            input.name,
+            input.machine_type,
+            input.status
+        )
+            .execute(&pool)
+            .await
+            .map_err(|e| {
+                eprintln!("Error executing query for machine::create: {:?}", e);
+                StatusCode::INTERNAL_SERVER_ERROR
+            })?
+            .last_insert_id();
 
-            // Create and return the response struct
-    let id = QueryMachine { id: last_inserted_id };
+                // Create and return the response struct
+        let id = QueryMachine { id: last_inserted_id };
 
-    Ok(Json(id))
+        Ok(Json(id))
 }
 
 pub async fn delete(
-    State(pool): State<MySqlPool>,
-    Query(query): Query<QueryMachine>
-) -> Result<StatusCode, StatusCode> {
+        State(pool): State<MySqlPool>,
+        Query(query): Query<QueryMachine>
+    ) -> Result<StatusCode, StatusCode> {
 
-    let result = sqlx::query!(
-        "DELETE FROM machine WHERE id = ?",
-        query.id
-    )
-    .execute(&pool)
-    .await
-    .map_err(|e| {
-        eprintln!("Error executing query for machine::create: {:?}", e);
-        StatusCode::INTERNAL_SERVER_ERROR
-    })?;
+        let result = sqlx::query!(
+            "DELETE FROM machine WHERE id = ?",
+            query.id
+        )
+        .execute(&pool)
+        .await
+        .map_err(|e| {
+            eprintln!("Error executing query for machine::delete: {:?}", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
 
-    if result.rows_affected() > 0 {
-        Ok(StatusCode::NO_CONTENT)
-    } else {
-        Ok(StatusCode::NOT_FOUND)
-    }
+        if result.rows_affected() > 0 {
+            Ok(StatusCode::NO_CONTENT)
+        } else {
+            Ok(StatusCode::NOT_FOUND)
+        }
+}
+
+pub async fn update(
+        State(pool): State<MySqlPool>,
+        Json(input): Json<UpdateMachine>
+    ) -> Result<StatusCode, StatusCode> {
+
+        let mut query = sqlx::QueryBuilder::new("UPDATE machine SET");
+
+        if let Some(name) = input.name {
+            query.push(" name = ").push_bind(name);
+        }
+
+        if let Some(machine_type) = input.machine_type {
+            query.push(", machine_type = ").push_bind(machine_type);
+        }
+
+        if let Some(status) = input.status {
+            query.push(", status = ").push_bind(status);
+        }
+
+        query.push(" WHERE id = ").push_bind(input.id);
+
+        let result = query.build().execute(&pool)
+            .await
+            .map_err(|e| {
+                eprintln!("Error executing query for machine::delete: {:?}", e);
+                StatusCode::INTERNAL_SERVER_ERROR
+            })?;
+
+        println!("{:?}", result);
+
+        if result.rows_affected() > 0 {
+            return Ok(StatusCode::NO_CONTENT);
+        } else {
+            return Ok(StatusCode::NOT_FOUND);
+        }
 }

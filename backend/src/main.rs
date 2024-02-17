@@ -23,7 +23,7 @@ async fn main() {
 
     dotenv().ok();
 
-    let database_url = env::var("DATABASE_URL").unwrap();
+    let database_url = env::var("DATABASE_URL").expect("Can't resolve DATABASE_URL");
 
     let pool = MySqlPoolOptions::new()
         .max_connections(7)
@@ -41,9 +41,10 @@ async fn main() {
         .route("/api/machines", get(machine::index))
         .route("/api/machine", post(machine::create))
         .route("/api/machine", delete(machine::delete))
+        .route("/api/machine", put(machine::update))
 
         .with_state(pool);
         
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:80").await.unwrap();
-    axum::serve(listener, app).await.unwrap();
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:80").await.expect("Can't start listener");
+    axum::serve(listener, app).await.expect("Can't start server");
 }
