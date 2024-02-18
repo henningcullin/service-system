@@ -1,5 +1,5 @@
 CREATE TABLE machine (
-    id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+    id BINARY(16) PRIMARY KEY DEFAULT (UUID_TO_BIN(UUID(), true)),
     name VARCHAR(255) NOT NULL,
     make VARCHAR(255),
     machine_type VARCHAR(255),
