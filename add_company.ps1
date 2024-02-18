@@ -23,9 +23,8 @@ $tableFilesPath = Join-Path (Get-Location).Path -ChildPath "structure\tables"
 $tableFilesArr = Get-ChildItem $tableFilesPath -Filter *.sql | Sort-Object {
     $order = @{
         'user'     = 1
-        'worker'   = 2
-        'machine'  = 3
-        'task'     = 4
+        'machine'  = 2
+        'task'     = 3
     }
     $order[$_.BaseName.ToLower()]
 }
