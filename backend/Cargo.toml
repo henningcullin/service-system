@@ -14,4 +14,10 @@ serde_json = "1.0.113"
 serde_derive = "1.0.196"
 
 dotenv = "0.15.0"
-sqlx = { version = "0.7.3", features = ["runtime-tokio-rustls", "any", "mysql"] }
+sqlx = { version = "0.7.3", features = ["runtime-tokio-rustls", "any", "mysql", "uuid", "chrono"] }
+
+chrono = { version = "0.4.34", features = ["serde"] }
+jsonwebtoken = "9.2.0"
+axum-extra = { version = "0.9.2", features = ["cookie"] }
+tower-http = { version = "0.5.1", features = ["cors"] }
+uuid = { version = "1.7.0", features = ["serde", "v4"] }

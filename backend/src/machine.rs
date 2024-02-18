@@ -15,6 +15,11 @@ use serde_derive::{
     Serialize,
     Deserialize
 };
+use chrono::{
+    DateTime, 
+    Utc
+};
+use uuid::Uuid;
 
 // ______________________________________ STRUCTS ______________________________________
 
@@ -27,20 +32,24 @@ pub enum MachineStatus {
 
 #[derive(Serialize, Deserialize, FromRow)]
 pub struct Machine {
-    id: u64,
+    id: Uuid,
     name: String,
+    make: Option<String>,
     machine_type: Option<String>,
-    status: MachineStatus
+    status: MachineStatus,
+    created: DateTime<Utc>,
+    edited: DateTime<Utc>
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, FromRow)]
 pub struct QueryMachine {
-    id: u64
+    id: Uuid
 }
 
 #[derive(Deserialize)]
 pub struct NewMachine {
     name: String,
+    make: Option<String>,
     machine_type: Option<String>,
     status: MachineStatus
 }
@@ -59,7 +68,7 @@ pub async fn details(
         State(pool): State<MySqlPool>,
         Query(query): Query<QueryMachine>,
     ) -> Result<Json<Machine>, StatusCode> {
-        let machine = sqlx::query_as::<_, Machine>("SELECT id, name, machine_type, CAST(status AS SIGNED) status FROM machine WHERE id = ?")
+        let machine = sqlx::query_as::<_, Machine>("SELECT id, name, make, machine_type, CAST(status AS SIGNED) status, created, edited FROM machine WHERE id = ?")
             .bind(query.id)
             .fetch_one(&pool)
             .await
@@ -79,7 +88,7 @@ pub async fn details(
 pub async fn index(
         State(pool): State<MySqlPool>
     ) -> Result<Json<Vec<Machine>>, StatusCode> {
-        let machines = sqlx::query_as::<_, Machine>("SELECT id, name, machine_type, CAST(status AS SIGNED) status FROM machine")
+        let machines: Vec<Machine> = sqlx::query_as::<_, Machine>("SELECT id, name, make, machine_type, CAST(status AS SIGNED) status, created, edited FROM machine")
             .fetch_all(&pool)
             .await
             .map_err(|e| {
@@ -93,12 +102,12 @@ pub async fn index(
 pub async fn create(
         State(pool): State<MySqlPool>,
         Json(input): Json<NewMachine>,
-    ) -> Result<Json<QueryMachine>, StatusCode> {
+    ) -> Result</* Json<QueryMachine>  */StatusCode, StatusCode> {
 
-        // Execute the INSERT statement with a prepared statement
-        let last_inserted_id:u64 = sqlx::query!(
-            "INSERT INTO machine (name, machine_type, status) VALUES (?, ?, ?)",
+        let result = sqlx::query!(
+            "INSERT INTO machine (name, make, machine_type, status) VALUES (?, ?, ?, ?)",
             input.name,
+            input.make,
             input.machine_type,
             input.status
         )
@@ -107,13 +116,15 @@ pub async fn create(
             .map_err(|e| {
                 eprintln!("Error executing query for machine::create: {:?}", e);
                 StatusCode::INTERNAL_SERVER_ERROR
-            })?
-            .last_insert_id();
+            })?;
+        
+        println!("{:?}", result);
 
-                // Create and return the response struct
-        let id = QueryMachine { id: last_inserted_id };
+        /* let id = QueryMachine { id: last_inserted_id.into() }; */
 
-        Ok(Json(id))
+        Ok(StatusCode::OK)
+
+        /* Ok(Json(id)) */
 }
 
 pub async fn delete(
@@ -168,7 +179,6 @@ pub async fn update(
                 query.push(",");
             }
             query.push(" status = ").push_bind(status);
-            first = false;
         }
 
         query.push(" WHERE id = ").push_bind(input.id);
@@ -176,11 +186,9 @@ pub async fn update(
         let result = query.build().execute(&pool)
             .await
             .map_err(|e| {
-                eprintln!("Error executing query for machine::delete: {:?}", e);
+                eprintln!("Error executing query for machine::update: {:?}", e);
                 StatusCode::INTERNAL_SERVER_ERROR
             })?;
-
-        println!("{:?}", result);
 
         if result.rows_affected() > 0 {
             return Ok(StatusCode::NO_CONTENT);
