@@ -1,11 +1,29 @@
 # Service System Project
 
+### Purpose
+
+This project is meant to explore the following areas:
+
+- Rust Language
+- Rust Backend
+- Axum Framework
+- Middleware
+- CRUD operations
+- REST API
+- MySQL database
+- Database Drivers
+- Authentication
+- Passwordless JWT
+- Password JWT
+- Role Based System
+
+### Features
 This project is a service system where you can do the following:
 
-- Build your facility
-- Add machines
-- Set service for the machines
-- Add users to manage the machines & services
+- Manage machines
+- Manage users
+- Manage tasks
+- Manage workers
 
 ### Techstack
 
@@ -14,8 +32,7 @@ This project is a service system where you can do the following:
 - Rust (language)
 - Axum (framework)
 - MySQL (database)
-- sqlx (database driver)
 
 #### Frontend
 
-- Svelte
+To be decided
