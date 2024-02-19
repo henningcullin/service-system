@@ -32,17 +32,18 @@ async fn main() {
         .await
         .expect("Can't connect to Database");
 
+
+    let api = Router::new()
+
+    .route("/machine", get(machine::details))
+    .route("/machines", get(machine::index))
+    .route("/machine", post(machine::create))
+    .route("/machine", delete(machine::delete))
+    .route("/machine", put(machine::update));
+    
     let app = Router::new()
-        // API
-
-        // MACHINE
-
-        .route("/api/machine", get(machine::details))
-        .route("/api/machines", get(machine::index))
-        .route("/api/machine", post(machine::create))
-        .route("/api/machine", delete(machine::delete))
-        .route("/api/machine", put(machine::update))
-
+    
+        .nest("/api", api)
         .with_state(pool);
         
     let listener = tokio::net::TcpListener::bind("0.0.0.0:80").await.expect("Can't start listener");
