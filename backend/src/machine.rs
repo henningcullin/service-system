@@ -41,7 +41,7 @@ pub struct Machine {
     edited: DateTime<Utc>
 }
 
-#[derive(Serialize, Deserialize, FromRow)]
+#[derive(Serialize, Deserialize)]
 pub struct QueryMachine {
     id: Uuid
 }
@@ -102,10 +102,13 @@ pub async fn index(
 pub async fn create(
         State(pool): State<MySqlPool>,
         Json(input): Json<NewMachine>,
-    ) -> Result</* Json<QueryMachine>  */StatusCode, StatusCode> {
+    ) -> Result<(StatusCode, Json<QueryMachine>) , StatusCode> {
 
-        let result = sqlx::query!(
-            "INSERT INTO machine (name, make, machine_type, status) VALUES (?, ?, ?, ?)",
+        let id = uuid::Uuid::new_v4();
+
+        sqlx::query!(
+            "INSERT INTO machine (id, name, make, machine_type, status) VALUES (?, ?, ?, ?, ?)",
+            id,
             input.name,
             input.make,
             input.machine_type,
@@ -117,14 +120,15 @@ pub async fn create(
                 eprintln!("Error executing query for machine::create: {:?}", e);
                 StatusCode::INTERNAL_SERVER_ERROR
             })?;
-        
-        println!("{:?}", result);
 
-        /* let id = QueryMachine { id: last_inserted_id.into() }; */
+        let id = QueryMachine { id };
 
-        Ok(StatusCode::OK)
-
-        /* Ok(Json(id)) */
+        Ok(
+            (
+                StatusCode::CREATED,
+                Json(id)
+            )
+        )
 }
 
 pub async fn delete(
