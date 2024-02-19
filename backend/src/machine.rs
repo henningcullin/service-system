@@ -56,8 +56,9 @@ pub struct NewMachine {
 
 #[derive(Deserialize)]
 pub struct UpdateMachine {
-    id: u64,
+    id: Uuid,
     name: Option<String>,
+    make: Option<String>,
     machine_type: Option<String>,
     status: Option<MachineStatus>
 }
@@ -159,40 +160,20 @@ pub async fn update(
         Json(input): Json<UpdateMachine>
     ) -> Result<StatusCode, StatusCode> {
 
-        let mut query = sqlx::QueryBuilder::new("UPDATE machine SET");
-        let mut first = true;
-
-        if let Some(name) = input.name {
-            if !first {
-                query.push(",");
-            }
-            query.push(" name = ").push_bind(name);
-            first = false;
-        }
-
-        if let Some(machine_type) = input.machine_type {
-            if !first {
-                query.push(",");
-            }
-            query.push(" machine_type = ").push_bind(machine_type);
-            first = false;
-        }
-
-        if let Some(status) = input.status {
-            if !first {
-                query.push(",");
-            }
-            query.push(" status = ").push_bind(status);
-        }
-
-        query.push(" WHERE id = ").push_bind(input.id);
-
-        let result = query.build().execute(&pool)
-            .await
-            .map_err(|e| {
-                eprintln!("Error executing query for machine::update: {:?}", e);
-                StatusCode::INTERNAL_SERVER_ERROR
-            })?;
+        let result = sqlx::query!(
+            "UPDATE machine SET name = COALESCE(?, name), make = COALESCE(?, make), machine_type = COALESCE(?, machine_type), status = COALESCE(?, status) WHERE id = ?",
+            input.name,
+            input.make,
+            input.machine_type,
+            input.status,
+            input.id
+        )
+        .execute(&pool)
+        .await
+        .map_err(|e| {
+            eprintln!("Error executing update for machine::update: {:?}", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
 
         if result.rows_affected() > 0 {
             return Ok(StatusCode::NO_CONTENT);
