@@ -14,7 +14,6 @@ use std::{
 };
 use dotenv::dotenv;
 use sqlx::{mysql::MySqlPoolOptions, MySql, Pool};
-
 use config::Config;
 
 
@@ -22,6 +21,13 @@ use config::Config;
 pub struct AppState {
     db: Pool<MySql>,
     env: Config
+}
+
+
+#[derive(Debug, serde::Serialize)]
+pub struct ErrorResponse {
+    pub status: &'static str,
+    pub message: String,
 }
 
 #[tokio::main]

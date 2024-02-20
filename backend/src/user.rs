@@ -11,7 +11,7 @@ use sqlx::{FromRow, Type};
 
 use validator::Validate;
 
-use crate::AppState;
+use crate::{AppState, ErrorResponse};
 
 #[derive(Debug, Serialize, Deserialize, Type, Clone, PartialEq)]
 #[repr(i32)]
@@ -52,8 +52,7 @@ impl User {
 pub struct TokenClaims {
     pub sub: String,
     pub iat: usize,
-    pub exp: usize,
-    pub role: i32
+    pub exp: usize
 }
 
 #[derive(Debug, Validate, Deserialize)]
@@ -100,23 +99,23 @@ pub async fn create(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<RegisterUserSchema>,
-) -> Result<(StatusCode, Json<UserResponse>), (StatusCode, Json<serde_json::Value>)> {
+) -> Result<(StatusCode, Json<UserResponse>), (StatusCode, Json<ErrorResponse>)> {
 
     if user.role == UserRole::Worker || user.role == UserRole::Basic {
-        let error_response = serde_json::json!({
-            "status": "Fail",
-            "message": "You don't have permission to add users"
-        });
+        let error_response = ErrorResponse{
+            status: "fail",
+            message: "You don't have permission to add users".to_owned()
+        };
         return Err((StatusCode::FORBIDDEN, Json(error_response)));
     }
 
     body.validate()
         .map_err(|e| {
             eprintln!("Error validating email | user::create: {:?}", e);
-            let error_response = serde_json::json!({
-                "status": "Fail",
-                "message": "Invalid email"
-            });
+            let error_response = ErrorResponse {
+                status: "fail",
+                message: "Invalid email".to_owned()
+            };
             (StatusCode::BAD_REQUEST, Json(error_response))
         })?;
 
@@ -126,19 +125,19 @@ pub async fn create(
         .await
         .map_err(|e| {
             eprintln!("Error checking if user exist | user::create: {:?}", e);
-            let error_response = serde_json::json!({
-                "status": "Fail",
-                "message": "Database error",
-            });
+            let error_response = ErrorResponse{
+                status: "fail",
+                message: "Database error".to_owned(),
+            };
             (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
         })?;
 
     if let Some(exists) = user_exists {
         if exists {
-            let error_response = serde_json::json!({
-                "status": "Fail",
-                "message": "an User with that email already exists",
-            });
+            let error_response = ErrorResponse {
+                status: "fail",
+                message: "an User with that email already exists".to_owned(),
+            };
             return Err((StatusCode::CONFLICT, Json(error_response)));
         }
     }
@@ -148,10 +147,10 @@ pub async fn create(
         .hash_password(body.password.as_bytes(), &salt)
         .map_err(|e| {
             eprintln!("Error hashing password | user::create: {:?}", e);
-            let error_response = serde_json::json!({
-                "status": "Fail",
-                "message": "Password error",
-            });
+            let error_response = ErrorResponse {
+                status: "fail",
+                message: "Password error".to_owned(),
+            };
             (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
         })
         .map(|hash| hash.to_string())?;
@@ -172,10 +171,10 @@ pub async fn create(
     .await
     .map_err(|e| {
         eprintln!("Error creating user | user::register_user: {:?}", e);
-        let error_response = serde_json::json!({
-            "status": "Fail",
-            "message": "Could not create user",
-        });
+        let error_response = ErrorResponse {
+            status: "fail",
+            message: "Could not create user".to_owned(),
+        };
         (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
     })?;
 
@@ -191,7 +190,7 @@ pub async fn create(
     };
 
     let user_response = UserResponse {
-        status: "Success".to_owned(),
+        status: "success".to_owned(),
         data: UserData { user: user.to_filtered() }
     };
 

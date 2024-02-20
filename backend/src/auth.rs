@@ -6,18 +6,11 @@ use axum::{
 
 use axum_extra::extract::cookie::CookieJar;
 use jsonwebtoken::{decode, DecodingKey, Validation};
-use serde::Serialize;
 
 use crate::{
     user::{TokenClaims, User},
-    AppState,
+    AppState, ErrorResponse,
 };
-
-#[derive(Debug, Serialize)]
-pub struct ErrorResponse {
-    pub status: &'static str,
-    pub message: String,
-}
 
 pub async fn auth(
     cookie_jar: CookieJar,
@@ -42,11 +35,11 @@ pub async fn auth(
         });
 
     let token = token.ok_or_else(|| {
-        let json_error = ErrorResponse {
-            status: "Fail",
-            message: "You are not logged in, please provide token".to_string(),
+        let error_response = ErrorResponse {
+            status: "fail",
+            message: "You are not logged in".to_string(),
         };
-        (StatusCode::UNAUTHORIZED, Json(json_error))
+        (StatusCode::UNAUTHORIZED, Json(error_response))
     })?;
 
     let claims = decode::<TokenClaims>(
@@ -54,21 +47,22 @@ pub async fn auth(
         &DecodingKey::from_secret(app_state.env.jwt_secret.as_ref()),
         &Validation::default(),
     )
-    .map_err(|_| {
-        let json_error = ErrorResponse {
+    .map_err(|e| {
+        eprintln!("Error decoding claims | auth::auth: {:?}", e);
+        let error_response = ErrorResponse {
             status: "fail",
             message: "Invalid token".to_string(),
         };
-        (StatusCode::UNAUTHORIZED, Json(json_error))
+        (StatusCode::UNAUTHORIZED, Json(error_response))
     })?
     .claims;
 
     let user_id = uuid::Uuid::parse_str(&claims.sub).map_err(|_| {
-        let json_error = ErrorResponse {
+        let error_response = ErrorResponse {
             status: "fail",
             message: "Invalid token".to_string(),
         };
-        (StatusCode::UNAUTHORIZED, Json(json_error))
+        (StatusCode::UNAUTHORIZED, Json(error_response))
     })?;
 
     let user = sqlx::query_as::<_, User>("SELECT id, first_name, last_name, email, password, phone, CAST(role AS SIGNED) role, last_login FROM user WHERE id = ?")
@@ -76,19 +70,20 @@ pub async fn auth(
         .fetch_optional(&app_state.db)
         .await
         .map_err(|e| {
-            let json_error = ErrorResponse {
+            eprintln!("Error selecting user from database | auth::auth: {:?}", e);
+            let error_response = ErrorResponse {
                 status: "fail",
-                message: format!("Error fetching user from databasebase: {}", e),
+                message: "Error fetching user from database".to_owned(),
             };
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(json_error))
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
         })?;
 
     let user = user.ok_or_else(|| {
-        let json_error = ErrorResponse {
+        let error_response = ErrorResponse {
             status: "fail",
             message: "The user belonging to this token no longer exists".to_string(),
         };
-        (StatusCode::UNAUTHORIZED, Json(json_error))
+        (StatusCode::UNAUTHORIZED, Json(error_response))
     })?;
 
     req.extensions_mut().insert(user);
