@@ -26,11 +26,12 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/machine", delete(machine::delete))
         .route("/machine", put(machine::update))
         
+        .route("/user", post(user::create))
+
         .layer(middleware::from_fn_with_state(app_state.clone(), auth));
 
     let api = Router::new()
 
-        .route("/register", post(user::register_user))
         .nest("/auth", auth);
 
     let app = Router::new()
