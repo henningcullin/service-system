@@ -2,19 +2,12 @@ mod machine;
 mod user;
 mod task;
 mod auth;
-mod model;
-mod response;
 mod config;
+mod router;
 
-use axum::{ // Framework
-    routing::{ // HTTP Methods
-        get,
-        post,
-        put,
-        delete
-    }, 
-    Router, // The Router
-};
+use axum::http::{header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE}, HeaderValue, Method};
+use router::create_router;
+use tower_http::cors::CorsLayer;
 use std::{
     sync::Arc,
     time::Duration
@@ -49,21 +42,15 @@ async fn main() {
         db: pool.clone(),
         env: config.clone()
     };
-
-
-    let api = Router::new()
-
-        .route("/machine", get(machine::details))
-        .route("/machines", get(machine::index))
-        .route("/machine", post(machine::create))
-        .route("/machine", delete(machine::delete))
-        .route("/machine", put(machine::update));
     
-    let app = Router::new()
-    
-        .nest("/api", api)
-        
-        .with_state(Arc::new(state));
+    let cors = CorsLayer::new()
+        .allow_origin("127.0.0.1".parse::<HeaderValue>().unwrap())
+        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
+        .allow_credentials(true)
+        .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE]);
+
+    let app = create_router(Arc::new(state))
+        .layer(cors);
         
     let listener = tokio::net::TcpListener::bind("0.0.0.0:80").await.expect("Can't start listener");
     axum::serve(listener, app).await.expect("Can't start server");
