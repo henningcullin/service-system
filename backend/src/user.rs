@@ -1,8 +1,10 @@
 use std::sync::Arc;
 
-use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
-use axum::{extract::State, http::StatusCode, Extension, Json};
+use argon2::{password_hash::SaltString, Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
+use axum::{extract::State, http::{header, Response, StatusCode}, response::IntoResponse, Extension, Json};
+use axum_extra::extract::cookie::{Cookie, SameSite};
 use chrono::{DateTime, Utc};
+use jsonwebtoken::{encode, EncodingKey, Header};
 use rand_core::OsRng;
 use uuid::Uuid;
 
@@ -200,4 +202,97 @@ pub async fn create(
             Json(user_response)
         )
     )
+}
+
+pub async fn login_user(
+    State(app_state): State<Arc<AppState>>,
+    Json(body): Json<LoginUserSchema>,
+) -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)> {
+    body.validate()
+        .map_err(|e| {
+            eprintln!("Error validating email | user::login_user: {:?}", e);
+            let error_response = ErrorResponse {
+                status: "fail",
+                message: "Invalid email".to_owned()
+            };
+            (StatusCode::BAD_REQUEST, Json(error_response))
+        })?;
+
+    let user = sqlx::query_as::<_, User>("SELECT id, first_name, last_name, email, password, phone, CAST(role AS SIGNED) role, last_login FROM user WHERE email = ?")
+    .bind(body.email.to_ascii_lowercase())
+    .fetch_optional(&app_state.db)
+    .await
+    .map_err(|e| {
+        eprintln!("Error retrieving user from database | user::login_user: {:?}", e);
+        let error_response = ErrorResponse {
+            status: "fail",
+            message: "Could not retrieve user from database".to_owned(),
+        };
+        (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+    })?
+    .ok_or_else(|| {
+        let error_response = ErrorResponse {
+            status: "fail",
+            message: "No user with this email".to_owned(),
+        };
+        (StatusCode::NOT_FOUND, Json(error_response))
+    })?;
+
+    let is_valid = match PasswordHash::new(&user.password) {
+        Ok(parsed_hash) => Argon2::default()
+            .verify_password(body.password.as_bytes(), &parsed_hash)
+            .map_or(false, |_| true),
+        Err(_) => false,
+    };
+
+    if !is_valid {
+        let error_response = ErrorResponse {
+            status: "fail",
+            message: "Incorrect password".to_owned()
+        };
+        return Err((StatusCode::BAD_REQUEST, Json(error_response)));
+    }
+
+    let now = chrono::Utc::now();
+    let iat = now.timestamp() as usize;
+    let exp = (now + chrono::Duration::minutes(60)).timestamp() as usize;
+    let claims: TokenClaims = TokenClaims {
+        sub: user.id.to_string(),
+        exp,
+        iat,
+    };
+
+    let token = encode(
+        &Header::default(),
+        &claims,
+        &EncodingKey::from_secret(app_state.env.jwt_secret.as_ref()),
+    )
+    .map_err(|e| {
+        eprintln!("Error creating token for user | user::login_user: {:?}", e);
+        let error_response = ErrorResponse {
+            status: "fail",
+            message: "Could create your token".to_owned(),
+        };
+        (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+    })?;
+
+    let cookie = Cookie::build(("token", token.to_owned()))
+        .path("/")
+        .max_age(time::Duration::hours(1))
+        .same_site(SameSite::Lax)
+        .http_only(true)
+        .build();
+
+    let mut response = Response::new(serde_json::json!({"status": "success", "token": token}).to_string());
+    response
+        .headers_mut()
+        .insert(header::SET_COOKIE, cookie.to_string().parse().map_err(|e| {
+            eprintln!("Error creating cookie | user::login_user: {:?}", e);
+            let error_response = ErrorResponse {
+                status: "fail",
+                message: "Could not create a cookie".to_owned(),
+            };
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+        })?);
+    Ok(response)
 }
