@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use axum::{
     extract::{
         Query, 
@@ -7,7 +8,6 @@ use axum::{
     http::StatusCode
 };
 use sqlx::{
-    MySqlPool, 
     FromRow, 
     Type
 };
@@ -20,6 +20,8 @@ use chrono::{
     Utc
 };
 use uuid::Uuid;
+
+use crate::AppState;
 
 // ______________________________________ STRUCTS ______________________________________
 
@@ -51,7 +53,7 @@ pub struct NewMachine {
     name: String,
     make: Option<String>,
     machine_type: Option<String>,
-    status: MachineStatus
+    status: Option<MachineStatus>
 }
 
 #[derive(Deserialize)]
@@ -66,12 +68,12 @@ pub struct UpdateMachine {
 // ___________________________________ FUNCTIONS ___________________________________
 
 pub async fn details(
-        State(pool): State<MySqlPool>,
+        State(app_state): State<Arc<AppState>>,
         Query(query): Query<QueryMachine>,
     ) -> Result<Json<Machine>, StatusCode> {
         let machine = sqlx::query_as::<_, Machine>("SELECT id, name, make, machine_type, CAST(status AS SIGNED) status, created, edited FROM machine WHERE id = ?")
             .bind(query.id)
-            .fetch_one(&pool)
+            .fetch_one(&app_state.db)
             .await
             .map_err(|e| {
                 eprintln!("Error executing query for machine::details: {:?}", e);
@@ -87,10 +89,10 @@ pub async fn details(
 }
 
 pub async fn index(
-        State(pool): State<MySqlPool>
+        State(app_state): State<Arc<AppState>>,
     ) -> Result<Json<Vec<Machine>>, StatusCode> {
         let machines: Vec<Machine> = sqlx::query_as::<_, Machine>("SELECT id, name, make, machine_type, CAST(status AS SIGNED) status, created, edited FROM machine")
-            .fetch_all(&pool)
+            .fetch_all(&app_state.db)
             .await
             .map_err(|e| {
                 eprintln!("Error executing query for machine::index: {:?}", e);
@@ -101,7 +103,7 @@ pub async fn index(
 }
 
 pub async fn create(
-        State(pool): State<MySqlPool>,
+        State(app_state): State<Arc<AppState>>,
         Json(input): Json<NewMachine>,
     ) -> Result<(StatusCode, Json<QueryMachine>) , StatusCode> {
 
@@ -115,7 +117,7 @@ pub async fn create(
             input.machine_type,
             input.status
         )
-            .execute(&pool)
+            .execute(&app_state.db)
             .await
             .map_err(|e| {
                 eprintln!("Error executing query for machine::create: {:?}", e);
@@ -133,7 +135,7 @@ pub async fn create(
 }
 
 pub async fn delete(
-        State(pool): State<MySqlPool>,
+        State(app_state): State<Arc<AppState>>,
         Query(query): Query<QueryMachine>
     ) -> Result<StatusCode, StatusCode> {
 
@@ -141,7 +143,7 @@ pub async fn delete(
             "DELETE FROM machine WHERE id = ?",
             query.id
         )
-        .execute(&pool)
+        .execute(&app_state.db)
         .await
         .map_err(|e| {
             eprintln!("Error executing query for machine::delete: {:?}", e);
@@ -156,7 +158,7 @@ pub async fn delete(
 }
 
 pub async fn update(
-        State(pool): State<MySqlPool>,
+        State(app_state): State<Arc<AppState>>,
         Json(input): Json<UpdateMachine>
     ) -> Result<StatusCode, StatusCode> {
 
@@ -168,7 +170,7 @@ pub async fn update(
             input.status,
             input.id
         )
-        .execute(&pool)
+        .execute(&app_state.db)
         .await
         .map_err(|e| {
             eprintln!("Error executing update for machine::update: {:?}", e);
