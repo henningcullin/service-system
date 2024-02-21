@@ -6,6 +6,7 @@ use axum_extra::extract::cookie::{Cookie, SameSite};
 use chrono::{DateTime, Utc};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use rand_core::OsRng;
+use serde_json::json;
 use uuid::Uuid;
 
 use serde::{Serialize, Deserialize};
@@ -107,6 +108,14 @@ pub async fn create(
         let error_response = ErrorResponse{
             status: "fail",
             message: "You don't have permission to add users".to_owned()
+        };
+        return Err((StatusCode::FORBIDDEN, Json(error_response)));
+    }
+
+    if body.role == UserRole::Super || body.role == UserRole::Administrator {
+        let error_response = ErrorResponse{
+            status: "fail",
+            message: format!("You can't create users with role {:?}", body.role)
         };
         return Err((StatusCode::FORBIDDEN, Json(error_response)));
     }
@@ -286,13 +295,42 @@ pub async fn login_user(
     let mut response = Response::new(serde_json::json!({"status": "success", "token": token}).to_string());
     response
         .headers_mut()
-        .insert(header::SET_COOKIE, cookie.to_string().parse().map_err(|e| {
-            eprintln!("Error creating cookie | user::login_user: {:?}", e);
-            let error_response = ErrorResponse {
-                status: "fail",
-                message: "Could not create a cookie".to_owned(),
-            };
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+        .insert(header::SET_COOKIE, cookie
+            .to_string()
+            .parse()
+            .map_err(|e| {
+                eprintln!("Error creating cookie | user::login_user: {:?}", e);
+                let error_response = ErrorResponse {
+                    status: "fail",
+                    message: "Could not create a cookie".to_owned(),
+                };
+                (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
         })?);
+    Ok(response)
+}
+
+pub async fn logout() -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)> {
+    let cookie = Cookie::build(("token", ""))
+        .path("/")
+        .max_age(time::Duration::hours(-1))
+        .same_site(SameSite::Lax)
+        .http_only(true)
+        .build();
+
+    let mut response = Response::new(json!({"status": "success", "message": "Successfully logged out"}).to_string());
+
+    response
+        .headers_mut()
+        .insert(header::SET_COOKIE, cookie
+            .to_string()
+            .parse()
+            .map_err(|e| {
+                eprintln!("Error creating cookie | user::logout: {:?}", e);
+                let error_response = ErrorResponse {
+                    status: "fail",
+                    message: "Could not create a cookie".to_owned(),
+                };
+                (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+            })?);
     Ok(response)
 }
