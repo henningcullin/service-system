@@ -216,7 +216,7 @@ pub async fn create(
 pub async fn login_user(
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<LoginUserSchema>,
-) -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<Response<String>, (StatusCode, Json<ErrorResponse>)> {
     body.validate()
         .map_err(|e| {
             eprintln!("Error validating email | user::login_user: {:?}", e);
@@ -292,7 +292,7 @@ pub async fn login_user(
         .http_only(true)
         .build();
 
-    let mut response = Response::new(serde_json::json!({"status": "success", "token": token}).to_string());
+    let mut response = Response::new(json!({"status": "success", "token": token}).to_string());
     response
         .headers_mut()
         .insert(header::SET_COOKIE, cookie
@@ -309,7 +309,7 @@ pub async fn login_user(
     Ok(response)
 }
 
-pub async fn logout() -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)> {
+pub async fn logout() -> Result<Response<String>, (StatusCode, Json<ErrorResponse>)> {
     let cookie = Cookie::build(("token", ""))
         .path("/")
         .max_age(time::Duration::hours(-1))

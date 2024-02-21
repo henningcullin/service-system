@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::{
-    body::Body, extract::State, http::{header, Request, StatusCode}, middleware::Next, response::IntoResponse, Json
+    body::Body, extract::State, http::{header, Request, StatusCode}, middleware::Next, response::Response, Json
 };
 
 use axum_extra::extract::cookie::CookieJar;
@@ -17,7 +17,7 @@ pub async fn auth(
     State(app_state): State<Arc<AppState>>,
     mut req: Request<Body>,
     next: Next,
-) -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<Response<Body>, (StatusCode, Json<ErrorResponse>)> {
     let token = cookie_jar
         .get("token")
         .map(|cookie| cookie.value().to_string())

@@ -16,13 +16,11 @@ use dotenv::dotenv;
 use sqlx::{mysql::MySqlPoolOptions, MySql, Pool};
 use config::Config;
 
-
 #[derive(Clone)]
 pub struct AppState {
     db: Pool<MySql>,
     env: Config
 }
-
 
 #[derive(Debug, serde::Serialize)]
 pub struct ErrorResponse {
@@ -30,7 +28,7 @@ pub struct ErrorResponse {
     pub message: String,
 }
 
-#[tokio::main]
+#[tokio::main(flavor = "multi_thread", worker_threads = 4)]
 async fn main() {
     dotenv().ok();
 
@@ -42,7 +40,6 @@ async fn main() {
         .connect(&config.database_url)
         .await
         .expect("Can't connect to Database");
-
 
     let state = AppState {
         db: pool.clone(),
