@@ -3,11 +3,8 @@ use axum::{
     extract::{
         Query, 
         State
-    },
-    Json,
-    http::StatusCode
+    }, http::StatusCode, Extension, Json
 };
-use serde_json::error;
 use sqlx::{
     FromRow, 
     Type
@@ -22,7 +19,7 @@ use chrono::{
 };
 use uuid::Uuid;
 
-use crate::{AppState, ErrorResponse};
+use crate::{user::{User, UserRole}, AppState, ErrorResponse};
 
 // ______________________________________ STRUCTS ______________________________________
 
@@ -120,9 +117,18 @@ pub async fn index(
 }
 
 pub async fn create(
+    Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
     Json(input): Json<NewMachine>,
 ) -> Result<(StatusCode, Json<QueryMachine>) , (StatusCode, Json<ErrorResponse>)> {
+
+    if user.role == UserRole::Worker {
+        let error_response = ErrorResponse {
+            status: "fail",
+            message: "You don't have permission to create machines".to_owned()
+        };
+        return Err((StatusCode::FORBIDDEN, Json(error_response)));
+    }
 
     let id = uuid::Uuid::new_v4();
 
@@ -156,9 +162,18 @@ pub async fn create(
 }
 
 pub async fn delete(
+    Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
     Query(query): Query<QueryMachine>
 ) -> Result<StatusCode, (StatusCode, Json<ErrorResponse>)> {
+
+    if user.role == UserRole::Worker {
+        let error_response = ErrorResponse {
+            status: "fail",
+            message: "You don't have permission to delete machines".to_owned()
+        };
+        return Err((StatusCode::FORBIDDEN, Json(error_response)));
+    }
 
     let result = sqlx::query!(
         "DELETE FROM machine WHERE id = ?",
@@ -187,9 +202,18 @@ pub async fn delete(
 }
 
 pub async fn update(
+    Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
     Json(input): Json<UpdateMachine>
 ) -> Result<StatusCode, (StatusCode, Json<ErrorResponse>)> {
+
+    if user.role == UserRole::Worker {
+        let error_response = ErrorResponse {
+            status: "fail",
+            message: "You don't have permission to edit machines".to_owned()
+        };
+        return Err((StatusCode::FORBIDDEN, Json(error_response)));
+    }
 
     let result = sqlx::query!(
         "UPDATE machine SET name = COALESCE(?, name), make = COALESCE(?, make), machine_type = COALESCE(?, machine_type), status = COALESCE(?, status) WHERE id = ?",
