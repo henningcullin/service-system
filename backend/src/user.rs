@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use argon2::{password_hash::SaltString, Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
-use axum::{extract::State, http::{header, Response, StatusCode}, Extension, Json};
+use axum::{extract::{Query, State}, http::{header, Response, StatusCode}, Extension, Json};
 use axum_extra::extract::cookie::{Cookie, SameSite};
 use chrono::{DateTime, Utc};
 use jsonwebtoken::{encode, EncodingKey, Header};
@@ -51,6 +51,11 @@ impl User {
     } 
 }
 
+#[derive(Debug, Deserialize)]
+pub struct QueryUser {
+    pub id: Uuid
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TokenClaims {
     pub sub: String,
@@ -87,7 +92,7 @@ pub struct LoginUser {
     pub password: String
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, FromRow)]
 pub struct FilteredUser {
     pub id: Uuid,
     pub first_name: String,
@@ -108,6 +113,48 @@ pub struct UserResponse {
     pub status: String,
     pub data: UserData,
 }
+
+pub async fn details(
+    State(app_state): State<Arc<AppState>>,
+    Query(querys): Query<QueryUser>
+) -> Result<Json<FilteredUser>, (StatusCode, Json<ErrorResponse>)> {
+
+    let user = sqlx::query_as::<_, FilteredUser>(
+        "SELECT 
+        id, 
+        first_name, 
+        last_name, 
+        email,
+        phone, 
+        CAST(role AS SIGNED) role, 
+        last_login 
+        FROM user 
+        WHERE id = ?"
+    )
+        .bind(querys.id)
+        .fetch_one(&app_state.db)
+        .await
+        .map_err(|e| {
+            eprintln!("Error executing query for user::details: {:?}", e);
+            match e {
+                sqlx::Error::RowNotFound => {
+                    (StatusCode::NOT_FOUND, Json(ErrorResponse {
+                        status: "fail",
+                        message: "The specified user does not exist".to_owned()
+                    }))
+                },
+                _ => {
+                    (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
+                        status: "fail",
+                        message: "Server error".to_owned()
+                    }))
+                }
+            }
+        })?;
+
+    Ok(Json(user)) 
+
+} 
 
 pub async fn create(
     Extension(user): Extension<User>,
