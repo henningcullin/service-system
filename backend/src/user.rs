@@ -156,6 +156,34 @@ pub async fn details(
 
 } 
 
+pub async fn index(
+    State(app_state): State<Arc<AppState>>,
+) -> Result<Json<Vec<FilteredUser>>, (StatusCode, Json<ErrorResponse>)> {
+    let users: Vec<FilteredUser> = sqlx::query_as::<_, FilteredUser>(
+    "SELECT 
+        id, 
+        first_name, 
+        last_name, 
+        email,
+        phone, 
+        CAST(role AS SIGNED) role, 
+        last_login 
+        FROM user
+        "
+    )
+        .fetch_all(&app_state.db)
+        .await
+        .map_err(|e| {
+            eprintln!("Error executing query for user::index: {:?}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
+                status: "fail",
+                message: "Could not retrieve the users from database".to_owned()
+            }))
+        })?;
+    
+        Ok(Json(users))
+}
+
 pub async fn create(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
