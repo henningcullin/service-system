@@ -78,18 +78,16 @@ pub async fn details(
 
             match e {
                 sqlx::Error::RowNotFound => {
-                    let error_response = ErrorResponse {
+                    (StatusCode::NOT_FOUND, Json(ErrorResponse {
                         status: "fail",
                         message: "The specified machine does not exist".to_owned()
-                    };
-                    (StatusCode::NOT_FOUND, Json(error_response))
+                    }))
                 },
                 _ => {
-                    let error_response = ErrorResponse {
+                    (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
                         status: "fail",
                         message: "Server error".to_owned()
-                    };
-                    (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+                    }))
                 }
             }
 
@@ -106,11 +104,10 @@ pub async fn index(
         .await
         .map_err(|e| {
             eprintln!("Error executing query for machine::index: {:?}", e);
-            let error_response = ErrorResponse {
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
                 status: "fail",
                 message: "Could not retrieve the machines from database".to_owned()
-            };
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+            }))
         })?;
 
     Ok(Json(machines))
@@ -119,15 +116,14 @@ pub async fn index(
 pub async fn create(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
-    Json(input): Json<NewMachine>,
+    Json(body): Json<NewMachine>,
 ) -> Result<(StatusCode, Json<QueryMachine>) , (StatusCode, Json<ErrorResponse>)> {
 
     if user.role == UserRole::Worker {
-        let error_response = ErrorResponse {
+        return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {
             status: "fail",
             message: "You don't have permission to create machines".to_owned()
-        };
-        return Err((StatusCode::FORBIDDEN, Json(error_response)));
+        })));
     }
 
     let id = uuid::Uuid::new_v4();
@@ -135,20 +131,19 @@ pub async fn create(
     sqlx::query!(
         "INSERT INTO machine (id, name, make, machine_type, status) VALUES (?, ?, ?, ?, ?)",
         id,
-        input.name,
-        input.make,
-        input.machine_type,
-        input.status
+        body.name,
+        body.make,
+        body.machine_type,
+        body.status
     )
         .execute(&app_state.db)
         .await
         .map_err(|e| {
             eprintln!("Error executing query for machine::create: {:?}", e);
-            let error_response = ErrorResponse {
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
                 status: "fail",
                 message: "Could not create machine in database".to_owned()
-            };
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+            }))
         })?;
 
     let id = QueryMachine { id };
@@ -168,11 +163,10 @@ pub async fn delete(
 ) -> Result<StatusCode, (StatusCode, Json<ErrorResponse>)> {
 
     if user.role == UserRole::Worker {
-        let error_response = ErrorResponse {
+        return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {
             status: "fail",
             message: "You don't have permission to delete machines".to_owned()
-        };
-        return Err((StatusCode::FORBIDDEN, Json(error_response)));
+        })));
     }
 
     let result = sqlx::query!(
@@ -183,64 +177,59 @@ pub async fn delete(
     .await
     .map_err(|e| {
         eprintln!("Error executing query for machine::delete: {:?}", e);
-        let error_response = ErrorResponse {
+        (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
             status: "fail",
             message: "Could not delete the machine".to_owned()
-        };
-        (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+        }))
     })?;
 
     if result.rows_affected() > 0 {
         Ok(StatusCode::NO_CONTENT)
     } else {
-        let error_response = ErrorResponse {
+        Err((StatusCode::NOT_FOUND, Json(ErrorResponse {
             status: "fail",
             message: "The machine was not found in the database".to_owned()
-        };
-        Err((StatusCode::NOT_FOUND, Json(error_response)))
+        })))
     }
 }
 
 pub async fn update(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
-    Json(input): Json<UpdateMachine>
+    Json(body): Json<UpdateMachine>
 ) -> Result<StatusCode, (StatusCode, Json<ErrorResponse>)> {
 
     if user.role == UserRole::Worker {
-        let error_response = ErrorResponse {
+        return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {
             status: "fail",
             message: "You don't have permission to edit machines".to_owned()
-        };
-        return Err((StatusCode::FORBIDDEN, Json(error_response)));
+        })));
     }
 
     let result = sqlx::query!(
         "UPDATE machine SET name = COALESCE(?, name), make = COALESCE(?, make), machine_type = COALESCE(?, machine_type), status = COALESCE(?, status) WHERE id = ?",
-        input.name,
-        input.make,
-        input.machine_type,
-        input.status,
-        input.id
+        body.name,
+        body.make,
+        body.machine_type,
+        body.status,
+        body.id
     )
     .execute(&app_state.db)
     .await
     .map_err(|e| {
         eprintln!("Error executing update for machine::update: {:?}", e);
-        let error_response = ErrorResponse {
+        (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
             status: "fail",
             message: "Could not update the machine in the database".to_owned()
-        };
-        (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+        }))
     })?;
 
     if result.rows_affected() > 0 {
         return Ok(StatusCode::NO_CONTENT);
     } else {
-        let error_response = ErrorResponse {
+        Err((StatusCode::NOT_FOUND, Json(ErrorResponse {
             status: "fail",
             message: "The machine was not found in the database".to_owned()
-        };
-        Err((StatusCode::NOT_FOUND, Json(error_response)))
+        })))
     }
 }
