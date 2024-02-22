@@ -28,7 +28,7 @@ pub struct ErrorResponse {
     pub message: String,
 }
 
-#[tokio::main(flavor = "multi_thread", worker_threads = 4)]
+#[tokio::main(flavor = "multi_thread", worker_threads = 6)]
 async fn main() {
     dotenv().ok();
 

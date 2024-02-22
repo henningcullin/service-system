@@ -67,15 +67,14 @@ pub struct UpdateMachine {
 
 pub async fn details(
     State(app_state): State<Arc<AppState>>,
-    Query(query): Query<QueryMachine>,
+    Query(params): Query<QueryMachine>,
 ) -> Result<Json<Machine>, (StatusCode, Json<ErrorResponse>)> {
     let machine = sqlx::query_as::<_, Machine>("SELECT id, name, make, machine_type, CAST(status AS SIGNED) status, created, edited FROM machine WHERE id = ?")
-        .bind(query.id)
+        .bind(params.id)
         .fetch_one(&app_state.db)
         .await
         .map_err(|e| {
             eprintln!("Error executing query for machine::details: {:?}", e);
-
             match e {
                 sqlx::Error::RowNotFound => {
                     (StatusCode::NOT_FOUND, Json(ErrorResponse {
@@ -90,7 +89,6 @@ pub async fn details(
                     }))
                 }
             }
-
         })?;
 
     Ok(Json(machine)) 

@@ -441,7 +441,7 @@ pub async fn login_internal(
         .http_only(true)
         .build();
 
-    let mut response = Response::new(json!({"status": "success", "token": token, "id": user.id}).to_string());
+    let mut response = Response::new(json!({"status": "success", "token": token}).to_string());
     response
         .headers_mut()
         .insert(header::SET_COOKIE, cookie

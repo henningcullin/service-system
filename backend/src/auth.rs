@@ -35,11 +35,10 @@ pub async fn auth(
         });
 
     let token = token.ok_or_else(|| {
-        let error_response = ErrorResponse {
+        (StatusCode::UNAUTHORIZED, Json(ErrorResponse {
             status: "fail",
             message: "You are not logged in".to_string(),
-        };
-        (StatusCode::UNAUTHORIZED, Json(error_response))
+        }))
     })?;
 
     let claims = decode::<TokenClaims>(
@@ -49,20 +48,18 @@ pub async fn auth(
     )
     .map_err(|e| {
         eprintln!("Error decoding claims | auth::auth: {:?}", e);
-        let error_response = ErrorResponse {
+        (StatusCode::UNAUTHORIZED, Json(ErrorResponse {
             status: "fail",
             message: "Invalid token".to_string(),
-        };
-        (StatusCode::UNAUTHORIZED, Json(error_response))
+        }))
     })?
     .claims;
 
     let user_id = uuid::Uuid::parse_str(&claims.sub).map_err(|_| {
-        let error_response = ErrorResponse {
+        (StatusCode::UNAUTHORIZED, Json(ErrorResponse {
             status: "fail",
             message: "Invalid token".to_string(),
-        };
-        (StatusCode::UNAUTHORIZED, Json(error_response))
+        }))
     })?;
 
     let user = sqlx::query_as::<_, User>("SELECT id, first_name, last_name, email, password, phone, CAST(role AS SIGNED) role, last_login FROM user WHERE id = ?")
@@ -71,19 +68,17 @@ pub async fn auth(
         .await
         .map_err(|e| {
             eprintln!("Error selecting user from database | auth::auth: {:?}", e);
-            let error_response = ErrorResponse {
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
                 status: "fail",
                 message: "Error fetching user from database".to_owned(),
-            };
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+            }))
         })?;
 
     let user = user.ok_or_else(|| {
-        let error_response = ErrorResponse {
+        (StatusCode::UNAUTHORIZED, Json(ErrorResponse {
             status: "fail",
             message: "The user belonging to this token no longer exists".to_string(),
-        };
-        (StatusCode::UNAUTHORIZED, Json(error_response))
+        }))
     })?;
 
     req.extensions_mut().insert(user);
