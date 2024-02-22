@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use argon2::{password_hash::SaltString, Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
-use axum::{extract::State, http::{header, Response, StatusCode}, response::IntoResponse, Extension, Json};
+use axum::{extract::State, http::{header, Response, StatusCode}, Extension, Json};
 use axum_extra::extract::cookie::{Cookie, SameSite};
 use chrono::{DateTime, Utc};
 use jsonwebtoken::{encode, EncodingKey, Header};
@@ -59,7 +59,7 @@ pub struct TokenClaims {
 }
 
 #[derive(Debug, Validate, Deserialize)]
-pub struct RegisterUserSchema {
+pub struct RegisterUser {
     pub first_name: String,
     pub last_name: String,
     #[validate(email)]
@@ -70,7 +70,18 @@ pub struct RegisterUserSchema {
 }
 
 #[derive(Debug, Validate, Deserialize)]
-pub struct LoginUserSchema {
+pub struct UpdateUser {
+    pub id: Uuid,
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
+    #[validate(email)]
+    pub email: Option<String>,
+    pub phone: Option<String>,
+    pub role: Option<UserRole>
+}
+
+#[derive(Debug, Validate, Deserialize)]
+pub struct LoginUser {
     #[validate(email)]
     pub email: String,
     pub password: String
@@ -101,33 +112,29 @@ pub struct UserResponse {
 pub async fn create(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
-    Json(body): Json<RegisterUserSchema>,
+    Json(body): Json<RegisterUser>,
 ) -> Result<(StatusCode, Json<UserResponse>), (StatusCode, Json<ErrorResponse>)> {
 
     if user.role == UserRole::Worker || user.role == UserRole::Basic {
-        let error_response = ErrorResponse{
+        return Err((StatusCode::FORBIDDEN, Json(ErrorResponse{
             status: "fail",
             message: "You don't have permission to add users".to_owned()
-        };
-        return Err((StatusCode::FORBIDDEN, Json(error_response)));
+        })));
     }
 
     if body.role == UserRole::Super || body.role == UserRole::Administrator {
-        let error_response = ErrorResponse{
+        return Err((StatusCode::FORBIDDEN, Json(ErrorResponse{
             status: "fail",
             message: format!("You can't create users with role {:?}", body.role)
-        };
-        return Err((StatusCode::FORBIDDEN, Json(error_response)));
+        })));
     }
 
     body.validate()
-        .map_err(|e| {
-            eprintln!("Error validating email | user::create: {:?}", e);
-            let error_response = ErrorResponse {
+        .map_err(|_| {
+            (StatusCode::BAD_REQUEST, Json(ErrorResponse {
                 status: "fail",
                 message: "Invalid email".to_owned()
-            };
-            (StatusCode::BAD_REQUEST, Json(error_response))
+            }))
         })?;
 
     let user_exists: Option<bool> = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM user WHERE email = ?)")
@@ -136,20 +143,18 @@ pub async fn create(
         .await
         .map_err(|e| {
             eprintln!("Error checking if user exist | user::create: {:?}", e);
-            let error_response = ErrorResponse{
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse{
                 status: "fail",
                 message: "Database error".to_owned(),
-            };
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+            }))
         })?;
 
     if let Some(exists) = user_exists {
         if exists {
-            let error_response = ErrorResponse {
+            return Err((StatusCode::CONFLICT, Json(ErrorResponse {
                 status: "fail",
                 message: "an User with that email already exists".to_owned(),
-            };
-            return Err((StatusCode::CONFLICT, Json(error_response)));
+            })));
         }
     }
 
@@ -158,11 +163,10 @@ pub async fn create(
         .hash_password(body.password.as_bytes(), &salt)
         .map_err(|e| {
             eprintln!("Error hashing password | user::create: {:?}", e);
-            let error_response = ErrorResponse {
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
                 status: "fail",
                 message: "Password error".to_owned(),
-            };
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+            }))
         })
         .map(|hash| hash.to_string())?;
 
@@ -182,11 +186,10 @@ pub async fn create(
     .await
     .map_err(|e| {
         eprintln!("Error creating user | user::register_user: {:?}", e);
-        let error_response = ErrorResponse {
+        (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
             status: "fail",
             message: "Could not create user".to_owned(),
-        };
-        (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+        }))
     })?;
 
     let user = User {
@@ -200,31 +203,106 @@ pub async fn create(
         last_login: None
     };
 
-    let user_response = UserResponse {
-        status: "success".to_owned(),
-        data: UserData { user: user.to_filtered() }
-    };
-
     Ok(
         (
             StatusCode::CREATED,
-            Json(user_response)
+            Json(UserResponse {
+                status: "success".to_owned(),
+                data: UserData { user: user.to_filtered() }
+            })
         )
     )
 }
 
-pub async fn login_user(
+pub async fn update(
+    Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
-    Json(body): Json<LoginUserSchema>,
+    Json(body): Json<UpdateUser>
+) -> Result<StatusCode, (StatusCode, Json<ErrorResponse>)> {
+
+    match user.role {
+        UserRole::Basic => {
+            if user.id != body.id {
+                return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: "You can't change other peoples information".to_owned()})));
+            }
+            if body.role.is_some() {
+                return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: "You can't change your role".to_owned()})));
+            }
+        },
+        UserRole::Worker => {
+            if user.id != body.id {
+                return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: "You can't change other peoples information".to_owned()})));
+            }
+            if body.email.is_some() {
+                return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: "You can't change your email if you use it to login".to_owned()})));
+            }
+            if body.role.is_some() {
+                return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: "You can't change your role".to_owned()})));
+            }
+        },
+        UserRole::Administrator => {
+            if body.role.is_some() && (body.role == Some(UserRole::Administrator) || body.role == Some(UserRole::Super)) {
+                return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: format!("You can't set role to {:?}", body.role)})));
+            }
+        }
+        _ => {}
+    }
+
+    body.validate()
+        .map_err(|_| {
+            (StatusCode::BAD_REQUEST, Json(ErrorResponse {
+                status: "fail",
+                message: "Invalid email".to_owned()
+            }))
+        })?;
+
+    let result = sqlx::query!(
+        "UPDATE user SET 
+        first_name = COALESCE(?, first_name), 
+        last_name = COALESCE(?, last_name), 
+        email = COALESCE(?, email), 
+        phone = COALESCE(?, phone), 
+        role = COALESCE(?, role) 
+        WHERE id = ?",
+        body.first_name,
+        body.last_name,
+        body.email,
+        body.phone,
+        body.role,
+        body.id
+    )
+    .execute(&app_state.db)
+    .await
+    .map_err(|e| {
+        eprintln!("Error executing update for user::update: {:?}", e);
+        (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
+            status: "fail",
+            message: "Could not update the user in the database".to_owned()
+        }))
+    })?;
+
+    if result.rows_affected() > 0 {
+        Ok(StatusCode::NO_CONTENT)
+    } else {
+        Err((StatusCode::NOT_FOUND, Json(ErrorResponse {
+            status: "fail",
+            message: "The user was not found in the database".to_owned()
+        })))
+    }
+
+}
+
+pub async fn login_internal(
+    State(app_state): State<Arc<AppState>>,
+    Json(body): Json<LoginUser>,
 ) -> Result<Response<String>, (StatusCode, Json<ErrorResponse>)> {
     body.validate()
         .map_err(|e| {
             eprintln!("Error validating email | user::login_user: {:?}", e);
-            let error_response = ErrorResponse {
+            (StatusCode::BAD_REQUEST, Json(ErrorResponse {
                 status: "fail",
                 message: "Invalid email".to_owned()
-            };
-            (StatusCode::BAD_REQUEST, Json(error_response))
+            }))
         })?;
 
     let user = sqlx::query_as::<_, User>("SELECT id, first_name, last_name, email, password, phone, CAST(role AS SIGNED) role, last_login FROM user WHERE email = ?")
@@ -233,18 +311,16 @@ pub async fn login_user(
     .await
     .map_err(|e| {
         eprintln!("Error retrieving user from database | user::login_user: {:?}", e);
-        let error_response = ErrorResponse {
+        (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
             status: "fail",
             message: "Could not retrieve user from database".to_owned(),
-        };
-        (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+        }))
     })?
     .ok_or_else(|| {
-        let error_response = ErrorResponse {
+        (StatusCode::NOT_FOUND, Json(ErrorResponse {
             status: "fail",
             message: "No user with this email".to_owned(),
-        };
-        (StatusCode::NOT_FOUND, Json(error_response))
+        }))
     })?;
 
     let is_valid = match PasswordHash::new(&user.password) {
@@ -255,11 +331,10 @@ pub async fn login_user(
     };
 
     if !is_valid {
-        let error_response = ErrorResponse {
+        return Err((StatusCode::BAD_REQUEST, Json(ErrorResponse {
             status: "fail",
             message: "Incorrect password".to_owned()
-        };
-        return Err((StatusCode::BAD_REQUEST, Json(error_response)));
+        })));
     }
 
     let now = chrono::Utc::now();
@@ -278,11 +353,10 @@ pub async fn login_user(
     )
     .map_err(|e| {
         eprintln!("Error creating token for user | user::login_user: {:?}", e);
-        let error_response = ErrorResponse {
+        (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
             status: "fail",
             message: "Could create your token".to_owned(),
-        };
-        (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+        }))
     })?;
 
     let cookie = Cookie::build(("token", token.to_owned()))
@@ -292,7 +366,7 @@ pub async fn login_user(
         .http_only(true)
         .build();
 
-    let mut response = Response::new(json!({"status": "success", "token": token}).to_string());
+    let mut response = Response::new(json!({"status": "success", "token": token, "id": user.id}).to_string());
     response
         .headers_mut()
         .insert(header::SET_COOKIE, cookie
@@ -300,11 +374,10 @@ pub async fn login_user(
             .parse()
             .map_err(|e| {
                 eprintln!("Error creating cookie | user::login_user: {:?}", e);
-                let error_response = ErrorResponse {
+                (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
                     status: "fail",
                     message: "Could not create a cookie".to_owned(),
-                };
-                (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+                }))
         })?);
     Ok(response)
 }
@@ -326,11 +399,10 @@ pub async fn logout() -> Result<Response<String>, (StatusCode, Json<ErrorRespons
             .parse()
             .map_err(|e| {
                 eprintln!("Error creating cookie | user::logout: {:?}", e);
-                let error_response = ErrorResponse {
+                (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
                     status: "fail",
                     message: "Could not create a cookie".to_owned(),
-                };
-                (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response))
+                }))
             })?);
     Ok(response)
 }
