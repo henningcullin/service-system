@@ -6,6 +6,7 @@ CREATE TABLE user (
     password VARCHAR(255),
     phone VARCHAR(255) UNIQUE,
     role ENUM('Super', 'Administrator', 'Basic', 'Worker') NOT NULL DEFAULT 'Worker',
+    active BOOLEAN NOT NULL DEFAULT TRUE,
     last_login TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT check_password_for_non_worker CHECK (NOT (role != 'Worker' AND password IS NULL))
 );
