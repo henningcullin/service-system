@@ -2,7 +2,7 @@
 pub struct Config {
     pub database_url: String,
     pub jwt_secret: String,
-    pub jwt_expires_in: String,
+    pub jwt_expires_in: i64,
     pub jwt_maxage: i32
 }
 
@@ -15,8 +15,8 @@ impl Config {
         Config {
             database_url,
             jwt_secret,
-            jwt_expires_in,
-            jwt_maxage: jwt_maxage.parse::<i32>().expect("Could not parse jwt_maxage to i32"),
+            jwt_expires_in: jwt_expires_in.parse::<i64>().expect("Could not parse JWT_EXPIRES_IN to i32"),
+            jwt_maxage: jwt_maxage.parse::<i32>().expect("Could not parse JWT_MAXAGE to i32"),
         }
     }
 }

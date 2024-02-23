@@ -369,7 +369,7 @@ pub async fn update(
         UserRole::Super => {
             if user.id == body.id && body.role.is_some() {
                 return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: "You can't change your own role".to_owned()})));
-            }
+            } // SUPER CAN'T CHANGE OWN ROLE
         }
     }
 
@@ -484,7 +484,7 @@ pub async fn login_internal(
 
     let now = chrono::Utc::now();
     let iat = now.timestamp() as usize;
-    let exp = (now + chrono::Duration::minutes(60)).timestamp() as usize;
+    let exp = (now + chrono::Duration::minutes(app_state.env.jwt_expires_in)).timestamp() as usize;
     let claims: TokenClaims = TokenClaims {
         sub: user.id.to_string(),
         exp,
