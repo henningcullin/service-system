@@ -81,6 +81,7 @@ pub struct UpdateUser {
     pub last_name: Option<String>,
     #[validate(email)]
     pub email: Option<String>,
+    pub password: Option<String>,
     pub phone: Option<String>,
     pub role: Option<UserRole>
 }
@@ -295,32 +296,81 @@ pub async fn update(
     Json(body): Json<UpdateUser>
 ) -> Result<StatusCode, (StatusCode, Json<ErrorResponse>)> {
 
+    let target_user = sqlx::query_as::<_, FilteredUser>(
+        "SELECT 
+        id, 
+        first_name, 
+        last_name, 
+        email,
+        phone, 
+        CAST(role AS SIGNED) role, 
+        last_login 
+        FROM user 
+        WHERE id = ?"
+    )
+        .bind(body.id)
+        .fetch_one(&app_state.db)
+        .await
+        .map_err(|e| {
+            eprintln!("Error executing query for user::details: {:?}", e);
+            match e {
+                sqlx::Error::RowNotFound => {
+                    (StatusCode::NOT_FOUND, Json(ErrorResponse {
+                        status: "fail",
+                        message: "The specified user does not exist".to_owned()
+                    }))
+                },
+                _ => {
+                    (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
+                        status: "fail",
+                        message: "Server error".to_owned()
+                    }))
+                }
+            }
+        })?;
+
     match user.role {
-        UserRole::Basic => {
-            if user.id != body.id {
-                return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: "You can't change other peoples information".to_owned()})));
-            }
-            if body.role.is_some() {
-                return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: "You can't change your role".to_owned()})));
-            }
-        },
         UserRole::Worker => {
+            if body.password.is_some() {
+                return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: "You can't set a password".to_owned()})));
+            } // WORKERS CAN'T HAVE PASSWORD
             if user.id != body.id {
                 return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: "You can't change other peoples information".to_owned()})));
-            }
+            } // WORKER CAN'T CHANGE OTHERS INFO
             if body.email.is_some() {
                 return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: "You can't change your email if you use it to login".to_owned()})));
-            }
+            } // WORKER CAN'T CHANGE EMAIL
             if body.role.is_some() {
                 return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: "You can't change your role".to_owned()})));
-            }
+            } // WORKER CAN'T CHANGE ROLE
+        },
+        UserRole::Basic => {
+            if body.password.is_some() {
+                return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: "You can't change your password".to_owned()})));
+            } // BASIC CAN'T CHANGE PASSWORD HERE
+            if user.id != body.id {
+                return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: "You can't change other peoples information".to_owned()})));
+            } // BASIC CAN'T CHANGE OTHERS INFO
+            if body.role.is_some() {
+                return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: "You can't change your role".to_owned()})));
+            } // BASIC CAN'T CHANGE OWN ROLE
         },
         UserRole::Administrator => {
-            if body.role.is_some() && (body.role == Some(UserRole::Administrator) || body.role == Some(UserRole::Super)) {
-                return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: format!("You can't set role to {:?}", body.role)})));
+            if body.password.is_some() && (target_user.role == UserRole::Administrator || target_user.role == UserRole::Super) && user.id != body.id {
+                return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: format!("You can't change the password of people with role {:?}", target_user.role)})));
+            } // ADMINISTRATOR CAN'T CHANGE OTHER ADMINISTRATOR'S OR SUPER'S PASSWORD
+            if body.role.is_some() && (target_user.role == UserRole::Administrator || target_user.role == UserRole::Super) {
+                return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: format!("You can't change role for {:?}", target_user.role)})));
+            } // ADMINISTRATOR CAN'T CHANGE ROLE TO ADMINISTRATOR OR SUPER
+            if user.id == body.id && body.role.is_some() {
+                return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: "You can't change your own role".to_owned()})));
+            } // ADMINISTRATOR CAN'T CHANGE OWN ROLE
+        }
+        UserRole::Super => {
+            if user.id == body.id && body.role.is_some() {
+                return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: "You can't change your own role".to_owned()})));
             }
         }
-        _ => {}
     }
 
     body.validate()
@@ -331,17 +381,37 @@ pub async fn update(
             }))
         })?;
 
+    let hashed_password = match body.password {
+        None => None,
+        Some(password) => {
+            let salt = SaltString::generate(&mut OsRng);
+            let hashed_password = Argon2::default()
+                .hash_password(password.as_bytes(), &salt)
+                .map_err(|e| {
+                    eprintln!("Error hashing password | user::create: {:?}", e);
+                    (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
+                        status: "fail",
+                        message: "Password error".to_owned(),
+                    }))
+                })
+                .map(|hash| hash.to_string())?;
+            Some(hashed_password)
+        }
+    };
+
     let result = sqlx::query!(
         "UPDATE user SET 
         first_name = COALESCE(?, first_name), 
         last_name = COALESCE(?, last_name), 
         email = COALESCE(?, email), 
+        password = COALESCE(?, password), 
         phone = COALESCE(?, phone), 
         role = COALESCE(?, role) 
         WHERE id = ?",
         body.first_name,
         body.last_name,
         body.email,
+        hashed_password,
         body.phone,
         body.role,
         body.id
