@@ -1,14 +1,14 @@
 use std::sync::Arc;
 
-use axum::{extract::{Query, State}, http::StatusCode, Extension, Json};
+use axum::{extract::State, http::StatusCode, Extension, Json};
 use chrono::{DateTime, Utc};
 use serde_derive::{Deserialize, Serialize};
 use sqlx::prelude::{FromRow, Type};
 use uuid::Uuid;
 
-use crate::{user::User, AppState, ErrorResponse};
+use crate::{user::{User, UserRole}, AppState, ErrorResponse};
 
-#[derive(Debug, Deserialize, Serialize, Type)]
+#[derive(Debug, Deserialize, Serialize, Type, PartialEq)]
 #[repr(i32)]
 pub enum TaskType {
     Suggestion = 1,
@@ -17,7 +17,7 @@ pub enum TaskType {
     Other = 4
 }
 
-#[derive(Debug, Deserialize, Serialize, Type)]
+#[derive(Debug, Deserialize, Serialize, Type, PartialEq)]
 #[repr(i32)]
 pub enum TaskStatus {
     Pending = 1,
@@ -36,8 +36,23 @@ pub struct Task {
     created: DateTime<Utc>,
     edited: DateTime<Utc>,
     creator: Uuid,
-    executor: Uuid,
-    machine: Uuid
+    executor: Option<Uuid>,
+    machine: Option<Uuid>
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct QueryTask {
+    id: Uuid
+}
+
+#[derive(Debug, Deserialize)]
+pub struct NewTask {
+    title: String,
+    description: Option<String>,
+    task_type: Option<TaskType>,
+    status: Option<TaskStatus>,
+    executor: Option<Uuid>,
+    machine: Option<Uuid>
 }
 
 pub async fn index(
@@ -55,4 +70,41 @@ pub async fn index(
         })?;
 
     Ok(Json(tasks))
+}
+
+pub async fn create(
+    Extension(user): Extension<User>,
+    State(app_state): State<Arc<AppState>>,
+    Json(body): Json<NewTask>
+) -> Result<(StatusCode, Json<QueryTask>), (StatusCode, Json<ErrorResponse>)>{
+
+    if user.role == UserRole::Worker && (body.task_type != Some(TaskType::Suggestion) || body.task_type.is_some()) {
+        return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: "You can only set tasktype to suggestion".to_owned()})));
+    }
+
+    let id = uuid::Uuid::new_v4();
+
+    sqlx::query!(
+        "INSERT INTO task (id, title, description, task_type, status, creator, executor, machine) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        id,
+        body.title,
+        body.description,
+        body.task_type,
+        body.status,
+        user.id,
+        body.executor,
+        body.machine
+    )
+        .execute(&app_state.db)
+        .await
+        .map_err(|e| {
+            eprintln!("Error executing query for machine::create: {:?}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
+                status: "fail",
+                message: "Could not create machine in database".to_owned()
+            }))
+        })?;
+
+    Ok((StatusCode::CREATED, Json(QueryTask{id})))
+
 }
