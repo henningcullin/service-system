@@ -29,6 +29,7 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/user/update", put(user::update))
         .route("/user/logout", get(user::logout))
 
+        .route("/task", get(task::details))
         .route("/tasks", get(task::index))
         .route("/task", post(task::create))
         .layer(middleware::from_fn_with_state(app_state.clone(), auth));

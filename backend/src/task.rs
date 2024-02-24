@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::{extract::State, http::StatusCode, Extension, Json};
+use axum::{extract::{Query, State}, http::StatusCode, Extension, Json};
 use chrono::{DateTime, Utc};
 use serde_derive::{Deserialize, Serialize};
 use sqlx::prelude::{FromRow, Type};
@@ -53,6 +53,35 @@ pub struct NewTask {
     status: Option<TaskStatus>,
     executor: Option<Uuid>,
     machine: Option<Uuid>
+}
+
+pub async fn details(
+    State(app_state): State<Arc<AppState>>,
+    Query(params): Query<QueryTask>,
+) -> Result<Json<Task>, (StatusCode, Json<ErrorResponse>)> {
+    let task = sqlx::query_as::<_, Task>("SELECT id, title, description, CAST(task_type AS SIGNED) task_type, CAST(status AS SIGNED) status, archived, created, edited, creator, executor, machine FROM task WHERE id = ?")
+        .bind(params.id)
+        .fetch_one(&app_state.db)
+        .await
+        .map_err(|e| {
+            eprintln!("Error executing query for task::details: {:?}", e);
+            match e {
+                sqlx::Error::RowNotFound => {
+                    (StatusCode::NOT_FOUND, Json(ErrorResponse {
+                        status: "fail",
+                        message: "The specified task does not exist".to_owned()
+                    }))
+                },
+                _ => {
+                    (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
+                        status: "fail",
+                        message: "Server error".to_owned()
+                    }))
+                }
+            }
+        })?;
+
+    Ok(Json(task)) 
 }
 
 pub async fn index(
