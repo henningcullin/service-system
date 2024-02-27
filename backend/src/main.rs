@@ -7,6 +7,7 @@ mod router;
 
 use axum::http::{header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE}, HeaderValue, Method};
 use router::create_router;
+use serde::Serialize;
 use tower_http::cors::CorsLayer;
 use std::{
     sync::Arc,
@@ -22,8 +23,14 @@ pub struct AppState {
     env: Config
 }
 
-#[derive(Debug, serde::Serialize)]
+#[derive(Debug, Serialize)]
 pub struct ErrorResponse {
+    pub status: &'static str,
+    pub message: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct SuccessResponse {
     pub status: &'static str,
     pub message: String,
 }
