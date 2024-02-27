@@ -5,7 +5,7 @@ use axum::{extract::{Query, State}, http::{header, Response, StatusCode}, Extens
 use axum_extra::extract::{cookie::{Cookie, SameSite}, CookieJar};
 use chrono::{DateTime, Utc};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
-use rand_core::OsRng;
+use rand_core::{OsRng, RngCore};
 use serde_json::json;
 use uuid::Uuid;
 
@@ -230,7 +230,7 @@ pub async fn create(
                     message: format!("You can't create users with role {:?}", body.role)
                 })));
             }
-        }
+        },
         UserRole::Super => {
             if body.role == UserRole::Super {
                 return Err((StatusCode::FORBIDDEN, Json(ErrorResponse{
@@ -477,6 +477,7 @@ pub async fn login_internal(
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<LoginInternalUser>,
 ) -> Result<Response<String>, (StatusCode, Json<ErrorResponse>)> {
+
     body.validate()
         .map_err(|_| {
             (StatusCode::BAD_REQUEST, Json(ErrorResponse {
@@ -626,9 +627,17 @@ pub async fn login_external(
         }
     }
 
-    let code = SaltString::generate(&mut OsRng); // EMAIL THIS TO USER
+    let mut rng = OsRng; // Use the operating system's random number generator
+    let mut buffer = [0u8; 3]; // 6 characters in hexadecimal = 3 bytes
+
+    rng.fill_bytes(&mut buffer); // Fill the buffer with random bytes
+
+    // Convert the bytes to a hexadecimal string
+    let code = buffer.iter().map(|b| format!("{:02X}", b)).collect::<String>(); // EMAIL THIS TO USER
+
+    let salt = SaltString::generate(&mut OsRng);
     let hash = Argon2::default()
-        .hash_password(body.email.as_bytes(), &code)
+        .hash_password(code.as_bytes(), &salt)
         .map_err(|e| {
             eprintln!("Error creating hash | user::login_external: {:?}", e);
             (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
@@ -718,15 +727,9 @@ pub async fn verify_external(
         .claims;
 
     let is_valid = match PasswordHash::new(&claims.hash) {
-        Ok(parsed_hash) => {
-            println!("stored: {}", parsed_hash);
-            println!("entered: {}", body.code);
-
-            Argon2::default()
-            .verify_password(body.code.as_bytes(), &parsed_hash)
-            .map_or(false, |_| true)
-        } 
-        
+        Ok(parsed_hash) => Argon2::default()
+                .verify_password(body.code.as_bytes(), &parsed_hash)
+                .map_or(false, |_| true),
         Err(_) => false,
     };
 
@@ -779,7 +782,7 @@ pub async fn verify_external(
 
     let cookie = Cookie::build(("token", token.to_owned()))
         .path("/")
-        .max_age(time::Duration::hours(1))
+        .max_age(time::Duration::hours(2))
         .same_site(SameSite::Lax)
         .http_only(true)
         .build();
