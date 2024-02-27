@@ -1,18 +1,25 @@
-use axum::{
-    extract::{Query, State},
-    http::StatusCode,
-    Extension, Json,
-};
-use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
-use sqlx::{FromRow, Type};
 use std::sync::Arc;
+use axum::{
+    extract::{
+        Query, 
+        State
+    }, http::StatusCode, Extension, Json
+};
+use sqlx::{
+    FromRow, 
+    Type
+};
+use serde::{
+    Serialize,
+    Deserialize
+};
+use chrono::{
+    DateTime, 
+    Utc
+};
 use uuid::Uuid;
 
-use crate::{
-    user::{User, UserRole},
-    AppState, ErrorResponse,
-};
+use crate::{user::{User, UserRole}, AppState, ErrorResponse};
 
 // ______________________________________ STRUCTS ______________________________________
 
@@ -31,12 +38,12 @@ pub struct Machine {
     machine_type: Option<String>,
     status: MachineStatus,
     created: DateTime<Utc>,
-    edited: DateTime<Utc>,
+    edited: DateTime<Utc>
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct QueryMachine {
-    id: Uuid,
+    id: Uuid
 }
 
 #[derive(Deserialize)]
@@ -44,7 +51,7 @@ pub struct NewMachine {
     name: String,
     make: Option<String>,
     machine_type: Option<String>,
-    status: Option<MachineStatus>,
+    status: Option<MachineStatus>
 }
 
 #[derive(Deserialize)]
@@ -53,7 +60,7 @@ pub struct UpdateMachine {
     name: Option<String>,
     make: Option<String>,
     machine_type: Option<String>,
-    status: Option<MachineStatus>,
+    status: Option<MachineStatus>
 }
 
 // ___________________________________ FUNCTIONS ___________________________________
@@ -84,7 +91,7 @@ pub async fn details(
             }
         })?;
 
-    Ok(Json(machine))
+    Ok(Json(machine)) 
 }
 
 pub async fn index(
@@ -108,15 +115,13 @@ pub async fn create(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<NewMachine>,
-) -> Result<(StatusCode, Json<QueryMachine>), (StatusCode, Json<ErrorResponse>)> {
+) -> Result<(StatusCode, Json<QueryMachine>) , (StatusCode, Json<ErrorResponse>)> {
+
     if user.role == UserRole::Worker {
-        return Err((
-            StatusCode::FORBIDDEN,
-            Json(ErrorResponse {
-                status: "fail",
-                message: "You don't have permission to create machines".to_owned(),
-            }),
-        ));
+        return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {
+            status: "fail",
+            message: "You don't have permission to create machines".to_owned()
+        })));
     }
 
     let id = uuid::Uuid::new_v4();
@@ -129,79 +134,74 @@ pub async fn create(
         body.machine_type,
         body.status
     )
-    .execute(&app_state.db)
-    .await
-    .map_err(|e| {
-        eprintln!("Error executing query for machine::create: {:?}", e);
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(ErrorResponse {
+        .execute(&app_state.db)
+        .await
+        .map_err(|e| {
+            eprintln!("Error executing query for machine::create: {:?}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
                 status: "fail",
-                message: "Could not create machine in database".to_owned(),
-            }),
-        )
-    })?;
+                message: "Could not create machine in database".to_owned()
+            }))
+        })?;
 
     let id = QueryMachine { id };
 
-    Ok((StatusCode::CREATED, Json(id)))
+    Ok(
+        (
+            StatusCode::CREATED,
+            Json(id)
+        )
+    )
 }
 
 pub async fn delete(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
-    Query(query): Query<QueryMachine>,
+    Query(query): Query<QueryMachine>
 ) -> Result<StatusCode, (StatusCode, Json<ErrorResponse>)> {
+
     if user.role == UserRole::Worker {
-        return Err((
-            StatusCode::FORBIDDEN,
-            Json(ErrorResponse {
-                status: "fail",
-                message: "You don't have permission to delete machines".to_owned(),
-            }),
-        ));
+        return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {
+            status: "fail",
+            message: "You don't have permission to delete machines".to_owned()
+        })));
     }
 
-    let result = sqlx::query!("DELETE FROM machine WHERE id = ?", query.id)
-        .execute(&app_state.db)
-        .await
-        .map_err(|e| {
-            eprintln!("Error executing query for machine::delete: {:?}", e);
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(ErrorResponse {
-                    status: "fail",
-                    message: "Could not delete the machine".to_owned(),
-                }),
-            )
-        })?;
+    let result = sqlx::query!(
+        "DELETE FROM machine WHERE id = ?",
+        query.id
+    )
+    .execute(&app_state.db)
+    .await
+    .map_err(|e| {
+        eprintln!("Error executing query for machine::delete: {:?}", e);
+        (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
+            status: "fail",
+            message: "Could not delete the machine".to_owned()
+        }))
+    })?;
 
     if result.rows_affected() > 0 {
         Ok(StatusCode::NO_CONTENT)
     } else {
-        Err((
-            StatusCode::NOT_FOUND,
-            Json(ErrorResponse {
-                status: "fail",
-                message: "The machine was not found in the database".to_owned(),
-            }),
-        ))
+        Err((StatusCode::NOT_FOUND, Json(ErrorResponse {
+            status: "fail",
+            message: "The machine was not found in the database".to_owned()
+        })))
     }
 }
 
 pub async fn update(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
-    Json(body): Json<UpdateMachine>,
+    Json(body): Json<UpdateMachine>
 ) -> Result<StatusCode, (StatusCode, Json<ErrorResponse>)> {
+
     if user.role == UserRole::Worker {
-        return Err((
-            StatusCode::FORBIDDEN,
-            Json(ErrorResponse {
-                status: "fail",
-                message: "You don't have permission to edit machines".to_owned(),
-            }),
-        ));
+        return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {
+            status: "fail",
+            message: "You don't have permission to edit machines".to_owned()
+        })));
     }
 
     let result = sqlx::query!(
@@ -225,12 +225,9 @@ pub async fn update(
     if result.rows_affected() > 0 {
         return Ok(StatusCode::NO_CONTENT);
     } else {
-        Err((
-            StatusCode::NOT_FOUND,
-            Json(ErrorResponse {
-                status: "fail",
-                message: "The machine was not found in the database".to_owned(),
-            }),
-        ))
+        Err((StatusCode::NOT_FOUND, Json(ErrorResponse {
+            status: "fail",
+            message: "The machine was not found in the database".to_owned()
+        })))
     }
 }
