@@ -544,6 +544,7 @@ pub async fn login_external(
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<LoginExternalUser>
 ) -> Result<Response<String>, (StatusCode, Json<ErrorResponse>)> {
+
     body.validate()
         .map_err(|_| {
             (StatusCode::BAD_REQUEST, Json(ErrorResponse {
@@ -551,6 +552,27 @@ pub async fn login_external(
                 message: "Invalid email".to_owned()
             }))
         })?;
+
+    let user_exists: Option<bool> = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM user WHERE email = ?)")
+        .bind(body.email.to_owned().to_ascii_lowercase())
+        .fetch_one(&app_state.db)
+        .await
+        .map_err(|e| {
+            eprintln!("Error checking if user exist | user::login_external: {:?}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse{
+                status: "fail",
+                message: "Database error".to_owned(),
+            }))
+        })?;
+
+    if let Some(exists) = user_exists {
+        if !exists {
+            return Err((StatusCode::NOT_FOUND, Json(ErrorResponse {
+                status: "fail",
+                message: "No user with that email exists".to_owned(),
+            })));
+        }
+    }
 
     let salt = SaltString::generate(&mut OsRng);
     let hash = Argon2::default()
@@ -609,6 +631,13 @@ pub async fn login_external(
                 }))
         })?);
     Ok(response)
+}
+
+pub async fn verify_external(
+    State(app_state): State<Arc<AppState>>,
+    Json(body): Json<LoginExternalUser>
+) {
+    todo!()
 }
 
 pub async fn logout() -> Result<Response<String>, (StatusCode, Json<ErrorResponse>)> {
