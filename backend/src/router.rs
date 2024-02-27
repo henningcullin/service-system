@@ -23,6 +23,7 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/machine", delete(machine::delete))
         .route("/machine", put(machine::update))
         
+        .route("/user/me", get(user::me))
         .route("/user", get(user::details))
         .route("/users", get(user::index))
         .route("/user", post(user::create))

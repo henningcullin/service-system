@@ -134,6 +134,12 @@ pub struct UserResponse {
     pub data: UserData,
 }
 
+pub async fn me(
+    Extension(user): Extension<User>
+) -> Json<FilteredUser> {
+    Json(user.to_filtered())
+}
+
 pub async fn details(
     State(app_state): State<Arc<AppState>>,
     Query(querys): Query<QueryUser>
