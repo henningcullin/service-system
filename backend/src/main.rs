@@ -35,6 +35,18 @@ pub struct SuccessResponse {
     pub message: String,
 }
 
+#[derive(Debug, Serialize)]
+pub enum ResponseType {
+    Fail,
+    Success
+}
+
+#[derive(Debug, Serialize)]
+pub struct ResponseData {
+    pub status: ResponseType,
+    pub message: String 
+}
+
 #[tokio::main(flavor = "multi_thread", worker_threads = 6)]
 async fn main() {
     dotenv().ok();

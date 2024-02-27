@@ -21,7 +21,7 @@ use sqlx::{FromRow, Type};
 
 use validator::Validate;
 
-use crate::{AppState, ErrorResponse, SuccessResponse};
+use crate::{AppState, ResponseData, ResponseType::{Fail, Success}};
 
 #[derive(Debug, Serialize, Deserialize, Type, Clone, PartialEq)]
 #[repr(i32)]
@@ -148,7 +148,7 @@ pub async fn me(Extension(user): Extension<User>) -> Json<FilteredUser> {
 pub async fn details(
     State(app_state): State<Arc<AppState>>,
     Query(querys): Query<QueryUser>,
-) -> Result<Json<FilteredUser>, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<Json<FilteredUser>, (StatusCode, Json<ResponseData>)> {
     let user = sqlx::query_as::<_, FilteredUser>(
         "SELECT 
         id, 
@@ -169,15 +169,15 @@ pub async fn details(
         match e {
             sqlx::Error::RowNotFound => (
                 StatusCode::NOT_FOUND,
-                Json(ErrorResponse {
-                    status: "fail",
+                Json(ResponseData {
+                    status: Fail,
                     message: "The specified user does not exist".to_owned(),
                 }),
             ),
             _ => (
                 StatusCode::INTERNAL_SERVER_ERROR,
-                Json(ErrorResponse {
-                    status: "fail",
+                Json(ResponseData {
+                    status: Fail,
                     message: "Server error".to_owned(),
                 }),
             ),
@@ -189,7 +189,7 @@ pub async fn details(
 
 pub async fn index(
     State(app_state): State<Arc<AppState>>,
-) -> Result<Json<Vec<FilteredUser>>, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<Json<Vec<FilteredUser>>, (StatusCode, Json<ResponseData>)> {
     let users: Vec<FilteredUser> = sqlx::query_as::<_, FilteredUser>(
         "SELECT 
         id, 
@@ -208,8 +208,8 @@ pub async fn index(
         eprintln!("Error executing query for user::index: {:?}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
-            Json(ErrorResponse {
-                status: "fail",
+            Json(ResponseData {
+                status: Fail,
                 message: "Could not retrieve the users from database".to_owned(),
             }),
         )
@@ -222,13 +222,13 @@ pub async fn create(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<RegisterUser>,
-) -> Result<(StatusCode, Json<UserResponse>), (StatusCode, Json<ErrorResponse>)> {
+) -> Result<(StatusCode, Json<UserResponse>), (StatusCode, Json<ResponseData>)> {
     match user.role {
         UserRole::Worker => {
             return Err((
                 StatusCode::FORBIDDEN,
-                Json(ErrorResponse {
-                    status: "fail",
+                Json(ResponseData {
+                    status: Fail,
                     message: "You don't have permission to add users".to_owned(),
                 }),
             ));
@@ -236,8 +236,8 @@ pub async fn create(
         UserRole::Basic => {
             return Err((
                 StatusCode::FORBIDDEN,
-                Json(ErrorResponse {
-                    status: "fail",
+                Json(ResponseData {
+                    status: Fail,
                     message: "You don't have permission to add users".to_owned(),
                 }),
             ));
@@ -246,8 +246,8 @@ pub async fn create(
             if body.role == UserRole::Administrator || body.role == UserRole::Super {
                 return Err((
                     StatusCode::FORBIDDEN,
-                    Json(ErrorResponse {
-                        status: "fail",
+                    Json(ResponseData {
+                        status: Fail,
                         message: format!("You can't create users with role {:?}", body.role),
                     }),
                 ));
@@ -257,8 +257,8 @@ pub async fn create(
             if body.role == UserRole::Super {
                 return Err((
                     StatusCode::FORBIDDEN,
-                    Json(ErrorResponse {
-                        status: "fail",
+                    Json(ResponseData {
+                        status: Fail,
                         message: format!("You can't create users with role {:?}", body.role),
                     }),
                 ));
@@ -269,8 +269,8 @@ pub async fn create(
     body.validate().map_err(|_| {
         (
             StatusCode::BAD_REQUEST,
-            Json(ErrorResponse {
-                status: "fail",
+            Json(ResponseData {
+                status: Fail,
                 message: "Invalid email".to_owned(),
             }),
         )
@@ -285,8 +285,8 @@ pub async fn create(
                 eprintln!("Error checking if user exist | user::create: {:?}", e);
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(ErrorResponse {
-                        status: "fail",
+                    Json(ResponseData {
+                        status: Fail,
                         message: "Database error".to_owned(),
                     }),
                 )
@@ -296,8 +296,8 @@ pub async fn create(
         if exists {
             return Err((
                 StatusCode::CONFLICT,
-                Json(ErrorResponse {
-                    status: "fail",
+                Json(ResponseData {
+                    status: Fail,
                     message: "an User with that email already exists".to_owned(),
                 }),
             ));
@@ -311,8 +311,8 @@ pub async fn create(
             eprintln!("Error hashing password | user::create: {:?}", e);
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
-                Json(ErrorResponse {
-                    status: "fail",
+                Json(ResponseData {
+                    status: Fail,
                     message: "Password error".to_owned(),
                 }),
             )
@@ -335,8 +335,8 @@ pub async fn create(
     .await
     .map_err(|e| {
         eprintln!("Error creating user | user::register_user: {:?}", e);
-        (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
-            status: "fail",
+        (StatusCode::INTERNAL_SERVER_ERROR, Json(ResponseData {
+            status: Fail,
             message: "Could not create user".to_owned(),
         }))
     })?;
@@ -367,7 +367,7 @@ pub async fn update(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<UpdateUser>,
-) -> Result<StatusCode, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<StatusCode, (StatusCode, Json<ResponseData>)> {
     let target_user = sqlx::query_as::<_, FilteredUser>(
         "SELECT 
         id, 
@@ -388,15 +388,15 @@ pub async fn update(
         match e {
             sqlx::Error::RowNotFound => (
                 StatusCode::NOT_FOUND,
-                Json(ErrorResponse {
-                    status: "fail",
+                Json(ResponseData {
+                    status: Fail,
                     message: "The specified user does not exist".to_owned(),
                 }),
             ),
             _ => (
                 StatusCode::INTERNAL_SERVER_ERROR,
-                Json(ErrorResponse {
-                    status: "fail",
+                Json(ResponseData {
+                    status: Fail,
                     message: "Server error".to_owned(),
                 }),
             ),
@@ -408,8 +408,8 @@ pub async fn update(
             if body.password.is_some() {
                 return Err((
                     StatusCode::FORBIDDEN,
-                    Json(ErrorResponse {
-                        status: "fail",
+                    Json(ResponseData {
+                        status: Fail,
                         message: "You can't set a password".to_owned(),
                     }),
                 ));
@@ -417,8 +417,8 @@ pub async fn update(
             if user.id != body.id {
                 return Err((
                     StatusCode::FORBIDDEN,
-                    Json(ErrorResponse {
-                        status: "fail",
+                    Json(ResponseData {
+                        status: Fail,
                         message: "You can't change other peoples information".to_owned(),
                     }),
                 ));
@@ -426,8 +426,8 @@ pub async fn update(
             if body.email.is_some() {
                 return Err((
                     StatusCode::FORBIDDEN,
-                    Json(ErrorResponse {
-                        status: "fail",
+                    Json(ResponseData {
+                        status: Fail,
                         message: "You can't change your email if you use it to login".to_owned(),
                     }),
                 ));
@@ -435,8 +435,8 @@ pub async fn update(
             if body.role.is_some() {
                 return Err((
                     StatusCode::FORBIDDEN,
-                    Json(ErrorResponse {
-                        status: "fail",
+                    Json(ResponseData {
+                        status: Fail,
                         message: "You can't change your role".to_owned(),
                     }),
                 ));
@@ -446,8 +446,8 @@ pub async fn update(
             if body.password.is_some() {
                 return Err((
                     StatusCode::FORBIDDEN,
-                    Json(ErrorResponse {
-                        status: "fail",
+                    Json(ResponseData {
+                        status: Fail,
                         message: "You can't change your password".to_owned(),
                     }),
                 ));
@@ -455,8 +455,8 @@ pub async fn update(
             if user.id != body.id {
                 return Err((
                     StatusCode::FORBIDDEN,
-                    Json(ErrorResponse {
-                        status: "fail",
+                    Json(ResponseData {
+                        status: Fail,
                         message: "You can't change other peoples information".to_owned(),
                     }),
                 ));
@@ -464,8 +464,8 @@ pub async fn update(
             if body.role.is_some() {
                 return Err((
                     StatusCode::FORBIDDEN,
-                    Json(ErrorResponse {
-                        status: "fail",
+                    Json(ResponseData {
+                        status: Fail,
                         message: "You can't change your role".to_owned(),
                     }),
                 ));
@@ -479,8 +479,8 @@ pub async fn update(
             {
                 return Err((
                     StatusCode::FORBIDDEN,
-                    Json(ErrorResponse {
-                        status: "fail",
+                    Json(ResponseData {
+                        status: Fail,
                         message: format!(
                             "You can't change the password of people with role {:?}",
                             target_user.role
@@ -494,8 +494,8 @@ pub async fn update(
             {
                 return Err((
                     StatusCode::FORBIDDEN,
-                    Json(ErrorResponse {
-                        status: "fail",
+                    Json(ResponseData {
+                        status: Fail,
                         message: format!("You can't change role for {:?}", target_user.role),
                     }),
                 ));
@@ -503,8 +503,8 @@ pub async fn update(
             if user.id == body.id && body.role.is_some() {
                 return Err((
                     StatusCode::FORBIDDEN,
-                    Json(ErrorResponse {
-                        status: "fail",
+                    Json(ResponseData {
+                        status: Fail,
                         message: "You can't change your own role".to_owned(),
                     }),
                 ));
@@ -514,8 +514,8 @@ pub async fn update(
             if user.id == body.id && body.role.is_some() {
                 return Err((
                     StatusCode::FORBIDDEN,
-                    Json(ErrorResponse {
-                        status: "fail",
+                    Json(ResponseData {
+                        status: Fail,
                         message: "You can't change your own role".to_owned(),
                     }),
                 ));
@@ -526,8 +526,8 @@ pub async fn update(
     body.validate().map_err(|_| {
         (
             StatusCode::BAD_REQUEST,
-            Json(ErrorResponse {
-                status: "fail",
+            Json(ResponseData {
+                status: Fail,
                 message: "Invalid email".to_owned(),
             }),
         )
@@ -543,8 +543,8 @@ pub async fn update(
                     eprintln!("Error hashing password | user::create: {:?}", e);
                     (
                         StatusCode::INTERNAL_SERVER_ERROR,
-                        Json(ErrorResponse {
-                            status: "fail",
+                        Json(ResponseData {
+                            status: Fail,
                             message: "Password error".to_owned(),
                         }),
                     )
@@ -577,8 +577,8 @@ pub async fn update(
         eprintln!("Error executing update for user::update: {:?}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
-            Json(ErrorResponse {
-                status: "fail",
+            Json(ResponseData {
+                status: Fail,
                 message: "Could not update the user in the database".to_owned(),
             }),
         )
@@ -589,8 +589,8 @@ pub async fn update(
     } else {
         Err((
             StatusCode::NOT_FOUND,
-            Json(ErrorResponse {
-                status: "fail",
+            Json(ResponseData {
+                status: Fail,
                 message: "The user was not found in the database".to_owned(),
             }),
         ))
@@ -600,12 +600,12 @@ pub async fn update(
 pub async fn login_internal(
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<LoginInternalUser>,
-) -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<impl IntoResponse, (StatusCode, Json<ResponseData>)> {
     body.validate().map_err(|_| {
         (
             StatusCode::BAD_REQUEST,
-            Json(ErrorResponse {
-                status: "fail",
+            Json(ResponseData {
+                status: Fail,
                 message: "Invalid email".to_owned(),
             }),
         )
@@ -617,14 +617,14 @@ pub async fn login_internal(
         .await
         .map_err(|e| {
             eprintln!("Error retrieving user from database | user::login_internal: {:?}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
-                status: "fail",
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ResponseData {
+                status: Fail,
                 message: "Could not retrieve user from database".to_owned(),
             }))
         })?
         .ok_or_else(|| {
-            (StatusCode::NOT_FOUND, Json(ErrorResponse {
-                status: "fail",
+            (StatusCode::NOT_FOUND, Json(ResponseData {
+                status: Fail,
                 message: "No user with this email".to_owned(),
             }))
         })?;
@@ -633,8 +633,8 @@ pub async fn login_internal(
         UserRole::Super => {
             return Err((
                 StatusCode::FORBIDDEN,
-                Json(ErrorResponse {
-                    status: "fail",
+                Json(ResponseData {
+                    status: Fail,
                     message: "You don't use a password to login".to_string(),
                 }),
             ));
@@ -642,8 +642,8 @@ pub async fn login_internal(
         UserRole::Worker => {
             return Err((
                 StatusCode::FORBIDDEN,
-                Json(ErrorResponse {
-                    status: "fail",
+                Json(ResponseData {
+                    status: Fail,
                     message: "You don't use a password to login".to_string(),
                 }),
             ));
@@ -655,8 +655,8 @@ pub async fn login_internal(
         None => {
             return Err((
                 StatusCode::BAD_REQUEST,
-                Json(ErrorResponse {
-                    status: "fail",
+                Json(ResponseData {
+                    status: Fail,
                     message: "You need to provide a password".to_string(),
                 }),
             ));
@@ -677,8 +677,8 @@ pub async fn login_internal(
     if !is_valid {
         return Err((
             StatusCode::BAD_REQUEST,
-            Json(ErrorResponse {
-                status: "fail",
+            Json(ResponseData {
+                status: Fail,
                 message: "Incorrect password".to_owned(),
             }),
         ));
@@ -702,8 +702,8 @@ pub async fn login_internal(
         eprintln!("Error creating token for user | user::login_user: {:?}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
-            Json(ErrorResponse {
-                status: "fail",
+            Json(ResponseData {
+                status: Fail,
                 message: "Could create your token".to_owned(),
             }),
         )
@@ -718,8 +718,8 @@ pub async fn login_internal(
 
     Ok((
         AppendHeaders([(header::SET_COOKIE, cookie)]),
-        Json(SuccessResponse {
-            status: "success",
+        Json(ResponseData {
+            status: Success,
             message: "Successfully logged in".to_string(),
         }),
     ))
@@ -728,12 +728,12 @@ pub async fn login_internal(
 pub async fn login_external(
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<LoginExternalUser>,
-) -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<impl IntoResponse, (StatusCode, Json<ResponseData>)> {
     body.validate().map_err(|_| {
         (
             StatusCode::BAD_REQUEST,
-            Json(ErrorResponse {
-                status: "fail",
+            Json(ResponseData {
+                status: Fail,
                 message: "Invalid email".to_owned(),
             }),
         )
@@ -751,8 +751,8 @@ pub async fn login_external(
                 );
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(ErrorResponse {
-                        status: "fail",
+                    Json(ResponseData {
+                        status: Fail,
                         message: "Database error".to_owned(),
                     }),
                 )
@@ -762,8 +762,8 @@ pub async fn login_external(
         if !exists {
             return Err((
                 StatusCode::NOT_FOUND,
-                Json(ErrorResponse {
-                    status: "fail",
+                Json(ResponseData {
+                    status: Fail,
                     message: "No user with that email exists".to_owned(),
                 }),
             ));
@@ -787,8 +787,8 @@ pub async fn login_external(
             eprintln!("Error creating hash | user::login_external: {:?}", e);
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
-                Json(ErrorResponse {
-                    status: "fail",
+                Json(ResponseData {
+                    status: Fail,
                     message: "Password error".to_owned(),
                 }),
             )
@@ -820,8 +820,8 @@ pub async fn login_external(
         );
         (
             StatusCode::INTERNAL_SERVER_ERROR,
-            Json(ErrorResponse {
-                status: "fail",
+            Json(ResponseData {
+                status: Fail,
                 message: "Could create your token".to_owned(),
             }),
         )
@@ -836,8 +836,8 @@ pub async fn login_external(
 
     Ok((
         AppendHeaders([(header::SET_COOKIE, cookie)]),
-        Json(SuccessResponse {
-            status: "success",
+        Json(ResponseData {
+            status: Success,
             message: "Successfully logged in".to_string(),
         }),
     ))
@@ -847,7 +847,7 @@ pub async fn verify_external(
     State(app_state): State<Arc<AppState>>,
     cookie_jar: CookieJar,
     Json(body): Json<VerifyExternalUser>,
-) -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<impl IntoResponse, (StatusCode, Json<ResponseData>)> {
     let token = cookie_jar
         .get("auth_token")
         .map(|cookie| cookie.value().to_string());
@@ -855,8 +855,8 @@ pub async fn verify_external(
     let token = token.ok_or_else(|| {
         (
             StatusCode::UNAUTHORIZED,
-            Json(ErrorResponse {
-                status: "fail",
+            Json(ResponseData {
+                status: Fail,
                 message: "You need to enter your email first".to_string(),
             }),
         )
@@ -871,8 +871,8 @@ pub async fn verify_external(
         eprintln!("Error decoding claims | user::verify_external: {:?}", e);
         (
             StatusCode::UNAUTHORIZED,
-            Json(ErrorResponse {
-                status: "fail",
+            Json(ResponseData {
+                status: Fail,
                 message: "Invalid token".to_string(),
             }),
         )
@@ -889,8 +889,8 @@ pub async fn verify_external(
     if !is_valid {
         return Err((
             StatusCode::BAD_REQUEST,
-            Json(ErrorResponse {
-                status: "fail",
+            Json(ResponseData {
+                status: Fail,
                 message: "Incorrect code".to_owned(),
             }),
         ));
@@ -902,14 +902,14 @@ pub async fn verify_external(
         .await
         .map_err(|e| {
             eprintln!("Error retrieving user from database | user::login_internal: {:?}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
-                status: "fail",
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ResponseData {
+                status: Fail,
                 message: "Could not retrieve user from database".to_owned(),
             }))
         })?
         .ok_or_else(|| {
-            (StatusCode::NOT_FOUND, Json(ErrorResponse {
-                status: "fail",
+            (StatusCode::NOT_FOUND, Json(ResponseData {
+                status: Fail,
                 message: "No user with this email".to_owned(),
             }))
         })?;
@@ -932,8 +932,8 @@ pub async fn verify_external(
         eprintln!("Error creating token for user | user::login_user: {:?}", e);
         (
             StatusCode::INTERNAL_SERVER_ERROR,
-            Json(ErrorResponse {
-                status: "fail",
+            Json(ResponseData {
+                status: Fail,
                 message: "Could create your token".to_owned(),
             }),
         )
@@ -958,14 +958,14 @@ pub async fn verify_external(
             (header::SET_COOKIE, token_cookie),
             (header::SET_COOKIE, auth_token_cookie),
         ]),
-        Json(SuccessResponse {
-            status: "success",
+        Json(ResponseData {
+            status: Success,
             message: "Successfully logged in".to_string(),
         }),
     ))
 }
 
-pub async fn logout() -> Result<impl IntoResponse, (StatusCode, Json<ErrorResponse>)> {
+pub async fn logout() -> Result<impl IntoResponse, (StatusCode, Json<ResponseData>)> {
     let cookie = Cookie::build(("token", ""))
         .path("/")
         .max_age(time::Duration::hours(-1))
@@ -975,8 +975,8 @@ pub async fn logout() -> Result<impl IntoResponse, (StatusCode, Json<ErrorRespon
 
     Ok((
         AppendHeaders([(header::SET_COOKIE, cookie)]),
-        Json(SuccessResponse {
-            status: "success",
+        Json(ResponseData {
+            status: Success,
             message: "Successfully logged out".to_string(),
         }),
     ))
