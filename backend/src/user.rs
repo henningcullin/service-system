@@ -21,7 +21,10 @@ use sqlx::{FromRow, Type};
 
 use validator::Validate;
 
-use crate::{AppState, ResponseData, ResponseType::{Fail, Success}};
+use crate::{
+    AppState, ResponseData,
+    ResponseType::{Fail, Success},
+};
 
 #[derive(Debug, Serialize, Deserialize, Type, Clone, PartialEq)]
 #[repr(i32)]

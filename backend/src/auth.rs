@@ -1,7 +1,12 @@
 use std::sync::Arc;
 
 use axum::{
-    body::Body, extract::State, http::{header, Request, StatusCode}, middleware::Next, response::Response, Json
+    body::Body,
+    extract::State,
+    http::{header, Request, StatusCode},
+    middleware::Next,
+    response::Response,
+    Json,
 };
 
 use axum_extra::extract::cookie::CookieJar;
@@ -35,10 +40,13 @@ pub async fn auth(
         });
 
     let token = token.ok_or_else(|| {
-        (StatusCode::UNAUTHORIZED, Json(ErrorResponse {
-            status: "fail",
-            message: "You are not logged in".to_string(),
-        }))
+        (
+            StatusCode::UNAUTHORIZED,
+            Json(ErrorResponse {
+                status: "fail",
+                message: "You are not logged in".to_string(),
+            }),
+        )
     })?;
 
     let claims = decode::<TokenClaims>(
@@ -48,18 +56,24 @@ pub async fn auth(
     )
     .map_err(|e| {
         eprintln!("Error decoding claims | auth::auth: {:?}", e);
-        (StatusCode::UNAUTHORIZED, Json(ErrorResponse {
-            status: "fail",
-            message: "Invalid token".to_string(),
-        }))
+        (
+            StatusCode::UNAUTHORIZED,
+            Json(ErrorResponse {
+                status: "fail",
+                message: "Invalid token".to_string(),
+            }),
+        )
     })?
     .claims;
 
     let user_id = uuid::Uuid::parse_str(&claims.sub).map_err(|_| {
-        (StatusCode::UNAUTHORIZED, Json(ErrorResponse {
-            status: "fail",
-            message: "Invalid token".to_string(),
-        }))
+        (
+            StatusCode::UNAUTHORIZED,
+            Json(ErrorResponse {
+                status: "fail",
+                message: "Invalid token".to_string(),
+            }),
+        )
     })?;
 
     let user = sqlx::query_as::<_, User>("SELECT id, first_name, last_name, email, password, phone, CAST(role AS SIGNED) role, last_login FROM user WHERE id = ?")
@@ -75,10 +89,13 @@ pub async fn auth(
         })?;
 
     let user = user.ok_or_else(|| {
-        (StatusCode::UNAUTHORIZED, Json(ErrorResponse {
-            status: "fail",
-            message: "The user belonging to this token no longer exists".to_string(),
-        }))
+        (
+            StatusCode::UNAUTHORIZED,
+            Json(ErrorResponse {
+                status: "fail",
+                message: "The user belonging to this token no longer exists".to_string(),
+            }),
+        )
     })?;
 
     req.extensions_mut().insert(user);

@@ -1,12 +1,19 @@
 use std::sync::Arc;
 
-use axum::{extract::{Query, State}, http::StatusCode, Extension, Json};
+use axum::{
+    extract::{Query, State},
+    http::StatusCode,
+    Extension, Json,
+};
 use chrono::{DateTime, Utc};
 use serde_derive::{Deserialize, Serialize};
 use sqlx::prelude::{FromRow, Type};
 use uuid::Uuid;
 
-use crate::{user::{User, UserRole}, AppState, ErrorResponse};
+use crate::{
+    user::{User, UserRole},
+    AppState, ErrorResponse,
+};
 
 #[derive(Debug, Deserialize, Serialize, Type, PartialEq)]
 #[repr(i32)]
@@ -14,7 +21,7 @@ pub enum TaskType {
     Suggestion = 1,
     Issue = 2,
     Service = 3,
-    Other = 4
+    Other = 4,
 }
 
 #[derive(Debug, Deserialize, Serialize, Type, PartialEq)]
@@ -22,7 +29,7 @@ pub enum TaskType {
 pub enum TaskStatus {
     Pending = 1,
     Active = 2,
-    Completed = 3
+    Completed = 3,
 }
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]
@@ -37,12 +44,12 @@ pub struct Task {
     edited: DateTime<Utc>,
     creator: Uuid,
     executor: Option<Uuid>,
-    machine: Option<Uuid>
+    machine: Option<Uuid>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct QueryTask {
-    id: Uuid
+    id: Uuid,
 }
 
 #[derive(Debug, Deserialize)]
@@ -52,7 +59,7 @@ pub struct NewTask {
     task_type: Option<TaskType>,
     status: Option<TaskStatus>,
     executor: Option<Uuid>,
-    machine: Option<Uuid>
+    machine: Option<Uuid>,
 }
 
 pub async fn details(
@@ -81,11 +88,11 @@ pub async fn details(
             }
         })?;
 
-    Ok(Json(task)) 
+    Ok(Json(task))
 }
 
 pub async fn index(
-    State(app_state): State<Arc<AppState>>
+    State(app_state): State<Arc<AppState>>,
 ) -> Result<Json<Vec<Task>>, (StatusCode, Json<ErrorResponse>)> {
     let tasks: Vec<Task> = sqlx::query_as::<_, Task>("SELECT id, title, description, CAST(task_type AS SIGNED) task_type, CAST(status AS SIGNED) status, archived, created, edited, creator, executor, machine FROM task")
         .fetch_all(&app_state.db)
@@ -104,11 +111,18 @@ pub async fn index(
 pub async fn create(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
-    Json(body): Json<NewTask>
-) -> Result<(StatusCode, Json<QueryTask>), (StatusCode, Json<ErrorResponse>)>{
-
-    if user.role == UserRole::Worker && (body.task_type != Some(TaskType::Suggestion) || body.task_type.is_some()) {
-        return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {status: "fail", message: "You can only set tasktype to suggestion".to_owned()})));
+    Json(body): Json<NewTask>,
+) -> Result<(StatusCode, Json<QueryTask>), (StatusCode, Json<ErrorResponse>)> {
+    if user.role == UserRole::Worker
+        && (body.task_type != Some(TaskType::Suggestion) || body.task_type.is_some())
+    {
+        return Err((
+            StatusCode::FORBIDDEN,
+            Json(ErrorResponse {
+                status: "fail",
+                message: "You can only set tasktype to suggestion".to_owned(),
+            }),
+        ));
     }
 
     let id = uuid::Uuid::new_v4();
@@ -134,6 +148,5 @@ pub async fn create(
             }))
         })?;
 
-    Ok((StatusCode::CREATED, Json(QueryTask{id})))
-
+    Ok((StatusCode::CREATED, Json(QueryTask { id })))
 }
