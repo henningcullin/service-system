@@ -62,6 +62,19 @@ pub struct NewTask {
     machine: Option<Uuid>,
 }
 
+pub struct UpdateTask {
+    id: Uuid,
+    title: Option<String>,
+    description: Option<String>,
+    task_type: Option<TaskType>,
+    status: Option<TaskStatus>,
+    archived: Option<bool>,
+    creator: Option<Uuid>,
+    executor: Option<Uuid>,
+    machine: Option<Uuid>,
+}
+
+
 pub async fn details(
     State(app_state): State<Arc<AppState>>,
     Query(params): Query<QueryTask>,
