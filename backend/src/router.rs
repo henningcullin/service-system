@@ -25,8 +25,8 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         
         .route("/user", get(user::details))
         .route("/users", get(user::index))
-        .route("/user/create", post(user::create))
-        .route("/user/update", put(user::update))
+        .route("/user", post(user::create))
+        .route("/user", put(user::update))
         .route("/user/logout", get(user::logout))
 
         .route("/task", get(task::details))
@@ -38,6 +38,7 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
 
         .route("/user/internal/login", post(user::login_internal))
         .route("/user/external/login", post(user::login_external))
+        .route("/user/external/verify", post(user::verify_external))
         .nest("/auth", auth);
         
     let app = Router::new()

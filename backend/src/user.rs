@@ -2,9 +2,9 @@ use std::sync::Arc;
 
 use argon2::{password_hash::SaltString, Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 use axum::{extract::{Query, State}, http::{header, Response, StatusCode}, Extension, Json};
-use axum_extra::extract::cookie::{Cookie, SameSite};
+use axum_extra::extract::{cookie::{Cookie, SameSite}, CookieJar};
 use chrono::{DateTime, Utc};
-use jsonwebtoken::{encode, EncodingKey, Header};
+use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use rand_core::OsRng;
 use serde_json::json;
 use uuid::Uuid;
@@ -31,7 +31,7 @@ pub struct User {
     pub first_name: String,
     pub last_name: String,
     pub email: String,
-    pub password: String,
+    pub password: Option<String>,
     pub phone: Option<String>,
     pub role: UserRole,
     pub last_login: Option<DateTime<Utc>>
@@ -105,6 +105,11 @@ pub struct LoginInternalUser {
 pub struct LoginExternalUser {
     #[validate(email)]
     pub email: String
+}
+
+#[derive(Debug, Validate, Deserialize)]
+pub struct VerifyExternalUser {
+    pub code: String
 }
 
 #[derive(Debug, Serialize, FromRow)]
@@ -205,18 +210,35 @@ pub async fn create(
     Json(body): Json<RegisterUser>,
 ) -> Result<(StatusCode, Json<UserResponse>), (StatusCode, Json<ErrorResponse>)> {
 
-    if user.role == UserRole::Worker || user.role == UserRole::Basic {
-        return Err((StatusCode::FORBIDDEN, Json(ErrorResponse{
-            status: "fail",
-            message: "You don't have permission to add users".to_owned()
-        })));
-    }
-
-    if body.role == UserRole::Super || body.role == UserRole::Administrator {
-        return Err((StatusCode::FORBIDDEN, Json(ErrorResponse{
-            status: "fail",
-            message: format!("You can't create users with role {:?}", body.role)
-        })));
+    match user.role {
+        UserRole::Worker => {
+            return Err((StatusCode::FORBIDDEN, Json(ErrorResponse{
+                status: "fail",
+                message: "You don't have permission to add users".to_owned()
+            })));
+        },
+        UserRole::Basic => {
+            return Err((StatusCode::FORBIDDEN, Json(ErrorResponse{
+                status: "fail",
+                message: "You don't have permission to add users".to_owned()
+            })));
+        },
+        UserRole::Administrator => {
+            if body.role == UserRole::Administrator || body.role == UserRole::Super {
+                return Err((StatusCode::FORBIDDEN, Json(ErrorResponse{
+                    status: "fail",
+                    message: format!("You can't create users with role {:?}", body.role)
+                })));
+            }
+        }
+        UserRole::Super => {
+            if body.role == UserRole::Super {
+                return Err((StatusCode::FORBIDDEN, Json(ErrorResponse{
+                    status: "fail",
+                    message: format!("You can't create users with role {:?}", body.role)
+                })));
+            }
+        }
     }
 
     body.validate()
@@ -287,7 +309,7 @@ pub async fn create(
         first_name: body.first_name.to_string(),
         last_name: body.last_name.to_string(),
         email: body.email,
-        password: hashed_password,
+        password: Some(hashed_password),
         phone: body.phone,
         role: body.role,
         last_login: None
@@ -481,7 +503,37 @@ pub async fn login_internal(
             }))
         })?;
 
-    let is_valid = match PasswordHash::new(&user.password) {
+    match user.role {
+        UserRole::Super => {
+            return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {
+                status: "fail",
+                message: "You don't use a password to login".to_string()
+            })));
+        } 
+        UserRole::Worker => {
+            return Err((StatusCode::FORBIDDEN, Json(ErrorResponse {
+                status: "fail",
+                message: "You don't use a password to login".to_string()
+            })));
+        }
+        _ => {}
+    }
+
+    let password = match user.password {
+        None => {
+            return Err((StatusCode::BAD_REQUEST, Json(ErrorResponse {
+                status: "fail",
+                message: "You need to provide a password".to_string()
+            })));
+        }
+        Some(password) => password 
+    };
+
+    println!("stored: {:?}", password);
+    println!("entered: {}", body.password);
+
+
+    let is_valid = match PasswordHash::new(&password) {
         Ok(parsed_hash) => Argon2::default()
             .verify_password(body.password.as_bytes(), &parsed_hash)
             .map_or(false, |_| true),
@@ -574,9 +626,9 @@ pub async fn login_external(
         }
     }
 
-    let salt = SaltString::generate(&mut OsRng);
+    let code = SaltString::generate(&mut OsRng); // EMAIL THIS TO USER
     let hash = Argon2::default()
-        .hash_password(body.email.as_bytes(), &salt)
+        .hash_password(body.email.as_bytes(), &code)
         .map_err(|e| {
             eprintln!("Error creating hash | user::login_external: {:?}", e);
             (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
@@ -585,7 +637,9 @@ pub async fn login_external(
             }))
         })
         .map(|hash| hash.to_string())?;
-    
+
+    println!("Code: {}", code);
+
     let now = chrono::Utc::now();
     let iat = now.timestamp() as usize;
     let exp = (now + chrono::Duration::minutes(app_state.env.jwt_expires_in)).timestamp() as usize;
@@ -635,9 +689,115 @@ pub async fn login_external(
 
 pub async fn verify_external(
     State(app_state): State<Arc<AppState>>,
-    Json(body): Json<LoginExternalUser>
-) {
-    todo!()
+    cookie_jar: CookieJar,
+    Json(body): Json<VerifyExternalUser>,
+) -> Result<Response<String>, (StatusCode, Json<ErrorResponse>)> {
+    let token = cookie_jar
+        .get("auth_token")
+        .map(|cookie| cookie.value().to_string());
+
+    let token = token.ok_or_else(|| {
+        (StatusCode::UNAUTHORIZED, Json(ErrorResponse {
+            status: "fail",
+            message: "You need to enter your email first".to_string(),
+        }))
+    })?;
+
+    let claims = decode::<LoginTokenClaims>(
+        &token,
+        &DecodingKey::from_secret(app_state.env.jwt_pwl_secret.as_ref()),
+        &Validation::default(),
+    )
+        .map_err(|e| {
+            eprintln!("Error decoding claims | user::verify_external: {:?}", e);
+            (StatusCode::UNAUTHORIZED, Json(ErrorResponse {
+                status: "fail",
+                message: "Invalid token".to_string(),
+            }))
+        })?
+        .claims;
+
+    let is_valid = match PasswordHash::new(&claims.hash) {
+        Ok(parsed_hash) => {
+            println!("stored: {}", parsed_hash);
+            println!("entered: {}", body.code);
+
+            Argon2::default()
+            .verify_password(body.code.as_bytes(), &parsed_hash)
+            .map_or(false, |_| true)
+        } 
+        
+        Err(_) => false,
+    };
+
+    if !is_valid {
+        return Err((StatusCode::BAD_REQUEST, Json(ErrorResponse {
+            status: "fail",
+            message: "Incorrect code".to_owned()
+        })));
+    }
+
+    let user = sqlx::query_as::<_, User>("SELECT id, first_name, last_name, email, password, phone, CAST(role AS SIGNED) role, last_login FROM user WHERE email = ?")
+        .bind(claims.sub.to_ascii_lowercase())
+        .fetch_optional(&app_state.db)
+        .await
+        .map_err(|e| {
+            eprintln!("Error retrieving user from database | user::login_internal: {:?}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
+                status: "fail",
+                message: "Could not retrieve user from database".to_owned(),
+            }))
+        })?
+        .ok_or_else(|| {
+            (StatusCode::NOT_FOUND, Json(ErrorResponse {
+                status: "fail",
+                message: "No user with this email".to_owned(),
+            }))
+        })?;
+
+    let now = chrono::Utc::now();
+    let iat = now.timestamp() as usize;
+    let exp = (now + chrono::Duration::minutes(app_state.env.jwt_expires_in)).timestamp() as usize;
+    let claims: TokenClaims = TokenClaims {
+        sub: user.id.to_string(),
+        exp,
+        iat,
+    };
+
+    let token = encode(
+        &Header::default(),
+        &claims,
+        &EncodingKey::from_secret(app_state.env.jwt_secret.as_ref()),
+    )
+    .map_err(|e| {
+        eprintln!("Error creating token for user | user::login_user: {:?}", e);
+        (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
+            status: "fail",
+            message: "Could create your token".to_owned(),
+        }))
+    })?;
+
+    let cookie = Cookie::build(("token", token.to_owned()))
+        .path("/")
+        .max_age(time::Duration::hours(1))
+        .same_site(SameSite::Lax)
+        .http_only(true)
+        .build();
+
+    let mut response = Response::new(json!({"status": "success", "token": token}).to_string());
+    response
+        .headers_mut()
+        .insert(header::SET_COOKIE, cookie
+            .to_string()
+            .parse()
+            .map_err(|e| {
+                eprintln!("Error creating cookie | user::login_user: {:?}", e);
+                (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
+                    status: "fail",
+                    message: "Could not create a cookie".to_owned(),
+                }))
+        })?);
+    Ok(response)
 }
 
 pub async fn logout() -> Result<Response<String>, (StatusCode, Json<ErrorResponse>)> {
