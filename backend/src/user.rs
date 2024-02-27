@@ -63,6 +63,14 @@ pub struct TokenClaims {
     pub exp: usize
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LoginTokenClaims {
+    pub sub: String,
+    pub hash: String,
+    pub iat: usize,
+    pub exp: usize
+}
+
 #[derive(Debug, Validate, Deserialize)]
 pub struct RegisterUser {
     pub first_name: String,
@@ -87,10 +95,16 @@ pub struct UpdateUser {
 }
 
 #[derive(Debug, Validate, Deserialize)]
-pub struct LoginUser {
+pub struct LoginInternalUser {
     #[validate(email)]
     pub email: String,
     pub password: String
+}
+
+#[derive(Debug, Validate, Deserialize)]
+pub struct LoginExternalUser {
+    #[validate(email)]
+    pub email: String
 }
 
 #[derive(Debug, Serialize, FromRow)]
@@ -439,11 +453,10 @@ pub async fn update(
 
 pub async fn login_internal(
     State(app_state): State<Arc<AppState>>,
-    Json(body): Json<LoginUser>,
+    Json(body): Json<LoginInternalUser>,
 ) -> Result<Response<String>, (StatusCode, Json<ErrorResponse>)> {
     body.validate()
-        .map_err(|e| {
-            eprintln!("Error validating email | user::login_user: {:?}", e);
+        .map_err(|_| {
             (StatusCode::BAD_REQUEST, Json(ErrorResponse {
                 status: "fail",
                 message: "Invalid email".to_owned()
@@ -451,22 +464,22 @@ pub async fn login_internal(
         })?;
 
     let user = sqlx::query_as::<_, User>("SELECT id, first_name, last_name, email, password, phone, CAST(role AS SIGNED) role, last_login FROM user WHERE email = ?")
-    .bind(body.email.to_ascii_lowercase())
-    .fetch_optional(&app_state.db)
-    .await
-    .map_err(|e| {
-        eprintln!("Error retrieving user from database | user::login_user: {:?}", e);
-        (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
-            status: "fail",
-            message: "Could not retrieve user from database".to_owned(),
-        }))
-    })?
-    .ok_or_else(|| {
-        (StatusCode::NOT_FOUND, Json(ErrorResponse {
-            status: "fail",
-            message: "No user with this email".to_owned(),
-        }))
-    })?;
+        .bind(body.email.to_ascii_lowercase())
+        .fetch_optional(&app_state.db)
+        .await
+        .map_err(|e| {
+            eprintln!("Error retrieving user from database | user::login_internal: {:?}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
+                status: "fail",
+                message: "Could not retrieve user from database".to_owned(),
+            }))
+        })?
+        .ok_or_else(|| {
+            (StatusCode::NOT_FOUND, Json(ErrorResponse {
+                status: "fail",
+                message: "No user with this email".to_owned(),
+            }))
+        })?;
 
     let is_valid = match PasswordHash::new(&user.password) {
         Ok(parsed_hash) => Argon2::default()
@@ -519,6 +532,77 @@ pub async fn login_internal(
             .parse()
             .map_err(|e| {
                 eprintln!("Error creating cookie | user::login_user: {:?}", e);
+                (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
+                    status: "fail",
+                    message: "Could not create a cookie".to_owned(),
+                }))
+        })?);
+    Ok(response)
+}
+
+pub async fn login_external(
+    State(app_state): State<Arc<AppState>>,
+    Json(body): Json<LoginExternalUser>
+) -> Result<Response<String>, (StatusCode, Json<ErrorResponse>)> {
+    body.validate()
+        .map_err(|_| {
+            (StatusCode::BAD_REQUEST, Json(ErrorResponse {
+                status: "fail",
+                message: "Invalid email".to_owned()
+            }))
+        })?;
+
+    let salt = SaltString::generate(&mut OsRng);
+    let hash = Argon2::default()
+        .hash_password(body.email.as_bytes(), &salt)
+        .map_err(|e| {
+            eprintln!("Error creating hash | user::login_external: {:?}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
+                status: "fail",
+                message: "Password error".to_owned(),
+            }))
+        })
+        .map(|hash| hash.to_string())?;
+    
+    let now = chrono::Utc::now();
+    let iat = now.timestamp() as usize;
+    let exp = (now + chrono::Duration::minutes(app_state.env.jwt_expires_in)).timestamp() as usize;
+
+    let claims: LoginTokenClaims = LoginTokenClaims {
+        sub: body.email,
+        hash,
+        iat,
+        exp,
+    };
+
+    let token = encode(
+        &Header::default(),
+        &claims,
+        &EncodingKey::from_secret(app_state.env.jwt_pwl_secret.as_ref()),
+    )
+        .map_err(|e| {
+            eprintln!("Error creating token for user | user::login_external: {:?}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
+                status: "fail",
+                message: "Could create your token".to_owned(),
+            }))
+        })?;
+
+    let cookie = Cookie::build(("auth_token", token.to_owned()))
+        .path("/")
+        .max_age(time::Duration::hours(1))
+        .same_site(SameSite::Lax)
+        .http_only(true)
+        .build();
+
+    let mut response = Response::new(json!({"status": "success", "token": token}).to_string());
+    response
+        .headers_mut()
+        .insert(header::SET_COOKIE, cookie
+            .to_string()
+            .parse()
+            .map_err(|e| {
+                eprintln!("Error creating cookie | user::login_external: {:?}", e);
                 (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
                     status: "fail",
                     message: "Could not create a cookie".to_owned(),
