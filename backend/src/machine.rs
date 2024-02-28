@@ -69,8 +69,7 @@ pub async fn details(
     State(app_state): State<Arc<AppState>>,
     Query(params): Query<QueryMachine>,
 ) -> Result<Json<Machine>, (StatusCode, Json<ResponseData>)> {
-    let machine = sqlx::query_as::<_, Machine>("SELECT id, name, make, machine_type, CAST(status AS SIGNED) status, created, edited FROM machine WHERE id = ?")
-        .bind(params.id)
+    let machine = sqlx::query_as_unchecked!(Machine, "SELECT id, name, make, machine_type, CAST(status AS SIGNED) status, created, edited FROM machine WHERE id = ?", params.id)
         .fetch_one(&app_state.db)
         .await
         .map_err(|e| {
@@ -97,7 +96,7 @@ pub async fn details(
 pub async fn index(
     State(app_state): State<Arc<AppState>>,
 ) -> Result<Json<Vec<Machine>>, (StatusCode, Json<ResponseData>)> {
-    let machines: Vec<Machine> = sqlx::query_as::<_, Machine>("SELECT id, name, make, machine_type, CAST(status AS SIGNED) status, created, edited FROM machine")
+    let machines: Vec<Machine> = sqlx::query_as_unchecked!(Machine, "SELECT id, name, make, machine_type, CAST(status AS SIGNED) status, created, edited FROM machine")
         .fetch_all(&app_state.db)
         .await
         .map_err(|e| {
@@ -171,15 +170,15 @@ pub async fn delete(
         "DELETE FROM machine WHERE id = ?",
         query.id
     )
-    .execute(&app_state.db)
-    .await
-    .map_err(|e| {
-        eprintln!("Error executing query for machine::delete: {:?}", e);
-        (StatusCode::INTERNAL_SERVER_ERROR, Json(ResponseData {
-            status: Fail,
-            message: "Could not delete the machine".to_owned()
-        }))
-    })?;
+        .execute(&app_state.db)
+        .await
+        .map_err(|e| {
+            eprintln!("Error executing query for machine::delete: {:?}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ResponseData {
+                status: Fail,
+                message: "Could not delete the machine".to_owned()
+            }))
+        })?;
 
     if result.rows_affected() > 0 {
         Ok(StatusCode::NO_CONTENT)

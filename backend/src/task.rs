@@ -79,8 +79,7 @@ pub async fn details(
     State(app_state): State<Arc<AppState>>,
     Query(params): Query<QueryTask>,
 ) -> Result<Json<Task>, (StatusCode, Json<ResponseData>)> {
-    let task = sqlx::query_as::<_, Task>("SELECT id, title, description, CAST(task_type AS SIGNED) task_type, CAST(status AS SIGNED) status, archived, created, edited, creator, executor, machine FROM task WHERE id = ?")
-        .bind(params.id)
+    let task = sqlx::query_as_unchecked!(Task, "SELECT id, title, description, CAST(task_type AS SIGNED) task_type, CAST(status AS SIGNED) status, archived, created, edited, creator, executor, machine FROM task WHERE id = ?", params.id)
         .fetch_one(&app_state.db)
         .await
         .map_err(|e| {
@@ -107,7 +106,7 @@ pub async fn details(
 pub async fn index(
     State(app_state): State<Arc<AppState>>,
 ) -> Result<Json<Vec<Task>>, (StatusCode, Json<ResponseData>)> {
-    let tasks: Vec<Task> = sqlx::query_as::<_, Task>("SELECT id, title, description, CAST(task_type AS SIGNED) task_type, CAST(status AS SIGNED) status, archived, created, edited, creator, executor, machine FROM task")
+    let tasks: Vec<Task> = sqlx::query_as_unchecked!(Task, "SELECT id, title, description, CAST(task_type AS SIGNED) task_type, CAST(status AS SIGNED) status, archived, created, edited, creator, executor, machine FROM task")
         .fetch_all(&app_state.db)
         .await
         .map_err(|e| {
@@ -163,7 +162,6 @@ pub async fn create(
 
     Ok((StatusCode::CREATED, Json(QueryTask { id })))
 }
-
 
 pub async fn delete(
     Extension(user): Extension<User>,

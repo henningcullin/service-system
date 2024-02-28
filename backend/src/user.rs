@@ -150,9 +150,10 @@ pub async fn me(Extension(user): Extension<User>) -> Json<FilteredUser> {
 
 pub async fn details(
     State(app_state): State<Arc<AppState>>,
-    Query(querys): Query<QueryUser>,
+    Query(params): Query<QueryUser>,
 ) -> Result<Json<FilteredUser>, (StatusCode, Json<ResponseData>)> {
-    let user = sqlx::query_as::<_, FilteredUser>(
+    let user = sqlx::query_as_unchecked!(
+        FilteredUser,
         "SELECT 
         id, 
         first_name, 
@@ -163,29 +164,29 @@ pub async fn details(
         last_login 
         FROM user 
         WHERE id = ?",
+        params.id
     )
-    .bind(querys.id)
-    .fetch_one(&app_state.db)
-    .await
-    .map_err(|e| {
-        eprintln!("Error executing query for user::details: {:?}", e);
-        match e {
-            sqlx::Error::RowNotFound => (
-                StatusCode::NOT_FOUND,
-                Json(ResponseData {
-                    status: Fail,
-                    message: "The specified user does not exist".to_owned(),
-                }),
-            ),
-            _ => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(ResponseData {
-                    status: Fail,
-                    message: "Server error".to_owned(),
-                }),
-            ),
-        }
-    })?;
+        .fetch_one(&app_state.db)
+        .await
+        .map_err(|e| {
+            eprintln!("Error executing query for user::details: {:?}", e);
+            match e {
+                sqlx::Error::RowNotFound => (
+                    StatusCode::NOT_FOUND,
+                    Json(ResponseData {
+                        status: Fail,
+                        message: "The specified user does not exist".to_owned(),
+                    }),
+                ),
+                _ => (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(ResponseData {
+                        status: Fail,
+                        message: "Server error".to_owned(),
+                    }),
+                ),
+            }
+        })?;
 
     Ok(Json(user))
 }
@@ -193,7 +194,8 @@ pub async fn details(
 pub async fn index(
     State(app_state): State<Arc<AppState>>,
 ) -> Result<Json<Vec<FilteredUser>>, (StatusCode, Json<ResponseData>)> {
-    let users: Vec<FilteredUser> = sqlx::query_as::<_, FilteredUser>(
+    let users: Vec<FilteredUser> = sqlx::query_as_unchecked!(
+        FilteredUser,
         "SELECT 
         id, 
         first_name, 
@@ -280,8 +282,10 @@ pub async fn create(
     })?;
 
     let user_exists: Option<bool> =
-        sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM user WHERE email = ?)")
-            .bind(body.email.to_owned().to_ascii_lowercase())
+        sqlx::query_scalar_unchecked!(
+            "SELECT EXISTS(SELECT 1 FROM user WHERE email = ?)",
+            body.email.to_owned().to_ascii_lowercase()
+        )
             .fetch_one(&app_state.db)
             .await
             .map_err(|e| {
@@ -371,7 +375,8 @@ pub async fn update(
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<UpdateUser>,
 ) -> Result<StatusCode, (StatusCode, Json<ResponseData>)> {
-    let target_user = sqlx::query_as::<_, FilteredUser>(
+    let target_user = sqlx::query_as_unchecked!(
+        FilteredUser,
         "SELECT 
         id, 
         first_name, 
@@ -382,8 +387,8 @@ pub async fn update(
         last_login 
         FROM user 
         WHERE id = ?",
+        body.id
     )
-    .bind(body.id)
     .fetch_one(&app_state.db)
     .await
     .map_err(|e| {
@@ -614,8 +619,7 @@ pub async fn login_internal(
         )
     })?;
 
-    let user = sqlx::query_as::<_, User>("SELECT id, first_name, last_name, email, password, phone, CAST(role AS SIGNED) role, last_login FROM user WHERE email = ?")
-        .bind(body.email.to_ascii_lowercase())
+    let user = sqlx::query_as_unchecked!(User, "SELECT id, first_name, last_name, email, password, phone, CAST(role AS SIGNED) role, last_login FROM user WHERE email = ?", body.email.to_ascii_lowercase())
         .fetch_optional(&app_state.db)
         .await
         .map_err(|e| {
@@ -743,8 +747,7 @@ pub async fn login_external(
     })?;
 
     let user_exists: Option<bool> =
-        sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM user WHERE email = ?)")
-            .bind(body.email.to_owned().to_ascii_lowercase())
+        sqlx::query_scalar_unchecked!("SELECT EXISTS(SELECT 1 FROM user WHERE email = ?)", body.email.to_owned().to_ascii_lowercase())
             .fetch_one(&app_state.db)
             .await
             .map_err(|e| {
@@ -899,8 +902,7 @@ pub async fn verify_external(
         ));
     }
 
-    let user = sqlx::query_as::<_, User>("SELECT id, first_name, last_name, email, password, phone, CAST(role AS SIGNED) role, last_login FROM user WHERE email = ?")
-        .bind(claims.sub.to_ascii_lowercase())
+    let user = sqlx::query_as_unchecked!(User, "SELECT id, first_name, last_name, email, password, phone, CAST(role AS SIGNED) role, last_login FROM user WHERE email = ?", claims.sub.to_ascii_lowercase())
         .fetch_optional(&app_state.db)
         .await
         .map_err(|e| {
