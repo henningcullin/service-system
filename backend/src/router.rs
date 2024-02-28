@@ -31,6 +31,7 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/task", get(task::details))
         .route("/tasks", get(task::index))
         .route("/task", post(task::create))
+        .route("/task", delete(task::delete))
         .layer(middleware::from_fn_with_state(app_state.clone(), auth));
 
     let api = Router::new()
