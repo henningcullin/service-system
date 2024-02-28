@@ -12,7 +12,7 @@ use uuid::Uuid;
 
 use crate::{
     user::{User, UserRole},
-    AppState, ErrorResponse, ResponseData, ResponseType::Fail
+    AppState, ResponseData, ResponseType::Fail
 };
 
 #[derive(Debug, Deserialize, Serialize, Type, PartialEq)]
@@ -78,7 +78,7 @@ pub struct UpdateTask {
 pub async fn details(
     State(app_state): State<Arc<AppState>>,
     Query(params): Query<QueryTask>,
-) -> Result<Json<Task>, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<Json<Task>, (StatusCode, Json<ResponseData>)> {
     let task = sqlx::query_as::<_, Task>("SELECT id, title, description, CAST(task_type AS SIGNED) task_type, CAST(status AS SIGNED) status, archived, created, edited, creator, executor, machine FROM task WHERE id = ?")
         .bind(params.id)
         .fetch_one(&app_state.db)
@@ -87,14 +87,14 @@ pub async fn details(
             eprintln!("Error executing query for task::details: {:?}", e);
             match e {
                 sqlx::Error::RowNotFound => {
-                    (StatusCode::NOT_FOUND, Json(ErrorResponse {
-                        status: "fail",
+                    (StatusCode::NOT_FOUND, Json(ResponseData {
+                        status: Fail,
                         message: "The specified task does not exist".to_owned()
                     }))
                 },
                 _ => {
-                    (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
-                        status: "fail",
+                    (StatusCode::INTERNAL_SERVER_ERROR, Json(ResponseData {
+                        status: Fail,
                         message: "Server error".to_owned()
                     }))
                 }
@@ -106,14 +106,14 @@ pub async fn details(
 
 pub async fn index(
     State(app_state): State<Arc<AppState>>,
-) -> Result<Json<Vec<Task>>, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<Json<Vec<Task>>, (StatusCode, Json<ResponseData>)> {
     let tasks: Vec<Task> = sqlx::query_as::<_, Task>("SELECT id, title, description, CAST(task_type AS SIGNED) task_type, CAST(status AS SIGNED) status, archived, created, edited, creator, executor, machine FROM task")
         .fetch_all(&app_state.db)
         .await
         .map_err(|e| {
             eprintln!("Error executing query for task::index: {:?}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
-                status: "fail",
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ResponseData {
+                status: Fail,
                 message: "Could not retrieve the tasks from database".to_owned()
             }))
         })?;
@@ -125,14 +125,14 @@ pub async fn create(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<NewTask>,
-) -> Result<(StatusCode, Json<QueryTask>), (StatusCode, Json<ErrorResponse>)> {
+) -> Result<(StatusCode, Json<QueryTask>), (StatusCode, Json<ResponseData>)> {
     if user.role == UserRole::Worker
         && (body.task_type != Some(TaskType::Suggestion) || body.task_type.is_some())
     {
         return Err((
             StatusCode::FORBIDDEN,
-            Json(ErrorResponse {
-                status: "fail",
+            Json(ResponseData {
+                status: Fail,
                 message: "You can only set tasktype to suggestion".to_owned(),
             }),
         ));
@@ -155,8 +155,8 @@ pub async fn create(
         .await
         .map_err(|e| {
             eprintln!("Error executing query for machine::create: {:?}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
-                status: "fail",
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ResponseData {
+                status: Fail,
                 message: "Could not create machine in database".to_owned()
             }))
         })?;

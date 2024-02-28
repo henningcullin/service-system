@@ -24,18 +24,6 @@ pub struct AppState {
 }
 
 #[derive(Debug, Serialize)]
-pub struct ErrorResponse {
-    pub status: &'static str,
-    pub message: String,
-}
-
-#[derive(Debug, Serialize)]
-pub struct SuccessResponse {
-    pub status: &'static str,
-    pub message: String,
-}
-
-#[derive(Debug, Serialize)]
 pub enum ResponseType {
     Fail,
     Success,

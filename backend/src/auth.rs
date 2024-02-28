@@ -14,7 +14,7 @@ use jsonwebtoken::{decode, DecodingKey, Validation};
 
 use crate::{
     user::{TokenClaims, User},
-    AppState, ErrorResponse,
+    AppState, ResponseData, ResponseType::Fail
 };
 
 pub async fn auth(
@@ -22,7 +22,7 @@ pub async fn auth(
     State(app_state): State<Arc<AppState>>,
     mut req: Request<Body>,
     next: Next,
-) -> Result<Response<Body>, (StatusCode, Json<ErrorResponse>)> {
+) -> Result<Response<Body>, (StatusCode, Json<ResponseData>)> {
     let token = cookie_jar
         .get("token")
         .map(|cookie| cookie.value().to_string())
@@ -42,8 +42,8 @@ pub async fn auth(
     let token = token.ok_or_else(|| {
         (
             StatusCode::UNAUTHORIZED,
-            Json(ErrorResponse {
-                status: "fail",
+            Json(ResponseData {
+                status: Fail,
                 message: "You are not logged in".to_string(),
             }),
         )
@@ -58,8 +58,8 @@ pub async fn auth(
         eprintln!("Error decoding claims | auth::auth: {:?}", e);
         (
             StatusCode::UNAUTHORIZED,
-            Json(ErrorResponse {
-                status: "fail",
+            Json(ResponseData {
+                status: Fail,
                 message: "Invalid token".to_string(),
             }),
         )
@@ -69,8 +69,8 @@ pub async fn auth(
     let user_id = uuid::Uuid::parse_str(&claims.sub).map_err(|_| {
         (
             StatusCode::UNAUTHORIZED,
-            Json(ErrorResponse {
-                status: "fail",
+            Json(ResponseData {
+                status: Fail,
                 message: "Invalid token".to_string(),
             }),
         )
@@ -82,8 +82,8 @@ pub async fn auth(
         .await
         .map_err(|e| {
             eprintln!("Error selecting user from database | auth::auth: {:?}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(ErrorResponse {
-                status: "fail",
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ResponseData {
+                status: Fail,
                 message: "Error fetching user from database".to_owned(),
             }))
         })?;
@@ -91,8 +91,8 @@ pub async fn auth(
     let user = user.ok_or_else(|| {
         (
             StatusCode::UNAUTHORIZED,
-            Json(ErrorResponse {
-                status: "fail",
+            Json(ResponseData {
+                status: Fail,
                 message: "The user belonging to this token no longer exists".to_string(),
             }),
         )
