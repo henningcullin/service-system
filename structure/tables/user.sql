@@ -14,4 +14,4 @@ CREATE TABLE user (
 CREATE INDEX idx_email ON user (email);
 
 INSERT INTO user (first_name, last_name, email, phone, role)
-VALUES ('Axami', 'Systems', 'henade0401@edu.halmstad.se', '0761999773', 'Super');
+VALUES ('Axami', 'Systems', 'henade0401@edu.halmstad.se', '123456789', 'Super');
