@@ -1,20 +1,19 @@
 use crate::{auth::auth, machine, task, user, AppState};
 use axum::{
-    middleware,
-    // Framework
-    routing::{
-        delete,
-        // HTTP Methods
-        get,
-        post,
-        put,
-    },
-    Router, // The Router
+    middleware, routing::{
+        delete, get, get_service, post, put
+    }, Router,
 };
-use tower_http::services::ServeDir;
+use tower_http::services::{ServeDir, ServeFile};
 use std::sync::Arc;
 
+
 pub fn create_router(app_state: Arc<AppState>) -> Router {
+
+    let file_serve = get_service(ServeDir::new(&app_state.env.frontend_url));
+
+    let index_serve = get_service(ServeFile::new(app_state.env.frontend_url.to_owned() + "\\index.html"));
+    
     let auth = Router::new()
         .route("/machine", get(machine::details))
         .route("/machines", get(machine::index))
@@ -44,7 +43,9 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
 
     let app = Router::new()
         .nest("/api", api)
-        .fallback_service(ServeDir::new("E:\\Programmering\\Rust\\service-system\\frontend\\dist"))
+        .route("/assets/*path", get(file_serve))
+        .route("/", index_serve.to_owned())
+        .route("/*path", index_serve)
         .with_state(app_state);
 
     app
