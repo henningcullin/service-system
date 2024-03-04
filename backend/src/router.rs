@@ -43,8 +43,8 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .nest("/auth", auth);
 
     let app = Router::new()
-        .fallback_service(ServeDir::new("E:\\Programmering\\Rust\\service-system\\frontend\\dist"))
         .nest("/api", api)
+        .fallback_service(ServeDir::new("E:\\Programmering\\Rust\\service-system\\frontend\\dist"))
         .with_state(app_state);
 
     app
