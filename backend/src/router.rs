@@ -11,6 +11,7 @@ use axum::{
     },
     Router, // The Router
 };
+use tower_http::services::ServeDir;
 use std::sync::Arc;
 
 pub fn create_router(app_state: Arc<AppState>) -> Router {
@@ -32,6 +33,7 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/tasks", get(task::index))
         .route("/task", post(task::create))
         .route("/task", delete(task::delete))
+        .route("/task", put(task::update))
         .layer(middleware::from_fn_with_state(app_state.clone(), auth));
 
     let api = Router::new()
@@ -40,7 +42,10 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/user/external/verify", post(user::verify_external))
         .nest("/auth", auth);
 
-    let app = Router::new().nest("/api", api).with_state(app_state);
+    let app = Router::new()
+        .fallback_service(ServeDir::new("E:\\Programmering\\Rust\\service-system\\frontend\\dist"))
+        .nest("/api", api)
+        .with_state(app_state);
 
     app
 }

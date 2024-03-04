@@ -671,9 +671,6 @@ pub async fn login_internal(
         Some(password) => password,
     };
 
-    println!("stored: {:?}", password);
-    println!("entered: {}", body.password);
-
     let is_valid = match PasswordHash::new(&password) {
         Ok(parsed_hash) => Argon2::default()
             .verify_password(body.password.as_bytes(), &parsed_hash)

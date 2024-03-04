@@ -12,7 +12,8 @@ use uuid::Uuid;
 
 use crate::{
     user::{User, UserRole},
-    AppState, ResponseData, ResponseType::Fail
+    AppState, ResponseData,
+    ResponseType::Fail,
 };
 
 #[derive(Debug, Deserialize, Serialize, Type, PartialEq)]
@@ -62,6 +63,7 @@ pub struct NewTask {
     machine: Option<Uuid>,
 }
 
+#[derive(Debug, Deserialize)]
 pub struct UpdateTask {
     id: Uuid,
     title: Option<String>,
@@ -69,11 +71,9 @@ pub struct UpdateTask {
     task_type: Option<TaskType>,
     status: Option<TaskStatus>,
     archived: Option<bool>,
-    creator: Option<Uuid>,
     executor: Option<Uuid>,
     machine: Option<Uuid>,
 }
-
 
 pub async fn details(
     State(app_state): State<Arc<AppState>>,
@@ -163,12 +163,12 @@ pub async fn create(
     Ok((StatusCode::CREATED, Json(QueryTask { id })))
 }
 
+
 pub async fn delete(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
-    Query(params): Query<QueryTask>
+    Query(params): Query<QueryTask>,
 ) -> Result<StatusCode, (StatusCode, Json<ResponseData>)> {
-
     if user.role == UserRole::Worker {
         return Err((
             StatusCode::FORBIDDEN,
@@ -180,7 +180,7 @@ pub async fn delete(
     }
 
     let result = sqlx::query!("DELETE FROM task WHERE id = ?", params.id)
-        .execute(&app_state.db)
+    .execute(&app_state.db)
         .await
         .map_err(|e| {
             eprintln!("Error executing query for task::delete: {:?}", e);
@@ -189,6 +189,107 @@ pub async fn delete(
                 Json(ResponseData {
                     status: Fail,
                     message: "Could not delete the task".to_owned(),
+                }),
+            )
+        })?;
+        
+        if result.rows_affected() > 0 {
+            Ok(StatusCode::NO_CONTENT)
+        } else {
+            Err((
+                StatusCode::NOT_FOUND,
+                Json(ResponseData {
+                    status: Fail,
+                    message: "The task was not found in the database".to_owned(),
+                }),
+            ))
+        }
+    }
+    
+pub async fn update(
+    Extension(user): Extension<User>,
+    State(app_state): State<Arc<AppState>>,
+    Json(body): Json<UpdateTask>
+) -> Result<StatusCode, (StatusCode, Json<ResponseData>)> {
+
+    let target_task = sqlx::query_as_unchecked!(
+        Task,
+        "SELECT
+        id,
+        title,
+        description,
+        CAST(task_type AS SIGNED) task_type,
+        CAST(status AS SIGNED) status,
+        archived,
+        created,
+        edited,
+        creator,
+        executor,
+        machine
+        FROM task
+        WHERE id = ?",
+        body.id
+    )
+        .fetch_one(&app_state.db)
+        .await
+        .map_err(|e| {
+            eprintln!("Error executing query for task::update: {:?}", e);
+            match e {
+                sqlx::Error::RowNotFound => (
+                    StatusCode::NOT_FOUND,
+                    Json(ResponseData {
+                        status: Fail,
+                        message: "The specified task does not exist".to_owned(),
+                    }),
+                ),
+                _ => (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(ResponseData {
+                        status: Fail,
+                        message: "Server error".to_owned(),
+                    }),
+                ),
+            }
+        })?;
+
+    if user.role == UserRole::Worker && (target_task.creator != user.id || body.task_type != Some(TaskType::Suggestion)) {
+        return Err((
+            StatusCode::FORBIDDEN,
+            Json(ResponseData {
+                status: Fail,
+                message: "You can't change this property'".to_owned(),
+            }),
+        ));
+    }
+
+    let result = sqlx::query!(
+        "UPDATE task SET 
+        title = COALESCE(?, title), 
+        description = COALESCE(?, description), 
+        task_type = COALESCE(?, task_type), 
+        status = COALESCE(?, status), 
+        archived = COALESCE(?, archived), 
+        executor = COALESCE(?, executor),
+        machine = COALESCE(?, machine) 
+        WHERE id = ?",
+        body.title,
+        body.description,
+        body.task_type,
+        body.status,
+        body.archived,
+        body.executor,
+        body.machine,
+        body.id
+    )
+        .execute(&app_state.db)
+        .await
+        .map_err(|e| {
+            eprintln!("Error executing update for task::update: {:?}", e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ResponseData {
+                    status: Fail,
+                    message: "Could not update the task in the database".to_owned(),
                 }),
             )
         })?;
