@@ -1,7 +1,5 @@
 <script>
 
-    console.log("We are now in the Tasks page!");
-
 </script>
 
 

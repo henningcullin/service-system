@@ -1,7 +1,5 @@
 <script>
 
-    console.log("Now in the Users page!");
-
 </script>
 
 

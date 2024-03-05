@@ -110,14 +110,4 @@
 
 <style>
 
-    .segment {
-        height:95%;
-        width:95%;
-        background-color: #202020;
-        padding:7%;
-        border-radius: 3px;
-        justify-content: center;
-        text-align: center;
-    }
-
 </style>
