@@ -6,6 +6,7 @@
   import Machines from "./routes/machines.svelte";
   import Tasks from "./routes/tasks.svelte";
   import Users from "./routes/users.svelte";
+  import Login from "./routes/login.svelte"
 </script>
 
 <Router>
@@ -15,6 +16,7 @@
       <Link to="/machines" class="nav-link">Machines</Link>
       <Link to="/tasks" class="nav-link">Tasks</Link>
       <Link to="/users" class="nav-link">Users</Link>
+      <Link to="/login" class="nav-link">Login</Link>
     </nav>
   </header>
 
@@ -23,6 +25,7 @@
     <Route path="/machines/*" component={Machines} />
     <Route path="/tasks/*" component={Tasks} />
     <Route path="/users/*" component={Users} />
+    <Route path="/login/*" component={Login} />
     <Route path="*" component={NotFound} />
   </main>
 
@@ -70,6 +73,8 @@
 
   main {
     min-height:87.5dvh;
+    display:grid;
+    place-items: center;
   }
 
   /* #endregion */

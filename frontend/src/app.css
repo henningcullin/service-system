@@ -20,6 +20,17 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.hidden {
+  display:none;
+}
+
+form *{
+	display:block;
+  margin-top: 1px;
+	padding:1%;
+	width:100%;
+}
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;
