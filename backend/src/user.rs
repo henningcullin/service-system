@@ -841,7 +841,7 @@ pub async fn login_initiate(
         AppendHeaders([(header::SET_COOKIE, cookie)]),
         Json(ResponseData {
             status: Success,
-            message: "Awaiting code".to_string(),
+            message: "code".to_string(),
         }),
     ))
 }

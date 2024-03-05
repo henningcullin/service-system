@@ -1,16 +1,23 @@
 <script>
 
+    import { navigate } from 'svelte-navigator';
+
     /** @param {string} selector */
     function el(selector) {
         return document.querySelector(selector);
     }
 
     let email = '';
+    let type = '';
     let password = '';
     let code = '';
 
 
     async function submitEmailForm() {
+
+        type = '';
+        password = '';
+        code = '';
 
         if (email.length <= 0) return;
 
@@ -22,14 +29,65 @@
             body: JSON.stringify({email})
         });
 
-        console.log(await response.json());
+        console.log(response);
+
+        const data = await response.json();
         
-        if (response.status != 200) {
-            return;
+        if (response.status != 200) return;
+
+        const codeField = el('#code-field');
+        const passwordField = el('#password-field');
+
+        if (!codeField || !passwordField) return console.error('Fatal rendering error');
+
+        if (data.message == 'code') {
+            codeField.classList.remove('hidden');
+            passwordField.classList.add('hidden');
+            type = 'code';
+        }
+        else {
+            codeField.classList.add('hidden');
+            passwordField.classList.remove('hidden');
+            type = 'password';
         }
 
         el('#emailForm')?.classList.add('hidden');
-        el('#passwordForm')?.classList.remove('hidden');
+        el('#loginForm')?.classList.remove('hidden');
+
+    }
+
+    async function submitLoginForm() {
+
+        /**
+         * 
+         * @param {string} endpoint 
+         * @param {object} value
+         */
+        async function loginFetch(endpoint, value) {
+            return fetch(endpoint, {
+                headers: {
+                    'Content-Type':'application/json'
+                },
+                method: 'POST',
+                body: JSON.stringify(value)
+            });
+        }
+
+        const response = type === 'password'
+            ? await loginFetch('/api/user/internal/login', {email, password})
+            : type === 'code'
+                ? await loginFetch('/api/user/external/verify', {code})
+                : console.error('Unknown login type');
+
+
+        if (!response) return;
+
+        const data = await response.json();
+
+        if (response.status != 200) return alert(data.message);
+
+        navigate('/');
+
     }
 
 </script>
@@ -42,9 +100,10 @@
         <input type="submit" value="Send">
     </form>
 
-    <form id="passwordForm" class="hidden">
+    <form id="loginForm" class="hidden" on:submit|preventDefault={submitLoginForm}>
         <input type="email" readonly bind:value={email}><br>
-        <input type="password" placeholder="password" bind:value={password}><br>
+        <input type="text" placeholder="code" id="code-field" class="hidden" bind:value={code}><br>
+        <input type="password" placeholder="password" id="password-field" bind:value={password}><br>
         <input type="submit" value="Login">
     </form>
 </div>
