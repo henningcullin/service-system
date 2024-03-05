@@ -1,20 +1,27 @@
 <script>
 
     import { onMount } from 'svelte';
-    import { machines } from '../lib/stores.js'
+    import { machines } from '../../lib/stores.js'
 
     onMount(async () => {
         try {
             const response = await fetch('/api/auth/machines');
             const data = await response.json();
 
-            const formatted = data.map((/** @type {{ created: string | number | Date; edited: string | number | Date; }} */ machine) => {
-                machine.created = new Date(machine.created);
-                machine.edited = new Date(machine.edited);
-                return machine;
+            // @ts-ignore
+            const formatted = data.map((machine) => {
+                return {
+                    id: machine.id,
+                    name: machine.name,
+                    make: machine.make,
+                    machine_type: machine.machine_type,
+                    status: machine.status,
+                    created: new Date(machine.created),
+                    edited: new Date(machine.edited),
+                };
             })
 
-            machines.set(data);
+            machines.set(formatted);
         } catch (error) {
             console.log('Could not fetch products', error);
         }
@@ -45,7 +52,7 @@
         margin-top: 50px;
         display:grid;
         width:100%;
-        grid-template-columns: 1fr, 1fr;
+        grid-template-columns: 1fr 1fr;
         gap:10px;
         padding:0.5%;
     }
