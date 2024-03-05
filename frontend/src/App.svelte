@@ -3,7 +3,11 @@
 
   import Home from "./routes/home.svelte";
   import NotFound from "./routes/notFound.svelte";
-  import Machines from "./routes/machines.svelte";
+
+  
+  import Machines from "./routes/machines/machines.svelte";
+  import CreateMachine from "./routes/machines/createMachine.svelte";
+
   import Tasks from "./routes/tasks.svelte";
   import Users from "./routes/users.svelte";
   import Login from "./routes/login.svelte"
@@ -22,7 +26,10 @@
 
   <main>
     <Route path="/" component={Home} />
+
+    <Route path="/machines/new" component={CreateMachine}/>
     <Route path="/machines/*" component={Machines} />
+    
     <Route path="/tasks/*" component={Tasks} />
     <Route path="/users/*" component={Users} />
     <Route path="/login/*" component={Login} />
