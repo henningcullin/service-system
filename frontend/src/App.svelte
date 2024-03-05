@@ -31,11 +31,14 @@
 
 <style>
 
+  /* #region HEADER */
+
   header {
     width: 100%;
-    height: 7.5vh;
+    height: 7.5dvh;
     top: 0px;
     text-align: center;
+    background-color: #202020;
   }
 
   nav {
@@ -43,17 +46,42 @@
     height:100%;
     display:flex;
     align-items: center;
+    justify-content: center;
+    text-align: center;
     gap:1px;
   }
 
   :global(.nav-link) {
-    display:block;
-    position: relative;
-    background-color: green;
+    flex:1;
     color: whitesmoke;
-    width:100%;
+    text-align: center;
     height:100%;
-    padding:3.6%;
+    display:grid;
+    place-items: center;
   }
+
+  :global(.nav-link):hover {
+    background-color: #282828;
+  }
+
+  /* #endregion */
+
+  /* #region MAIN */
+
+  main {
+    min-height:87.5dvh;
+  }
+
+  /* #endregion */
+
+  /* #region FOOTER */
+
+  footer {
+    height: 5dvh;
+    background-color: #202020;
+    bottom:0px;
+  }
+
+  /* #endregion */
 
 </style>
