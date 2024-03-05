@@ -729,7 +729,7 @@ pub async fn login_internal(
     ))
 }
 
-pub async fn login_external(
+pub async fn login_initiate(
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<LoginExternalUser>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<ResponseData>)> {
@@ -743,35 +743,35 @@ pub async fn login_external(
         )
     })?;
 
-    let user_exists: Option<bool> =
-        sqlx::query_scalar_unchecked!("SELECT EXISTS(SELECT 1 FROM user WHERE email = ?)", body.email.to_owned().to_ascii_lowercase())
-            .fetch_one(&app_state.db)
-            .await
-            .map_err(|e| {
-                eprintln!(
-                    "Error checking if user exist | user::login_external: {:?}",
-                    e
-                );
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(ResponseData {
-                        status: Fail,
-                        message: "Database error".to_owned(),
-                    }),
-                )
-            })?;
+    let user = sqlx::query_as_unchecked!(User, "SELECT id, first_name, last_name, email, password, phone, CAST(role AS SIGNED) role, last_login FROM user WHERE email = ?", body.email.to_ascii_lowercase())
+        .fetch_optional(&app_state.db)
+        .await
+        .map_err(|e| {
+            eprintln!("Error retrieving user from database | user::login_internal: {:?}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ResponseData {
+                status: Fail,
+                message: "Could not retrieve user from database".to_owned(),
+            }))
+        })?
+        .ok_or_else(|| {
+            (StatusCode::NOT_FOUND, Json(ResponseData {
+                status: Fail,
+                message: "No user with this email".to_owned(),
+            }))
+        })?;
 
-    if let Some(exists) = user_exists {
-        if !exists {
-            return Err((
-                StatusCode::NOT_FOUND,
-                Json(ResponseData {
-                    status: Fail,
-                    message: "No user with that email exists".to_owned(),
-                }),
-            ));
-        }
+    
+    if user.role == UserRole::Administrator || user.role == UserRole::Basic {
+        return 
+        Err((
+            StatusCode::OK, 
+            Json(ResponseData {
+                status: Success,
+                message: "password".to_owned(),
+            })
+        ));
     }
+
 
     let mut rng = OsRng;
     let mut buffer = [0u8; 3];
@@ -841,7 +841,7 @@ pub async fn login_external(
         AppendHeaders([(header::SET_COOKIE, cookie)]),
         Json(ResponseData {
             status: Success,
-            message: "Successfully logged in".to_string(),
+            message: "Awaiting code".to_string(),
         }),
     ))
 }

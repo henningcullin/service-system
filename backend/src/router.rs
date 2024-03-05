@@ -37,7 +37,7 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
 
     let api = Router::new()
         .route("/user/internal/login", post(user::login_internal))
-        .route("/user/external/login", post(user::login_external))
+        .route("/user/login", post(user::login_initiate))
         .route("/user/external/verify", post(user::verify_external))
         .nest("/auth", auth);
 
