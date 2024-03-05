@@ -9,7 +9,25 @@
     let password = '';
     let code = '';
 
+
     async function submitEmailForm() {
+
+        if (email.length <= 0) return;
+
+        const response = await fetch('/api/user/login', {
+            headers: {
+                'Content-Type':'application/json'
+            },
+            method: 'POST',
+            body: JSON.stringify({email})
+        });
+
+        console.log(await response.json());
+        
+        if (response.status != 200) {
+            return;
+        }
+
         el('#emailForm')?.classList.add('hidden');
         el('#passwordForm')?.classList.remove('hidden');
     }
