@@ -1,5 +1,6 @@
 <script>
 
+    import { Link } from "svelte-navigator";
     import { onMount } from 'svelte';
     import { machines } from '../../lib/stores.js'
 
@@ -32,6 +33,10 @@
 <div class="segment">
     <h2> Welcome to the Machine page!!</h2>
     
+    <div class="menu">
+        <Link to="/machines/new">New</Link>
+    </div>
+
     <div class="machine-grid">
         {#each $machines as machine}
             <div class="machine-card"> 
