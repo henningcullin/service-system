@@ -715,7 +715,7 @@ pub async fn login_internal(
 
     let cookie = Cookie::build(("token", token.to_owned()))
         .path("/")
-        .max_age(time::Duration::hours(1))
+        .max_age(time::Duration::minutes(app_state.env.jwt_expires_in))
         .same_site(SameSite::Lax)
         .http_only(true)
         .to_string();
@@ -802,7 +802,7 @@ pub async fn login_initiate(
 
     let now = chrono::Utc::now();
     let iat = now.timestamp() as usize;
-    let exp = (now + chrono::Duration::minutes(app_state.env.jwt_expires_in)).timestamp() as usize;
+    let exp = (now + chrono::Duration::minutes(5)).timestamp() as usize;
 
     let claims: LoginTokenClaims = LoginTokenClaims {
         sub: body.email,
@@ -832,7 +832,7 @@ pub async fn login_initiate(
 
     let cookie = Cookie::build(("auth_token", token.to_owned()))
         .path("/")
-        .max_age(time::Duration::hours(1))
+        .max_age(time::Duration::minutes(5))
         .same_site(SameSite::Lax)
         .http_only(true)
         .to_string();
@@ -943,7 +943,7 @@ pub async fn verify_external(
 
     let token_cookie = Cookie::build(("token", token.to_owned()))
         .path("/")
-        .max_age(time::Duration::hours(2))
+        .max_age(time::Duration::minutes(app_state.env.jwt_expires_in))
         .same_site(SameSite::Lax)
         .http_only(true)
         .to_string();
