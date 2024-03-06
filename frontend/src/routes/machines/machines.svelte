@@ -57,7 +57,7 @@
 
             switch (type) {
                 case 'id':
-                    navigate(`/machines/${target.innerText}`);
+                    navigate(`/machine/${target.innerText}`);
                     break;
 
             }
