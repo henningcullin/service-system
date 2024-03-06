@@ -1,7 +1,6 @@
 <script>
 
-    import { createEventDispatcher } from 'svelte';
-import { navigate } from 'svelte-navigator';
+    import { navigate } from 'svelte-navigator';
 
     const MachineStatus = ['Active', 'Inactive'];
 
@@ -31,6 +30,8 @@ import { navigate } from 'svelte-navigator';
         newMachine.make = '';
         newMachine.machine_type = '';
         newMachine.status = 'Inactive';
+
+        navigate('/machines/');
     }
     
 </script>
