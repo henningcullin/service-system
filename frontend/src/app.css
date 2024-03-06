@@ -28,6 +28,8 @@ a{
 }
 
 .segment {
+  margin-top: 15px;
+  margin-bottom: 15px;
   min-height:95%;
   width:98%;
   background-color: #202020;
@@ -89,6 +91,12 @@ button:focus-visible {
   }
   button {
     background-color: #f9f9f9;
+  }
+  td[data-column-id="delete"] {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAABqQAAAakBDAYwoQAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAO3SURBVHic7ZtbqA1RGMd/H0LkWsclyiXxwANSRKFck1zyoEReSCnhzZsikZIHUcKDCBGKSKLIgweXpCg6HogchQ7puOT4PKy9O9/Zzpo9M3tmr63mX6vWzPmvb/7ff8+steb0jagqeUBEpgHbgSnABKBbwhDtwAvgMXBAVZ9kq7AEVc28AXuA34Bm1H4BO3PRmkPyGzJMvLKtbWgDgCbgixF8D1gN9EwRqxewBrhv4n0CBjayASuN2FagTwYx+wPfTNwlWWpOOjFVw1TTP6WqbbUGVNWvwFlzakqtMS2yNqDJ9J9lGNfGavKyUqBHXKKIdMctZ/0jaENMf4yIzEgrrAKjTH9YlbhfgJeq2h4rcoxncBxwCWgjv9k96/YNuACMrmkSBJYAPxogobTtOzAvKkcpJfoPRGQ0bhc2yJx+A7zvckDjYAQw0hx/BCar6rsu2RG//n46nHwNLAW6ZbkE5dGA7sAK4J3RvyvxIwC8MgG2hU4shRE7jP5nPl7UMjjA9K/EvwMbBlbzAB8pyoBW019Ws5z6w2pu9ZGiDLhq+ttFZHlpL9DQEJEeIrIK2GJOX/XyI1aBscBz3EtJGS3Ahwx05onhdN6QfQfGq+rbLtkx9gE/Cb+e17IPmB+ZY4zZdBruFgqdTJL2B7iMW/8j8/M+ApUQkbvA7NLhRuBhrIH1w0zgcKl/U1UXxRkU+2UI52wZzZrX/+hSQkSGmcN4vyrZvw7/dygMyCOoOOwTkXMiMsLD6Scix0TkqIj08XBGich5Edmdh06g+ipgVoM7dMyyc6tw5xjuXg9nk+Gs93AOGs70KtdcbLg34uaV1yMw3NPPg1MTijkgtIDQKAwILSA0CgNCCwiNwoDQAkKjMCC0gNAoDAgtIDQKA0ILCI3CgNACQqMwILSA0CgMCC0gNAoDQgsIjcKA0AJCozAgtIDQKAzIKe5DOooUHng4Dzz9rjjtuLLdzJGkQiQ2VLVZRGbhytwvemjXceW3f1T1todzCFeb3Kyqb7JXmr5EpjpZ9T7uex/f3xW4ViXGL+BMkuuWh8YlJnkEWkx/aIJx9YLV1OJlVSCJAU9Nf1KCcfWC1fTUy6pAWgPW+cpaQkBE+uE+sSsjtgFJSmT64j6YKJehHKEBvh/AfR9wwuh6BfSOPT7hxZbRuSLzFrAAGBQg8cHAIuBuhaaFieKkuPDpigs2UjueOJ8UBgiwFVeIHDrhcmsDNqe5k2LXCldCRCYC63DF1FPp/HFVPfAZeITbdZ5U1RdpgvwFMUZfow5k1NQAAAAASUVORK5CYII=');
+  }
+  td[data-column-id="edit"] {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAB2AAAAdgB+lymcgAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANlSURBVHic7dvNayRFHMbxT6JEWb0ZUPHt4AsxWVGJ6EnFLLKw6oJ/gXpS8CR4N2dZ/wTx4E0QD+LNl724eHB9iyJ4UBZEN+Iu6ibBjXHXQ89ITU/3TKanq6qzzAN16OpfVz/fJ901PTVprkyt4F38gR18jCeyOkqoNVzA5VLbw4sZfSXRY6rh++0SXs7mLrLWsG0Q+C/8ajiElzJ5jKYq+LNYxiK+NhzCFXM7jILvqyqEPTye1GkEVcFfxqe4rlRbFcKHyZxGUB18v51UHUI4J2wl8tq6quC3jA9hWTEx9vefS+a4RVXBbyoeftbVh7CsmBvCfe/MlQafx1M4htuxEJOkpIt4E++NqFnD+zgU9P3W6/+ut72O10rHncKduDHo28LDYdH9+Eb9PZWi7eKWGviqh5xNHK6oXR9znm0cCQ94pGLwXC38+GoCPy6EIfjr8XMHwLfxegXIqHt+lFYMT4zbvfEG9Gqp6Byexw1jTpBCTf7ysIRfDMMfqSr+rFT4ZAvG21ASePgzKPxxWtctKRm8UvHJKUy3paTwSgd80tR1S0oOT3cCyAJPNwLIBk/+ALLCkzeA7PDkC6AT8OQJoDPwpA+gU/CkDaBz8KQLIAX8ivr1hFqlCCAF/Bu9/bt4dhJzsQN4VPPv85uG4Ye+z/cUnuODSQzGDuCU+PBMwREzgAX8HYz/uzjwdDSA1dL4b42pn2a2b8Qxv9/ChlotbZ8eUbuk+EeGm4O+HRzHRy37+l9dCSALfF8xb4HPg7H3DP9WR3sPOY04rp7wJJNoweDn/PcKsEN4QHF1rOJpgyvQO3hGcUVEV8wADuOaYHsRG7gXV9UckxSeuAGU7/+beq1O/Xs+GTxxJ8F79lm3q3hYOirBhFdWzCtgo6LvYq//dNA28E9EHyMVM4C3FVfYgwrIL2SGrVOuJbG21cknwc5rFkBuA7k1CyC3gdyaBZDbQG7NAshtILdmAeQ2kFuzAHIbyK1ZAIqlqL4WcxmZUmXfO5VVFZrHmWB7CXe34Sixjpe2f5rk4BMGFxO+dLBCOIrzBhmO7ffgOdyGH3Bt0P+vYh3/bGs229cc7sIdpf6vFCvSlyYZ7DmDCR7UdgH3TQIe6gXF5JEbomk7g4eawvd1q+KtjW8PSBjnFS9JvmLwRap96z9uFfP9X563CQAAAABJRU5ErkJggg==');
   }
 }
 
@@ -427,7 +435,7 @@ th.gridjs-th:last-child {
     z-index: 5;
     padding: 12px 24px;
     border-top: 1px solid #1a1814;
-    background-color: #000;
+    background-color: #202020;
     box-shadow: 0 1px 3px 0 rgba(255,255,255, 0.1), 0 1px 2px 0 rgba(255,255,255, 0.26);
     border-radius: 0 0 8px 8px;
     border-bottom-width: 1px;
@@ -439,7 +447,7 @@ th.gridjs-th:last-child {
   
   input.gridjs-input {
     outline: none;
-    background-color: #000;
+    background-color: #303030;
     border: 1px solid #2d2923;
     border-radius: 5px;
     padding: 10px 13px;
@@ -466,7 +474,7 @@ th.gridjs-th:last-child {
       .gridjs-pagination .gridjs-pages button {
         padding: 5px 14px;
         border: 1px solid #2d2923;
-        background-color: #000;
+        background-color: #343434;
         border-right: none;
         outline: none;
         -webkit-user-select: none;
@@ -476,21 +484,21 @@ th.gridjs-th:last-child {
       .gridjs-pagination .gridjs-pages button:focus {
         box-shadow: 0 0 0 2px rgba(106,66,12, 0.5); }
       .gridjs-pagination .gridjs-pages button:hover {
-        background-color: #080808;
+        background-color: #3434;
         color: #c3bda8;
         outline: none; }
       .gridjs-pagination .gridjs-pages button:disabled,
       .gridjs-pagination .gridjs-pages button[disabled],
       .gridjs-pagination .gridjs-pages button:hover:disabled {
         cursor: default;
-        background-color: #000;
-        color: #948d7f; }
+        background-color: #343434;
+        color: #c3bda8; }
       .gridjs-pagination .gridjs-pages button.gridjs-spread {
         cursor: default;
         box-shadow: none;
         background-color: #000; }
       .gridjs-pagination .gridjs-pages button.gridjs-currentPage {
-        background-color: #080808;
+        background-color: #343434;
         font-weight: bold; }
       .gridjs-pagination .gridjs-pages button:last-child {
         border-bottom-right-radius: 6px;
