@@ -1,6 +1,7 @@
 <script>
 
-    import { Link } from "svelte-navigator";
+    import Grid from "gridjs-svelte"
+    import { Link, navigate } from "svelte-navigator";
     import { onMount } from 'svelte';
     import { machines } from '../../lib/stores.js'
 
@@ -15,7 +16,7 @@
                     id: machine.id,
                     name: machine.name,
                     make: machine.make,
-                    machine_type: machine.machine_type,
+                    type: machine.machine_type,
                     status: machine.status,
                     created: new Date(machine.created),
                     edited: new Date(machine.edited),
@@ -28,6 +29,44 @@
         }
     });
 
+    const columns = [
+        // @ts-ignore
+        'Id',
+        'Name', 
+        'Make', 
+        'Type', 
+        'Status', 
+        // @ts-ignore
+        {name:'Created', formatter: (cell) => cell.toLocaleString('en-GB')}, 
+        // @ts-ignore
+        {name:'Edited', formatter: (cell) => cell.toLocaleString('en-GB')}, 
+        'Delete', 
+        'Edit'
+    ]
+
+    // @ts-ignore
+    function handleTableEvent(e) {
+        try {
+            
+            const target = e.detail[0].target;
+            if (!target) return;
+
+            const type = target.getAttribute('data-column-id');
+
+            if (!type) return;
+
+            switch (type) {
+                case 'id':
+                    navigate(`/machines/${target.innerText}`);
+                    break;
+
+            }
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
 </script>
 
 <div class="segment">
@@ -37,9 +76,9 @@
         <Link to="/machines/new">New</Link>
     </div>
 
-    <div class="machine-grid">
+    <div class="mobile-grid">
         {#each $machines as machine}
-            <div class="machine-card"> 
+            <div class="mobile-card"> 
                 <b>Name: {machine.name}</b>
                 <p>Make: {machine.make}</p>
                 <p>Type: {machine.machine_type}</p>
@@ -49,11 +88,15 @@
             </div>
         {/each}
     </div>
+
+    <Grid on:rowClick={handleTableEvent} columns={columns} data={$machines} sort={true} search={true}, pagination={{limit: 15}}/>
+    
 </div>
 
 
 <style>
-    .machine-grid {
+
+    .mobile-grid {
         margin-top: 50px;
         display:grid;
         width:100%;
@@ -62,11 +105,16 @@
         padding:0.5%;
     }
 
-    .machine-card {
+    .mobile-card {
         padding: 0.5%;
         width:100%;
         background-color: #353535;
         border-radius: 5px;
+    }
+
+    :global([data-column-id="id"]) {
+        color: #2d53bd;
+        cursor: pointer;
     }
 
 </style>

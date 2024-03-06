@@ -4,7 +4,6 @@
   import Home from "./routes/home.svelte";
   import NotFound from "./routes/notFound.svelte";
 
-  
   import Machines from "./routes/machines/machines.svelte";
   import CreateMachine from "./routes/machines/createMachine.svelte";
 
