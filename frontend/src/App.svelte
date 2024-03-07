@@ -1,7 +1,10 @@
 <script>
-  import { Router, Route, Link } from 'svelte-navigator';
+// @ts-nocheck
 
-  import { user } from './lib/stores';
+  import { Router, Route, Link, navigate } from 'svelte-navigator';
+
+  import { account } from './lib/stores';
+  import { getUser } from './lib/helpers';
 
   import Home from './routes/home.svelte';
   import NotFound from './routes/notFound.svelte';
@@ -12,17 +15,33 @@
 
   import Tasks from './routes/tasks.svelte';
   import Users from './routes/users.svelte';
+
+
   import Login from './routes/login.svelte'
+  import Account from './routes/account.svelte';
+
+  account.subscribe((acc) => {
+    if (Object.keys(acc).length == 0) {
+      getUser();
+    }
+  });
+
+  console.log('app ran');
+
 </script>
 
 <Router>
   <header>
     <nav>
-      <Link to='/' class='nav-link'>Home</Link>
-      <Link to='/machines' class='nav-link'>Machines</Link>
-      <Link to='/tasks' class='nav-link'>Tasks</Link>
-      <Link to='/users' class='nav-link'>Users</Link>
+      {#if $account.id}
+        <Link to='/' class='nav-link'>Home</Link>
+        <Link to='/machines' class='nav-link'>Machines</Link>
+        <Link to='/tasks' class='nav-link'>Tasks</Link>
+        <Link to='/users' class='nav-link'>Users</Link>
+        <Link to='/account' class='nav-link'>{$account.id}</Link>
+      {:else}
       <Link to='/login' class='nav-link'>Login</Link>
+      {/if}
     </nav>
   </header>
 
@@ -35,7 +54,10 @@
     
     <Route path='/tasks/*' component={Tasks} />
     <Route path='/users/*' component={Users} />
+    
+
     <Route path='/login/*' component={Login} />
+    <Route path='/account/*' component={Account} />
     <Route path='*' component={NotFound} />
   </main>
 

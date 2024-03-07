@@ -1,6 +1,8 @@
 <script>
 
     import { navigate } from 'svelte-navigator';
+    import { getUser } from '../lib/helpers';
+    import { account } from '../lib/stores'
 
     /** @param {string} selector */
     function el(selector) {
@@ -86,8 +88,9 @@
 
         if (response.status != 200) return alert(data.message);
 
-        navigate('/');
+        getUser();
 
+        navigate('/');
     }
 
 </script>
