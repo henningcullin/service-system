@@ -2,10 +2,16 @@
 
     import Grid from "gridjs-svelte"
     import { Link, navigate } from "svelte-navigator";
-    import { onMount } from 'svelte';
     import { machines } from '../../lib/stores.js'
 
-    onMount(async () => {
+    machines.subscribe((arr) => {
+        if (!arr.length) {
+            console.log('machines gotten');
+            getMachines();
+        }
+    });
+
+    async function getMachines() {
         try {
             const response = await fetch('/api/auth/machines');
             const data = await response.json();
@@ -27,7 +33,7 @@
         } catch (error) {
             console.log('Could not fetch products', error);
         }
-    });
+    };
 
     const columns = [
         // @ts-ignore
@@ -131,6 +137,10 @@
         background-repeat: no-repeat;
         background-position: center;
         background-size: 32px, 32px;
+    }
+
+    :global(article) {
+        display: none;
     }
 
     @media (min-width: 1701px) {
