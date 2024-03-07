@@ -2,12 +2,7 @@
 
     import { navigate } from 'svelte-navigator';
     import { getUser } from '../lib/helpers';
-    import { account } from '../lib/stores'
-
-    /** @param {string} selector */
-    function el(selector) {
-        return document.querySelector(selector);
-    }
+    import { el } from '../lib/helpers';
 
     let email = '';
     let type = '';

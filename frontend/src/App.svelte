@@ -1,7 +1,7 @@
 <script>
 // @ts-nocheck
 
-  import { Router, Route, Link, navigate } from 'svelte-navigator';
+  import { Router, Route, Link} from 'svelte-navigator';
 
   import { account } from './lib/stores';
   import { getUser } from './lib/helpers';
