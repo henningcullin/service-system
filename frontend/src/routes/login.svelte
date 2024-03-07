@@ -92,19 +92,19 @@
 
 </script>
 
-<div class="segment">
+<div class='segment'>
     <h2>Log in</h2>
     
-    <form id="emailForm" on:submit|preventDefault={submitEmailForm}>
-        <input type="email" placeholder="email" bind:value={email}><br>
-        <input type="submit" value="Send">
+    <form id='emailForm' on:submit|preventDefault={submitEmailForm}>
+        <input type='email' placeholder='email' bind:value={email}><br>
+        <input type='submit' value='Send'>
     </form>
 
-    <form id="loginForm" class="hidden" on:submit|preventDefault={submitLoginForm}>
-        <input type="email" readonly bind:value={email}><br>
-        <input type="text" placeholder="code" id="code-field" class="hidden" bind:value={code}><br>
-        <input type="password" placeholder="password" id="password-field" bind:value={password}><br>
-        <input type="submit" value="Login">
+    <form id='loginForm' class='hidden' on:submit|preventDefault={submitLoginForm}>
+        <input type='email' readonly bind:value={email}><br>
+        <input type='text' placeholder='code' id='code-field' class='hidden' bind:value={code}><br>
+        <input type='password' placeholder='password' id='password-field' bind:value={password}><br>
+        <input type='submit' value='Login'>
     </form>
 </div>
 

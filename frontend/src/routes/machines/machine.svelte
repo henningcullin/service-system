@@ -33,7 +33,7 @@
 
 </script>
 
-<div class="segment">
+<div class='segment'>
 
     {#each $machine as machine}
         <b>Name: {machine.name}</b>

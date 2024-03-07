@@ -36,19 +36,19 @@
     
 </script>
 
-<div class="segment">
+<div class='segment'>
     <h2> Create new Machine </h2>
 
     <form on:submit|preventDefault={createMachine}>
-        <input type="text" placeholder="Name" bind:value={newMachine.name}>
-        <input type="text" placeholder="Make" bind:value={newMachine.make}>
-        <input type="text" placeholder="Type" bind:value={newMachine.machine_type}>
+        <input type='text' placeholder='Name' bind:value={newMachine.name}>
+        <input type='text' placeholder='Make' bind:value={newMachine.make}>
+        <input type='text' placeholder='Type' bind:value={newMachine.machine_type}>
         <select bind:value={newMachine.status}>
             {#each MachineStatus as option}
-                <option value="{option}">{option}</option>
+                <option value='{option}'>{option}</option>
             {/each}
         </select>
-        <input type="submit" value="Create">
+        <input type='submit' value='Create'>
     </form>
 </div>
 

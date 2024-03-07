@@ -1,40 +1,42 @@
 <script>
-  import { Router, Route, Link } from "svelte-navigator";
+  import { Router, Route, Link } from 'svelte-navigator';
 
-  import Home from "./routes/home.svelte";
-  import NotFound from "./routes/notFound.svelte";
+  import { user } from './lib/stores';
 
-  import Machine from "./routes/machines/machine.svelte";
-  import Machines from "./routes/machines/machines.svelte";
-  import CreateMachine from "./routes/machines/createMachine.svelte";
+  import Home from './routes/home.svelte';
+  import NotFound from './routes/notFound.svelte';
 
-  import Tasks from "./routes/tasks.svelte";
-  import Users from "./routes/users.svelte";
-  import Login from "./routes/login.svelte"
+  import Machine from './routes/machines/machine.svelte';
+  import Machines from './routes/machines/machines.svelte';
+  import CreateMachine from './routes/machines/createMachine.svelte';
+
+  import Tasks from './routes/tasks.svelte';
+  import Users from './routes/users.svelte';
+  import Login from './routes/login.svelte'
 </script>
 
 <Router>
   <header>
     <nav>
-      <Link to="/" class="nav-link">Home</Link>
-      <Link to="/machines" class="nav-link">Machines</Link>
-      <Link to="/tasks" class="nav-link">Tasks</Link>
-      <Link to="/users" class="nav-link">Users</Link>
-      <Link to="/login" class="nav-link">Login</Link>
+      <Link to='/' class='nav-link'>Home</Link>
+      <Link to='/machines' class='nav-link'>Machines</Link>
+      <Link to='/tasks' class='nav-link'>Tasks</Link>
+      <Link to='/users' class='nav-link'>Users</Link>
+      <Link to='/login' class='nav-link'>Login</Link>
     </nav>
   </header>
 
   <main>
-    <Route path="/" component={Home} />
+    <Route path='/' component={Home} />
 
-    <Route path="/machines/new" component={CreateMachine}/>
-    <Route path="/machines/" component={Machines} />
-    <Route path="/machine/:id" component={Machine}/>
+    <Route path='/machines/new' component={CreateMachine}/>
+    <Route path='/machines/' component={Machines} />
+    <Route path='/machine/:id' component={Machine}/>
     
-    <Route path="/tasks/*" component={Tasks} />
-    <Route path="/users/*" component={Users} />
-    <Route path="/login/*" component={Login} />
-    <Route path="*" component={NotFound} />
+    <Route path='/tasks/*' component={Tasks} />
+    <Route path='/users/*' component={Users} />
+    <Route path='/login/*' component={Login} />
+    <Route path='*' component={NotFound} />
   </main>
 
   <footer></footer>
