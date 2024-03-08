@@ -6,9 +6,13 @@
     import { machines } from '../../lib/stores.js'
     import { sendDelete } from '../../lib/helpers.js';
 
+    let lastFetch = false;
+
     machines.subscribe((arr) => {
-        if (!arr.length) {
+        if (!arr.length && !lastFetch) {
             console.log('machines gotten');
+            // @ts-ignore
+            lastFetch = Date.now();
             getMachines();
         }
     });
