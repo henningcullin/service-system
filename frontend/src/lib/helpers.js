@@ -21,6 +21,33 @@ export async function getUser() {
   }
 }
 
+
+/**
+ * Sends json data
+ * @param {string} url endpoint
+ * @param {string} method http method
+ * @param {Array<any> | Object} body data to be sent
+ * @returns {Promise<any>}
+ */
+export async function sendJson(url, method, body) {
+  return fetch(url, {
+    headers: {
+      'Content-Type':'application/json'
+    },
+    method: method,
+    body: JSON.stringify(body)
+  });
+}
+
+/**
+ * Sends delete requests
+ * @param {string} url endpoint
+ * @returns {Promise<any>}
+ */
+export async function sendDelete(url) {
+  return fetch(url, { method: 'DELETE'})
+}
+
 /**
  * Shorthand for document.querySelector
  * @param {string} selector 
