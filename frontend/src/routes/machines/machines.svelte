@@ -1,6 +1,7 @@
 <script>
 
-    import Grid from 'gridjs-svelte'
+    import { DataHandler, Datatable, Th, ThFilter} from '@vincjo/datatables';
+
     import { Link, navigate } from 'svelte-navigator';
     import { machines } from '../../lib/stores.js'
     import { sendDelete } from '../../lib/helpers.js';
@@ -11,6 +12,13 @@
             getMachines();
         }
     });
+
+
+    // @ts-ignore
+    const handler = new DataHandler($machines, {rowsPerPage: 10});
+    const rows = handler.getRows();
+    
+    $: handler.setRows($machines)
 
     async function getMachines() {
         try {
@@ -35,22 +43,6 @@
             console.log('Could not fetch products', error);
         }
     };
-
-    const columns = [
-        // @ts-ignore
-        'Id',
-        'Name', 
-        'Make', 
-        'Type', 
-        'Status', 
-        // @ts-ignore
-        {name:'Created', formatter: (cell) => cell.toLocaleString('en-GB')}, 
-        // @ts-ignore
-        {name:'Edited', formatter: (cell) => cell.toLocaleString('en-GB')}, 
-        'Delete', 
-        'Edit'
-    ]
-
     // @ts-ignore
     function handleTableEvent(e) {
         try {
@@ -121,9 +113,51 @@
             </div>
         {/each}
     </div>
-
-    <Grid on:rowClick={handleTableEvent} columns={columns} data={$machines} sort={true} search={true}, pagination={{limit: 15}}/>
     
+    <Datatable {handler}>
+        <table>
+            <thead>
+                <tr>
+                    <Th {handler} orderBy='id'>Id</Th>
+                    <Th {handler} orderBy='name'>Name</Th>
+                    <Th {handler} orderBy='make'>Make</Th>
+                    <Th {handler} orderBy='type'>Type</Th>
+                    <Th {handler} orderBy='status'>Status</Th>
+                    <Th {handler} orderBy='created'>Created</Th>
+                    <Th {handler} orderBy='edited'>Edited</Th>
+                    <Th {handler} orderBy='id'>Delete</Th>
+                    <Th {handler} orderBy='id'>Edit</Th>
+                </tr>
+                <tr>
+                    <ThFilter {handler} filterBy='id'/>
+                    <ThFilter {handler} filterBy='name'/>
+                    <ThFilter {handler} filterBy='make'/>
+                    <ThFilter {handler} filterBy='type'/>
+                    <ThFilter {handler} filterBy='status'/>
+                    <ThFilter {handler} filterBy='created'/>
+                    <ThFilter {handler} filterBy='edited'/>
+                    <ThFilter {handler} filterBy='id'/>
+                    <ThFilter {handler} filterBy='id'/>
+                </tr>
+            </thead>
+            <tbody>
+                {#each $rows as row}
+                    <tr>
+                        <td><Link to='{row.id}'>{row.id}</Link></td>
+                        <td>{row.name}</td>
+                        <td>{row.make}</td>
+                        <td>{row.type}</td>
+                        <td>{row.status}</td>
+                        <td>{row.created.toLocaleString('en-GB')}</td>
+                        <td>{row.edited.toLocaleString('en-GB')}</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                {/each}
+            </tbody>
+        </table>
+    </Datatable>
+
 </div>
 
 
@@ -145,7 +179,7 @@
         border-radius: 5px;
     }
 
-    :global(.mobile-card a) {
+    :global(a) {
         color: #2d53bd;
         font-size: 1.3em;
     }
