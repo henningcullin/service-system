@@ -26,11 +26,9 @@
     }
   });
 
-  console.log('app ran');
-
 </script>
 
-<Router>
+<Router primary={false}>
   <header>
     <nav>
       {#if $account.id}
