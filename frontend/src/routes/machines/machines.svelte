@@ -3,6 +3,7 @@
     import Grid from 'gridjs-svelte'
     import { Link, navigate } from 'svelte-navigator';
     import { machines } from '../../lib/stores.js'
+    import { sendDelete } from '../../lib/helpers.js';
 
     machines.subscribe((arr) => {
         if (!arr.length) {
@@ -65,6 +66,9 @@
                 case 'id':
                     navigate(`/machine/${target.innerText}`);
                     break;
+                case 'delete':
+                    deleteMachine(e);
+                    break;
 
             }
 
@@ -76,7 +80,16 @@
     // @ts-ignore
     async function deleteMachine(e) {
         
-        
+        const id = e.detail[1]
+            ? e.detail[1]._cells[0].data
+            : e.target.parentNode.id;
+
+        const response = await sendDelete(`/api/auth/machine?id=${id}`);
+
+        if (response.status != 204) alert('Could not delete');
+
+        // @ts-ignore
+        machines.update(prev => prev.filter(m => m.id != id));
 
     }
 
