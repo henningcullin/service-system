@@ -1,6 +1,7 @@
 <script>
 
     import { navigate } from 'svelte-navigator';
+    import { sendJson } from '../../lib/helpers';
 
     const MachineStatus = ['Active', 'Inactive'];
 
@@ -12,15 +13,9 @@
     };
 
     async function createMachine() {
-        if (newMachine.name.length <= 0) return;
-
-        const response = await fetch('/api/auth/machine', {
-            headers: {
-                'Content-Type':'application/json'
-            },
-            method: 'POST',
-            body: JSON.stringify(newMachine)
-        });
+        if (newMachine.name.length <= 0 || (newMachine.status != 'Inactive' && newMachine.status != 'Active')) return;
+            
+        const response = await sendJson('/api/auth/machine', 'POST', newMachine);
 
         const data = await response.json();
 
