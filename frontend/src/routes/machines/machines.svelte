@@ -15,14 +15,7 @@
             getMachines();
         }
     });
-
-
-    // @ts-ignore
-    const handler = new DataHandler($machines, {rowsPerPage: 10});
-    const rows = handler.getRows();
     
-    $: handler.setRows($machines)
-
     async function getMachines() {
         try {
             const response = await fetch('/api/auth/machines');
@@ -47,6 +40,22 @@
         }
     };
 
+
+    $: currentPage = 1;
+    const cardsPerPage = 6;
+    $: pageCount = Math.ceil( ($machines.length+1) / cardsPerPage);
+
+
+    // @ts-ignore
+    const handler = new DataHandler($machines, {rowsPerPage: 10});
+    const rows = handler.getRows();
+    
+    $: handler.setRows($machines)
+
+
+
+
+
     async function deleteMachine() {
         
         // @ts-ignore
@@ -54,7 +63,7 @@
 
         if (!id) return;
         
-        const choice = confirm(`Are you sure you want to delete ${this.parentNode.parentNode.children[2].innerText} ${this.parentNode.parentNode.children[1].innerText}`);
+        const choice = confirm(`Are you sure you want to delete this machine`);
 
         if (!choice) return;
 
@@ -85,18 +94,47 @@
     </div>
 
     <div class='mobile-grid'>
-        {#each $machines as machine}
+        {#each $machines.slice((currentPage - 1) * cardsPerPage, currentPage * cardsPerPage) as machine}
             <div class='mobile-card'> 
                 <Link to='/machine/{machine.id}'>{machine.name}</Link>
-                <p>Make: {machine.make}</p>
-                <p>Type: {machine.type}</p>
-                <p>Status: {machine.status}</p>
-                <i title={machine.created.toLocaleTimeString()}>Created: {machine.created.toLocaleDateString()}</i><br>
-                <i title={machine.edited.toLocaleTimeString()}>Edited: {machine.edited.toLocaleDateString()}</i><br>
-                <button on:click={deleteMachine} class='cardDeleteButton'/>
-                <button on:click={editMachine} class='cardEditButton'/>
+                <p>{machine.make}</p>
+                <p>{machine.type}</p>
+                <p class='{machine.status}'>{machine.status}</p>
+                <i>{machine.created.toLocaleString('en-GB')}</i><br>
+                <i>{machine.edited.toLocaleString('en-GB')}</i><br>
+                <button on:click={deleteMachine} id='{machine.id}' class='cardDeleteButton'/>
+                <button on:click={editMachine} id='{machine.id}' class='cardEditButton'/>
             </div>
         {/each}
+    </div>
+
+    <div class="pagination">
+        {#if currentPage > 1}
+            <div><button on:click={() => currentPage -= 1}>Previous</button></div>
+            <div><button on:click={() => currentPage = 1}>1</button></div>
+        {:else}
+            <div><button disabled>Previous</button></div>
+        {/if}
+    
+        {#if currentPage - 1 > 1}
+            <div><button on:click={() => currentPage -= 1}>{currentPage - 1}</button></div>
+        {/if}
+    
+        <div><button disabled>{currentPage}</button></div>
+    
+        {#if currentPage + 1 <= pageCount}
+            <div><button on:click={() => currentPage += 1}>{currentPage + 1}</button></div>
+        {/if}
+    
+        {#if currentPage < pageCount-1}
+            <div><button on:click={() => currentPage = pageCount}>{pageCount}</button></div>
+        {/if}
+
+        {#if currentPage < pageCount}
+            <div><button on:click={() => currentPage += 1}>Next</button></div>
+        {:else}
+        <div><button disabled>Next</button></div>
+        {/if}
     </div>
     
     <Datatable {handler}>
@@ -148,25 +186,51 @@
 
 <style>
 
+    .Active {
+        color: #40b129;
+    }
+
+    .Inactive {
+        color: #d84444;
+    }
+
     /* mobile */
 
     .mobile-grid {
-        margin-top: 50px;
+        margin-top: 30px;
         display:grid;
         width:100%;
         grid-template-columns: 1fr 1fr;
-        gap:10px;
-        padding:0.5%;
+        grid-template-rows: 1fr 1fr 1fr;
+        gap:6px;
+        padding:0.3%;
+        min-height: 72dvh;
     }
 
     .mobile-card {
-        padding: 0.5%;
+        padding: 0.2%;
         width:100%;
+        height:100%;
         background-color: #353535;
         border-radius: 5px;
     }
 
-    
+    .pagination {
+        display:flex;
+        margin-top: 25px;
+        background-color: #353535;
+        padding:1.5%;
+        border-radius: 5px;
+    }
+
+    .pagination * {
+        font-size:1.2em;
+    }
+
+    .pagination>div {
+        flex:1;
+    }
+
     .cardDeleteButton {
         height: 32px;
         width: 32px;
@@ -197,16 +261,8 @@
         background-position: center;
         background-size: 32px, 32px;
     }
-    
+
     /* desktop */
-
-    .Active {
-        color: #40b129;
-    }
-
-    .Inactive {
-        color: #b42525;
-    }
 
     td {
         height: 48px;
@@ -253,6 +309,9 @@
             display:inherit;
         }
         .mobile-grid {
+            display:none;
+        }
+        .pagination {
             display:none;
         }
     }
