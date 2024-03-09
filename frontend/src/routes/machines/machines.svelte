@@ -10,7 +10,6 @@
 
     machines.subscribe((arr) => {
         if (!arr.length && !lastFetch) {
-            console.log('machines gotten');
             // @ts-ignore
             lastFetch = Date.now();
             getMachines();
@@ -69,6 +68,11 @@
 
     async function editMachine() {
 
+        const id = this ? this.id : null;
+
+        if (!id) return;
+
+        navigate(`/machine/${id}?edit=true`);
     }
 
 </script>
