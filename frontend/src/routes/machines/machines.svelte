@@ -1,9 +1,9 @@
 <script>
+// @ts-nocheck
 
     import { DataHandler, Datatable, Th, ThFilter} from '@vincjo/datatables';
-
     import { Link, navigate } from 'svelte-navigator';
-    import { machines } from '../../lib/stores.js'
+    import { account, machines } from '../../lib/stores.js'
     import { sendDelete } from '../../lib/helpers.js';
 
     let lastFetch = false;
@@ -40,7 +40,6 @@
         }
     };
 
-
     $: currentPage = 1;
     const cardsPerPage = 6;
     $: pageCount = Math.ceil( ($machines.length+1) / cardsPerPage);
@@ -52,12 +51,10 @@
     
     $: handler.setRows($machines)
 
-
-
-
-
     async function deleteMachine() {
         
+        if ($account.role == 'Worker') return;
+
         // @ts-ignore
         const id = this ? this.id : null;
 
@@ -69,7 +66,7 @@
 
         const response = await sendDelete(`/api/auth/machine?id=${id}`);
 
-        if (response.status != 204) alert('Could not delete');
+        if (response.status != 204) return alert('Could not delete');
 
         // @ts-ignore
         machines.update(prev => prev.filter(m => m.id != id));
@@ -77,6 +74,9 @@
 
     async function editMachine() {
 
+        if ($account.role == 'Worker') return;
+
+        // @ts-ignore
         const id = this ? this.id : null;
 
         if (!id) return;
@@ -96,14 +96,16 @@
     <div class='mobile-grid'>
         {#each $machines.slice((currentPage - 1) * cardsPerPage, currentPage * cardsPerPage) as machine}
             <div class='mobile-card'> 
-                <Link to='/machine/{machine.id}'>{machine.name}</Link>
+                <Link to='/machine/{machine.id}' class='itemLink' >{machine.name}</Link>
                 <p>{machine.make}</p>
                 <p>{machine.type}</p>
                 <p class='{machine.status}'>{machine.status}</p>
                 <i>{machine.created.toLocaleString('en-GB')}</i><br>
                 <i>{machine.edited.toLocaleString('en-GB')}</i><br>
-                <button on:click={deleteMachine} id='{machine.id}' class='cardDeleteButton'/>
-                <button on:click={editMachine} id='{machine.id}' class='cardEditButton'/>
+                {#if $account.role != 'Worker'}
+                    <button on:click={deleteMachine} id='{machine.id}' class='cardDeleteButton'/>
+                    <button on:click={editMachine} id='{machine.id}' class='cardEditButton'/>
+                {/if}
             </div>
         {/each}
     </div>
@@ -148,8 +150,10 @@
                     <Th {handler} orderBy='status'>Status</Th>
                     <Th {handler} orderBy='created'>Created</Th>
                     <Th {handler} orderBy='edited'>Edited</Th>
-                    <Th {handler} orderBy='none'>Delete</Th>
-                    <Th {handler} orderBy='none'>Edit</Th>
+                    {#if $account.role != 'Worker'}
+                        <Th {handler} orderBy='none'>Delete</Th>
+                        <Th {handler} orderBy='none'>Edit</Th>
+                    {/if}
                 </tr>
                 <tr>
                     <ThFilter {handler} filterBy='id'/>
@@ -159,8 +163,10 @@
                     <ThFilter {handler} filterBy='status'/>
                     <ThFilter {handler} filterBy='created'/>
                     <ThFilter {handler} filterBy='edited'/>
-                    <ThFilter {handler} filterBy='none'/>
-                    <ThFilter {handler} filterBy='none'/>
+                    {#if $account.role != 'Worker'}
+                        <ThFilter {handler} filterBy='none'/>
+                        <ThFilter {handler} filterBy='none'/>
+                    {/if}
                 </tr>
             </thead>
             <tbody>
@@ -173,8 +179,10 @@
                         <td class='{row.status}'>{row.status}</td>
                         <td>{row.created.toLocaleString('en-GB')}</td>
                         <td>{row.edited.toLocaleString('en-GB')}</td>
-                        <td class='buttonCell'><button class='tableDeleteButton' id='{row.id}' on:click={deleteMachine}></button></td>
-                        <td class='buttonCell'><button class='tableEditButton' id='{row.id}' on:click={editMachine}></button></td>
+                        {#if $account.role != 'Worker'}
+                            <td class='buttonCell'><button class='tableDeleteButton' id='{row.id}' on:click={deleteMachine}></button></td>
+                            <td class='buttonCell'><button class='tableEditButton' id='{row.id}' on:click={editMachine}></button></td>
+                        {/if}
                     </tr>
                 {/each}
             </tbody>

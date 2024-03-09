@@ -1,16 +1,29 @@
 <script>
     // @ts-nocheck
-    import { machine } from '../../lib/stores';
+    import { account, machine } from '../../lib/stores';
     import { navigate } from 'svelte-navigator';
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    const isEditing = Boolean(urlParams.get('edit'));
+
+    machine.set({});
 
     /** @type {string} */
     export let id;
 
     if (!id || id.length != 36) navigate('/notfound');
 
+    account.subscribe((a) => {
+        if (isEditing && a['role'] == 'Worker') window.history.back();  
+    });
+
     async function getMachine() {
         try {
             const response = await fetch('/api/auth/machine?id='+ id);
+
+            if (response.status != 200) navigate('/notfound');
+
             const data = await response.json();
 
             // @ts-ignore
@@ -70,8 +83,8 @@
     }
 
     input {
-        margin-bottom: 25px;
-        font-size:1.15em;
+        margin-bottom: 15px;
+        font-size:1em;
         line-height: 1.5em;
     }
 
