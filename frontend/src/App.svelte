@@ -16,16 +16,13 @@
   import Tasks from './routes/tasks.svelte';
   import Users from './routes/users.svelte';
 
-
   import Login from './routes/login.svelte'
   import Account from './routes/account.svelte';
 
-  account.subscribe((acc) => {
-    if (Object.keys(acc).length == 0) {
-      getUser();
-    }
-  });
-
+  if (Object.keys($account).length == 0) {
+    getUser();
+  }
+  
 </script>
 
 <Router primary={false}>
@@ -36,9 +33,9 @@
         <Link to='/machines' class='nav-link'>Machines</Link>
         <Link to='/tasks' class='nav-link'>Tasks</Link>
         <Link to='/users' class='nav-link'>Users</Link>
-        <Link to='/account' class='nav-link'>{$account.id}</Link>
+        <Link to='/account' class='nav-link'>{$account.first_name}</Link>
       {:else}
-      <Link to='/login' class='nav-link'>Login</Link>
+        <Link to='/login' class='nav-link'>Login</Link>
       {/if}
     </nav>
   </header>

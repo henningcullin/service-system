@@ -8,13 +8,11 @@
 
     let lastFetch = false;
 
-    machines.subscribe((arr) => {
-        if (!arr.length && !lastFetch) {
-            // @ts-ignore
-            lastFetch = Date.now();
-            getMachines();
-        }
-    });
+    if (!$machines.length && !lastFetch) {
+        // @ts-ignore
+        lastFetch = Date.now();
+        getMachines();
+    }
     
     async function getMachines() {
         try {
@@ -40,10 +38,9 @@
         }
     };
 
-    $: currentPage = 1;
+    let currentPage = 1;
     const cardsPerPage = 6;
     $: pageCount = Math.ceil( ($machines.length+1) / cardsPerPage);
-
 
     // @ts-ignore
     const handler = new DataHandler($machines, {rowsPerPage: 10});
