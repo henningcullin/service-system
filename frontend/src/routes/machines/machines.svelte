@@ -78,7 +78,7 @@
 
         if (!id) return;
 
-        navigate(`/machine/${id}?edit=true`);
+        navigate(`/machine/?id=${id}&edit=true`);
     }
 
 </script>
@@ -87,13 +87,13 @@
     <h2> Welcome to the Machine page!!</h2>
     
     <div class='menu'>
-        <Link to='/machines/new'>New</Link>
+        <Link to='/machine/?new=true'>New</Link>
     </div>
 
     <div class='mobile-grid'>
         {#each $machines.slice((currentPage - 1) * cardsPerPage, currentPage * cardsPerPage) as machine}
             <div class='mobile-card'> 
-                <Link to='/machine/{machine.id}' class='itemLink' >{machine.name}</Link>
+                <Link to='/machine/?id={machine.id}' class='itemLink' >{machine.name}</Link>
                 <p>{machine.make}</p>
                 <p>{machine.type}</p>
                 <p class='{machine.status}'>{machine.status}</p>
@@ -107,7 +107,7 @@
         {/each}
     </div>
 
-    <div class="pagination">
+    <div class='pagination'>
         {#if currentPage > 1}
             <div><button on:click={() => currentPage -= 1}>Previous</button></div>
             <div><button on:click={() => currentPage = 1}>1</button></div>
@@ -169,7 +169,7 @@
             <tbody>
                 {#each $rows as row}
                     <tr>
-                        <td><Link to='/machine/{row.id}' class='itemLink'>{row.id}</Link></td>
+                        <td><Link to='/machine/?id={row.id}' class='itemLink'>{row.id}</Link></td>
                         <td>{row.name}</td>
                         <td>{row.make}</td>
                         <td>{row.type}</td>
