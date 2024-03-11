@@ -114,4 +114,10 @@
 
   /* #endregion */
 
+
+  @media (min-width: 1200px) {
+    header nav {
+      font-size: 1.4em;
+    }
+  }
 </style>

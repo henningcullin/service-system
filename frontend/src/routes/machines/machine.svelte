@@ -245,7 +245,7 @@
         text-align: left;
     }
 
-    input, select{
+    input, select {
         margin-bottom: 15px;
         font-size:1em;
         line-height: 1.5em;
@@ -270,6 +270,35 @@
 
     #save {
         margin-top:15px;
+    }
+
+    @media (min-width: 1200px) {
+
+        .menu>button{
+            font-size: 1.5em;
+        }
+
+        form {
+            margin-top: 50px;
+            display:grid;
+            grid-template-columns: 1fr 3fr 1fr 3fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            gap: 35px;
+        }
+
+        form input, form select {
+            width:100%;
+            font-size: 1.4em;
+        }
+
+        form label {
+            font-size: 1.4em;
+        }
+
+/*         #save, #edited, #created, #status {
+            float:right;
+        } */
+
     }
 
 </style>
