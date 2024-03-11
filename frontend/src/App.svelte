@@ -45,7 +45,7 @@
 
     <Route path='/machines/new' component={CreateMachine}/>
     <Route path='/machines/' component={Machines} />
-    <Route path='/machine/:id' component={Machine}/>
+    <Route path='/machine/' component={Machine}/>
     
     <Route path='/tasks/*' component={Tasks} />
     <Route path='/users/*' component={Users} />
