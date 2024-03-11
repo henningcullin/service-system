@@ -11,7 +11,6 @@
 
   import Machine from './routes/machines/machine.svelte';
   import Machines from './routes/machines/machines.svelte';
-  import CreateMachine from './routes/machines/createMachine.svelte';
 
   import Tasks from './routes/tasks.svelte';
   import Users from './routes/users.svelte';
@@ -43,7 +42,6 @@
   <main>
     <Route path='/' component={Home} />
 
-    <Route path='/machines/new' component={CreateMachine}/>
     <Route path='/machines/' component={Machines} />
     <Route path='/machine/' component={Machine}/>
     
