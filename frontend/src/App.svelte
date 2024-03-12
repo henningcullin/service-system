@@ -33,8 +33,8 @@
       {#if $account.id}
         <Link to='/' class='nav-link'>Home</Link>
         <Link to='/machines' class='nav-link'>Machines</Link>
-        <Link to='/tasks' class='nav-link'>Tasks</Link>
         <Link to='/users' class='nav-link'>Users</Link>
+        <Link to='/tasks' class='nav-link'>Tasks</Link>
         <Link to='/account' class='nav-link'>{$account.first_name}</Link>
       {:else}
         <Link to='/login' class='nav-link'>Login</Link>

@@ -56,22 +56,24 @@
     function setState(prop, newState) {
         if (newState != true && newState != false) return;
 
+        const path = location.pathname+location.search;
+
         switch (prop) {
             case 'new':
                 state.new = newState;
                 state.edit = false;
                 resetUser();
-                if (location.pathname !== '/user/?new=true') navigate('/user/?new=true');
+                if (path !== '/user?new=true') navigate('/user?new=true');
                 break;
             case 'edit':
                 state.new = false;
                 state.edit = newState;
-                if (location.pathname !== `/user/?id=${id}&edit=true`) navigate(`/user/?id=${id}&edit=true`);
+                if (path !== `/user?id=${id}&edit=true`) navigate(`/user?id=${id}&edit=true`);
                 break;
             default:
                 state.new = false;
                 state.edit = false;
-                if (id && location.pathname !== `/user/?id=${id}`) navigate(`/user/?id=${id}`)
+                if (id && path !== `/user?id=${id}`) navigate(`/user?id=${id}`)
                 else {
                     navigate('/users/');
                     return;
@@ -131,15 +133,17 @@
     }
 
     async function createUser() {
-        /* try {
+        try {
 
-            if (!state.new  || ($user.role != 'Inactive' && $user.status != 'Active')) return;
+            if (!state.new  || ($user.role != 'Worker' && $user.role != 'Basic' && $user.role != 'Administrator') || $user.role == 'Super') return;
             
             const response = await sendJson('/api/auth/machine', 'POST', {
-                name: $user.name,
-                make: $user.make,
-                machine_type: $user.machine_type,
-                status: $user.status,
+                first_name: $user.first_name,
+                last_name: $user.last_name,
+                email: $user.email,
+                phone: $user.phone,
+                role: $user.role,
+                active: $user.active,
             });
     
             const data = await response.json();
@@ -151,12 +155,11 @@
             setState('edit', true);
     
             $user.id = data.id;
-            $user.created = new Date().toLocaleString('en-GB');
-            $user.edited = new Date().toLocaleString('en-GB');
+            $user.last_login = new Date().toLocaleString('en-GB');
 
         } catch (error) {
-            console.error('createMachine error' + error);
-        } */
+            console.error('createUser error' + error);
+        }
     }
 
     async function updateUser() {

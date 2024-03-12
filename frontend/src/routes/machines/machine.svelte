@@ -55,22 +55,24 @@
     function setState(prop, newState) {
         if (newState != true && newState != false) return;
 
+        const path = location.pathname+location.search;
+
         switch (prop) {
             case 'new':
                 state.new = newState;
                 state.edit = false;
                 resetMachine();
-                navigate('/machine/?new=true');
+                if (path !== '/machine?new=true') navigate('/machine?new=true');
                 break;
             case 'edit':
                 state.new = false;
                 state.edit = newState;
-                navigate(`/machine/?id=${id}&edit=true`);
+                if (path !== `/machine?id=${id}&edit=true`) navigate(`/machine?id=${id}&edit=true`);
                 break;
             default:
                 state.new = false;
                 state.edit = false;
-                if (id) navigate(`/machine/?id=${id}`)
+                if (id && path !== `/machine?id=${id}`) navigate(`/machine?id=${id}`)
                 else {
                     navigate('/machines/');
                     return;

@@ -54,7 +54,7 @@
     
             if (!id) return;
     
-            navigate(`/user/?id=${id}&edit=true`);
+            navigate(`/user?id=${id}&edit=true`);
         }
     
     </script>
@@ -63,13 +63,13 @@
         <h2> Users </h2>
         
         <div class='menu'>
-            <Link to='/user/?new=true'>New</Link>
+            <Link to='/user?new=true'>New</Link>
         </div>
     
         <div class='mobile-grid'>
             {#each $users.slice((currentPage - 1) * cardsPerPage, currentPage * cardsPerPage) as u}
                 <div class='mobile-card'> 
-                    <Link to='/user/?id={u.id}' class='itemLink' >{u.first_name}</Link>
+                    <Link to='/user?id={u.id}' class='itemLink' >{u.first_name}</Link>
                     <p>{u.last_name}</p>
                     <p>{u.email}</p>
                     <p>{u.phone}</p>
@@ -145,13 +145,13 @@
                 <tbody>
                     {#each $rows as row}
                         <tr>
-                            <td><Link to='/user/?id={row.id}' class='itemLink'>{row.id}</Link></td>
+                            <td><Link to='/user?id={row.id}' class='itemLink'>{row.id}</Link></td>
                             <td>{row.first_name}</td>
                             <td>{row.last_name}</td>
                             <td>{row.email}</td>
                             <td>{row.phone ? row.phone : ''}</td>
                             <td>{row.role}</td>
-                            <td class='{row.active}'>{row.active}</td>
+                            <td class='{row.active}'>{row.active ? 'Active' : 'Deactivated'}</td>
                             <td>{row.last_login.toLocaleString('en-GB')}</td>
                             {#if $account.role != 'Worker'}
                                 <td class='buttonCell'><button class='tableEditButton' id='{row.id}' on:click={editUser}></button></td>
