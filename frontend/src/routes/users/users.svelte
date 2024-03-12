@@ -46,25 +46,6 @@
         
         $: handler.setRows($users)
     
-        async function deleteUser() {
-            
-            if ($account.role == 'Worker') return;
-    
-            const id = this ? this.id : null;
-    
-            if (!id) return;
-            
-            const choice = confirm(`Are you sure you want to delete this user`);
-    
-            if (!choice) return;
-    
-            const response = await sendDelete(`/api/auth/user?id=${id}`);
-    
-            if (response.status != 204) return alert('Could not delete');
-    
-            users.update(prev => prev.filter(m => m.id != id));
-        }
-    
         async function editUser() {
     
             if ($account.role == 'Worker') return;
@@ -96,7 +77,6 @@
                     <p class="{u.active}" >{u.active}</p>
                     <i>{u.last_login.toLocaleString('en-GB')}</i><br>
                     {#if $account.role != 'Worker'}
-                        <button on:click={deleteUser} id='{u.id}' class='cardDeleteButton'/>
                         <button on:click={editUser} id='{u.id}' class='cardEditButton'/>
                     {/if}
                 </div>
@@ -145,7 +125,6 @@
                         <Th {handler} orderBy='active'>Active</Th>
                         <Th {handler} orderBy='last_login'>Last Login</Th>
                         {#if $account.role != 'Worker'}
-                            <Th {handler} orderBy='none'>Delete</Th>
                             <Th {handler} orderBy='none'>Edit</Th>
                         {/if}
                     </tr>
@@ -159,7 +138,6 @@
                         <ThFilter {handler} filterBy='active'/>
                         <ThFilter {handler} filterBy='last_login'/>
                         {#if $account.role != 'Worker'}
-                            <ThFilter {handler} filterBy='none'/>
                             <ThFilter {handler} filterBy='none'/>
                         {/if}
                     </tr>
@@ -176,7 +154,6 @@
                             <td class='{row.active}'>{row.active}</td>
                             <td>{row.last_login.toLocaleString('en-GB')}</td>
                             {#if $account.role != 'Worker'}
-                                <td class='buttonCell'><button class='tableDeleteButton' id='{row.id}' on:click={deleteUser}></button></td>
                                 <td class='buttonCell'><button class='tableEditButton' id='{row.id}' on:click={editUser}></button></td>
                             {/if}
                         </tr>
@@ -204,7 +181,7 @@
             margin-top: 30px;
             display:grid;
             width:100%;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             grid-template-rows: 1fr 1fr 1fr;
             gap:6px;
             padding:0.3%;
@@ -233,21 +210,6 @@
     
         .pagination>div {
             flex:1;
-        }
-    
-        .cardDeleteButton {
-            height: 32px;
-            width: 32px;
-            float: left;
-            margin-bottom: 10px;
-            margin-left: 10px;
-            margin-top: 10px;
-            cursor: pointer;
-            background-color: transparent;
-            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAB8ElEQVR4Xu2bYXvDIAiE1/z/37xOtyRNU5U7hK7tc/nMCLw5QK27fCU91/JEur6UJ9Lf5ivFaXTye7AJEMIBZCWfBSEUwCh5VsKRvkalkw6ATfwcbAvErM/jO1IBRAV6hhDlt4IQAHS0ZDc3NA7UDlWJqYB3S/wMyAIxBPDuySOjswvgU5K3INAALEmhNZpl1/twvbhhAK+euLV+EIDOPkIK6NUiW0tZNc36ZeM2FPBd3r+wMbykPd0DahafMgpHDVwrQVSvj2qoJ14mP9R9uB06tuEMMrekEdl74xMAlL6XMOp/1s4bn0sBtfqXwQktEgxrY9U04q8F2QXg9yjpyQAi3ikADQJSANp8mBrbbdelQqtcEH+IzRY/Y3vMWQpIVcDqXApoTAxEsoiNSmAlwMBSDzgQUBPMb4LXsmpcHkAjkkVs1APUA/4IMGpRE1QTvBHQFMifAu2zA6RmERtNAU0BTQGNQa0DtBDSSlBLYWbNoL2A9gLaC+wEtBnSZggkwHbZo731w0jvl2bLxzF0Nr7tb1NKAGQaaiYAhcDdfAf/xU4KQHXYujRpXVtBfc/azcTmVMDtCu1/Q2DvBp9hwwBae25Pzc1+7d4ZoDcWCoAFISq5GT+sIvMBPPHCOZt8BU0DQCTo/YIzt489ydc4fwCoZ1BugYj1SgAAAABJRU5ErkJggg==');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: 32px, 32px;
         }
         
         .cardEditButton {
@@ -282,17 +244,13 @@
             color: #2d53bd;
         }
         
-        .tableDeleteButton, .tableEditButton {
+        .tableEditButton {
             height:48px;
             width:48px;
             background-color: transparent;
             background-repeat: no-repeat;
             background-position: center;
             background-size: 32px, 32px;
-        }
-    
-        .tableDeleteButton {
-            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAB8ElEQVR4Xu2bYXvDIAiE1/z/37xOtyRNU5U7hK7tc/nMCLw5QK27fCU91/JEur6UJ9Lf5ivFaXTye7AJEMIBZCWfBSEUwCh5VsKRvkalkw6ATfwcbAvErM/jO1IBRAV6hhDlt4IQAHS0ZDc3NA7UDlWJqYB3S/wMyAIxBPDuySOjswvgU5K3INAALEmhNZpl1/twvbhhAK+euLV+EIDOPkIK6NUiW0tZNc36ZeM2FPBd3r+wMbykPd0DahafMgpHDVwrQVSvj2qoJ14mP9R9uB06tuEMMrekEdl74xMAlL6XMOp/1s4bn0sBtfqXwQktEgxrY9U04q8F2QXg9yjpyQAi3ikADQJSANp8mBrbbdelQqtcEH+IzRY/Y3vMWQpIVcDqXApoTAxEsoiNSmAlwMBSDzgQUBPMb4LXsmpcHkAjkkVs1APUA/4IMGpRE1QTvBHQFMifAu2zA6RmERtNAU0BTQGNQa0DtBDSSlBLYWbNoL2A9gLaC+wEtBnSZggkwHbZo731w0jvl2bLxzF0Nr7tb1NKAGQaaiYAhcDdfAf/xU4KQHXYujRpXVtBfc/azcTmVMDtCu1/Q2DvBp9hwwBae25Pzc1+7d4ZoDcWCoAFISq5GT+sIvMBPPHCOZt8BU0DQCTo/YIzt489ydc4fwCoZ1BugYj1SgAAAABJRU5ErkJggg==');
         }
     
         .tableEditButton {

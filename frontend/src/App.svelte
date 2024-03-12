@@ -12,9 +12,10 @@
   import Machine from './routes/machines/machine.svelte';
   import Machines from './routes/machines/machines.svelte';
 
+  import User from './routes/users/user.svelte';
   import Users from './routes/users/users.svelte';
   
-  
+
   import Tasks from './routes/tasks.svelte';
 
   import Login from './routes/login.svelte'
@@ -47,8 +48,10 @@
     <Route path='/machines/' component={Machines} />
     <Route path='/machine/' component={Machine}/>
     
+    <Route path='/users/' component={Users} />
+    <Route path='/user/' component={User} />
+
     <Route path='/tasks/*' component={Tasks} />
-    <Route path='/users/*' component={Users} />
     
 
     <Route path='/login/*' component={Login} />
