@@ -74,10 +74,7 @@
                 state.new = false;
                 state.edit = false;
                 if (id && path !== `/user?id=${id}`) navigate(`/user?id=${id}`)
-                else {
-                    navigate('/users/');
-                    return;
-                }
+                else return navigate('/users/');
                 getUser();
                 break;
         };
@@ -137,7 +134,7 @@
 
             if (!state.new  || ($user.role != 'Worker' && $user.role != 'Basic' && $user.role != 'Administrator') || $user.role == 'Super') return;
             
-            const response = await sendJson('/api/auth/machine', 'POST', {
+            const response = await sendJson('/api/auth/user', 'POST', {
                 first_name: $user.first_name,
                 last_name: $user.last_name,
                 email: $user.email,
@@ -163,13 +160,16 @@
     }
 
     async function updateUser() {
-       /*  try {
-            const response = await sendJson('/api/auth/machine', 'PUT', {
+        try {
+
+            const response = await sendJson('/api/auth/user', 'PUT', {
                 id: $user.id,
-                name: $user.name,
-                make: $user.make,
-                machine_type: $user.machine_type,
-                status: $user.status,
+                first_name: $user.first_name,
+                last_name: $user.last_name,
+                email: $user.email,
+                phone: $user.phone,
+                role: $user.role,
+                active: $user.active,
             });
 
             if (response.status != 204) {
@@ -177,9 +177,11 @@
                 return alert(data.message);
             }
 
+            setState('view', true);
+
         } catch (error) {
             console.error(error);
-        } */
+        }
     }
 
 </script>
@@ -284,10 +286,6 @@
         form label {
             font-size: 1.4em;
         }
-
-/*         #save, #edited, #created, #status {
-            float:right;
-        } */
 
     }
 
