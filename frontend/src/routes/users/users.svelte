@@ -149,7 +149,7 @@
                             <td>{row.first_name}</td>
                             <td>{row.last_name}</td>
                             <td>{row.email}</td>
-                            <td>{row.phone}</td>
+                            <td>{row.phone ? row.phone : ''}</td>
                             <td>{row.role}</td>
                             <td class='{row.active}'>{row.active}</td>
                             <td>{row.last_login.toLocaleString('en-GB')}</td>
@@ -190,7 +190,8 @@
     
         .mobile-card {
             padding: 0.2%;
-            width:100%;
+            width:80%;
+            margin-left: 10%;
             height:100%;
             background-color: #353535;
             border-radius: 5px;

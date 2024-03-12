@@ -32,10 +32,10 @@ a{
 }
 
 .segment {
-  margin-top: 15px;
-  margin-bottom: 15px;
-  min-height:95%;
   width:98%;
+  min-height: 85dvh;
+  margin-top: 25px;
+  margin-bottom: 25px;
   background-color: #202020;
   padding:2%;
   border-radius: 3px;
