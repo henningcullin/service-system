@@ -44,6 +44,7 @@ pub struct User {
     pub password: Option<String>,
     pub phone: Option<String>,
     pub role: UserRole,
+    pub active: bool,
     pub last_login: Option<DateTime<Utc>>,
 }
 
@@ -56,9 +57,22 @@ impl User {
             email: self.email,
             phone: self.phone,
             role: self.role,
+            active: self.active,
             last_login: self.last_login,
         }
     }
+}
+
+#[derive(Debug, Serialize, FromRow)]
+pub struct FilteredUser {
+    pub id: Uuid,
+    pub first_name: String,
+    pub last_name: String,
+    pub email: String,
+    pub phone: Option<String>,
+    pub role: UserRole,
+    pub active: bool,
+    pub last_login: Option<DateTime<Utc>>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -90,6 +104,7 @@ pub struct RegisterUser {
     pub password: String,
     pub phone: Option<String>,
     pub role: UserRole,
+    pub active: bool,
 }
 
 #[derive(Debug, Validate, Deserialize)]
@@ -102,6 +117,7 @@ pub struct UpdateUser {
     pub password: Option<String>,
     pub phone: Option<String>,
     pub role: Option<UserRole>,
+    pub active: Option<bool>,
 }
 
 #[derive(Debug, Validate, Deserialize)]
@@ -122,16 +138,6 @@ pub struct VerifyExternalUser {
     pub code: String,
 }
 
-#[derive(Debug, Serialize, FromRow)]
-pub struct FilteredUser {
-    pub id: Uuid,
-    pub first_name: String,
-    pub last_name: String,
-    pub email: String,
-    pub phone: Option<String>,
-    pub role: UserRole,
-    pub last_login: Option<DateTime<Utc>>,
-}
 
 #[derive(Debug, Serialize)]
 pub struct UserData {
@@ -161,6 +167,7 @@ pub async fn details(
         email,
         phone, 
         CAST(role AS SIGNED) role, 
+        active,
         last_login 
         FROM user 
         WHERE id = ?",
@@ -202,7 +209,8 @@ pub async fn index(
         last_name, 
         email,
         phone, 
-        CAST(role AS SIGNED) role, 
+        CAST(role AS SIGNED) role,
+        active,
         last_login 
         FROM user
         ",
@@ -329,14 +337,15 @@ pub async fn create(
     let id = Uuid::new_v4();
 
     sqlx::query!(
-        "INSERT INTO user (id, first_name, last_name, email, password, phone, role) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO user (id, first_name, last_name, email, password, phone, role, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
         id,
         body.first_name.to_string(),
         body.last_name.to_string(),
         body.email,
         hashed_password,
         body.phone,
-        body.role
+        body.role,
+        body.active,
     )
     .execute(&app_state.db)
     .await
@@ -356,6 +365,7 @@ pub async fn create(
         password: Some(hashed_password),
         phone: body.phone,
         role: body.role,
+        active: body.active,
         last_login: None,
     };
 
@@ -384,6 +394,7 @@ pub async fn update(
         email,
         phone, 
         CAST(role AS SIGNED) role, 
+        active,
         last_login 
         FROM user 
         WHERE id = ?",
@@ -619,7 +630,7 @@ pub async fn login_internal(
         )
     })?;
 
-    let user = sqlx::query_as_unchecked!(User, "SELECT id, first_name, last_name, email, password, phone, CAST(role AS SIGNED) role, last_login FROM user WHERE email = ?", body.email.to_ascii_lowercase())
+    let user = sqlx::query_as_unchecked!(User, "SELECT id, first_name, last_name, email, password, phone, CAST(role AS SIGNED) role, active, last_login FROM user WHERE email = ?", body.email.to_ascii_lowercase())
         .fetch_optional(&app_state.db)
         .await
         .map_err(|e| {
@@ -635,6 +646,16 @@ pub async fn login_internal(
                 message: "No user with this email".to_owned(),
             }))
         })?;
+
+    if !user.active {
+        return Err((
+            StatusCode::FORBIDDEN,
+            Json(ResponseData {
+                status: Fail,
+                message: "Your account is deactivated".to_string(),
+            }),
+        ));
+    }
 
     match user.role {
         UserRole::Super => {
@@ -743,7 +764,7 @@ pub async fn login_initiate(
         )
     })?;
 
-    let user = sqlx::query_as_unchecked!(User, "SELECT id, first_name, last_name, email, password, phone, CAST(role AS SIGNED) role, last_login FROM user WHERE email = ?", body.email.to_ascii_lowercase())
+    let user = sqlx::query_as_unchecked!(User, "SELECT id, first_name, last_name, email, password, phone, CAST(role AS SIGNED) role, active, last_login FROM user WHERE email = ?", body.email.to_ascii_lowercase())
         .fetch_optional(&app_state.db)
         .await
         .map_err(|e| {
@@ -760,6 +781,15 @@ pub async fn login_initiate(
             }))
         })?;
 
+    if !user.active {
+        return Err((
+            StatusCode::FORBIDDEN,
+            Json(ResponseData {
+                status: Fail,
+                message: "Your account is deactivated".to_string(),
+            }),
+        ));
+    }
     
     if user.role == UserRole::Administrator || user.role == UserRole::Basic {
         return 
@@ -899,7 +929,7 @@ pub async fn verify_external(
         ));
     }
 
-    let user = sqlx::query_as_unchecked!(User, "SELECT id, first_name, last_name, email, password, phone, CAST(role AS SIGNED) role, last_login FROM user WHERE email = ?", claims.sub.to_ascii_lowercase())
+    let user = sqlx::query_as_unchecked!(User, "SELECT id, first_name, last_name, email, password, phone, CAST(role AS SIGNED) role, active, last_login FROM user WHERE email = ?", claims.sub.to_ascii_lowercase())
         .fetch_optional(&app_state.db)
         .await
         .map_err(|e| {
@@ -915,6 +945,16 @@ pub async fn verify_external(
                 message: "No user with this email".to_owned(),
             }))
         })?;
+
+    if !user.active {
+        return Err((
+            StatusCode::FORBIDDEN,
+            Json(ResponseData {
+                status: Fail,
+                message: "Your account is deactivated".to_string(),
+            }),
+        ));
+    }
 
     let now = chrono::Utc::now();
     let iat = now.timestamp() as usize;

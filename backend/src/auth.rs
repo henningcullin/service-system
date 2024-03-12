@@ -76,7 +76,7 @@ pub async fn auth(
         )
     })?;
 
-    let user = sqlx::query_as_unchecked!(User, "SELECT id, first_name, last_name, email, password, phone, CAST(role AS SIGNED) role, last_login FROM user WHERE id = ?", user_id)
+    let user = sqlx::query_as_unchecked!(User, "SELECT id, first_name, last_name, email, password, phone, CAST(role AS SIGNED) role, active, last_login FROM user WHERE id = ?", user_id)
         .fetch_optional(&app_state.db)
         .await
         .map_err(|e| {
@@ -96,6 +96,16 @@ pub async fn auth(
             }),
         )
     })?;
+
+    if !user.active {
+        return Err((
+            StatusCode::FORBIDDEN,
+            Json(ResponseData {
+                status: Fail,
+                message: "Your account is deactivated".to_string(),
+            }),
+        ));
+    }
 
     req.extensions_mut().insert(user);
     Ok(next.run(req).await)
