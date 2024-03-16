@@ -64,7 +64,7 @@
     }
 
     function resetMachine() {
-        machine.set(currentMachine);
+        machine.set({...currentMachine});
     }
 
     function emptyMachine() {
@@ -97,7 +97,7 @@
                 edited: new Date(data.edited).toLocaleString('en-GB'),
             };
 
-            machine.set(currentMachine);
+            machine.set({...currentMachine});
 
         } catch (error) {
             console.error(error)
@@ -147,13 +147,19 @@
 
     async function updateMachine() {
         try {
-            const response = await sendJson('/api/auth/machine', 'PUT', {
-                id: $machine.id,
-                name: $machine.name,
-                make: $machine.make,
-                machine_type: $machine.machine_type,
-                status: $machine.status,
-            });
+
+            const changes = {id};
+
+            // adds the NEW values to the changes object
+            for (const field in $machine) {
+                console.log($machine[field])
+                console.log(currentMachine[field])
+                if ($machine[field] !== currentMachine[field]) changes[field] = $machine[field];
+            }            
+
+            if (Object.keys(changes).length < 2) return; 
+
+            const response = await sendJson('/api/auth/machine', 'PUT', changes);
 
             if (response.status != 204) {
                 const data = await response.json();
