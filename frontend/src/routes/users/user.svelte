@@ -1,68 +1,49 @@
 <script>
     // @ts-nocheck
-    import { onMount } from 'svelte';
-    import { el, sendDelete, sendJson } from '../../lib/helpers';
+    import { sendJson } from '../../lib/helpers';
 
     import { account, user, users } from '../../lib/stores';
     import { navigate } from 'svelte-navigator';
-    
-    resetUser();
-
-    const urlParams = new URLSearchParams(window.location.search);
     
     const state = {
         edit: false,
         new: false
     };
 
+    let currentUser = {
+        id: '',
+        first_name: '',
+        last_name: '',
+        email: '',
+        phone: '',
+        role: '',
+        active: '',
+        last_login: '',
+    };
+
+    emptyUser();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    
     let id = urlParams.get('id');
     
-    if (Boolean(urlParams.get('new'))) setState('new', true);
-    if (Boolean(urlParams.get('edit'))) setState('edit', true);
+    if (Boolean(urlParams.get('new'))) setState('new');
+    if (Boolean(urlParams.get('edit'))) setState('edit');
     
 
-    if (!state.new && (!id || id.length != 36)) navigate('/notfound');
+    if (!state.new && (!id || id.length !== 36)) navigate('/notfound');
+    else getUser();
 
-    if ((state.new || state.edit) && ($account['role'] == 'Worker' || $account == {})) window.history.back();  
-    
-    if(id) getUser();
+    if ((state.new || state.edit) && ($account['role'] === 'Worker' || $account === {})) window.history.back();  
 
-    onMount(() => {
-        computeState();
-    })
-
-    /**
-     * true to turn on false to turn off
-     * @param {bool} state
-     */
-     function computeState() {
-        const combined = Boolean((state.new || state.edit));
-
-        if (!el('#first_name')) return;
-
-        el('#first_name').disabled = !combined;
-        el('#last_name').disabled = !combined;
-        el('#email').disabled = !combined;
-        el('#phone').disabled = !combined;
-        el('#role').disabled = !combined;
-        el('#active').disabled = !combined;
-        el('#save').disabled = !combined;
-
-        el('#new').disabled = state.new;
-        el('#edit').disabled = (state.new || state.edit);
-        el('#cancel').disabled = !(state.new || state.edit)
-    }
-
-    function setState(prop, newState) {
-        if (newState != true && newState != false) return;
-
+    function setState(prop) {
         const path = location.pathname+location.search;
 
         switch (prop) {
             case 'new':
                 state.new = newState;
                 state.edit = false;
-                resetUser();
+                emptyUser();
                 if (path !== '/user?new=true') navigate('/user?new=true');
                 break;
             case 'edit':
@@ -75,13 +56,16 @@
                 state.edit = false;
                 if (id && path !== `/user?id=${id}`) navigate(`/user?id=${id}`)
                 else return navigate('/users/');
-                getUser();
+                resetUser();
                 break;
         };
-        computeState();
     }
 
     function resetUser() {
+        user.set({...currentUser});
+    }
+
+    function emptyUser() {
         user.set({
             id: '',
             first_name: '',
@@ -98,11 +82,11 @@
         try {
             const response = await fetch(`/api/auth/user?id=${id}`);
 
-            if (response.status != 200) navigate('/notfound');
+            if (response.status !== 200) navigate('/notfound');
 
             const data = await response.json();
 
-            user.set({
+           currentUser = {
                 id: data.id,
                 first_name: data.first_name,
                 last_name: data.last_name,
@@ -111,7 +95,9 @@
                 role: data.role,
                 active: data.active,
                 last_login: new Date(data.last_login),
-            });
+            };
+
+            user.set({...currentUser});
 
         } catch (error) {
             console.error(error)
@@ -132,7 +118,7 @@
     async function createUser() {
         try {
 
-            if (!state.new  || ($user.role != 'Worker' && $user.role != 'Basic' && $user.role != 'Administrator') || $user.role == 'Super') return;
+            if (!state.new  || $user.role === 'Super') return;
             
             const response = await sendJson('/api/auth/user', 'POST', {
                 first_name: $user.first_name,
@@ -149,12 +135,15 @@
     
             id = data.id;
     
-            setState('edit', true);
+            setState('edit');
     
             $user.id = data.id;
             $user.last_login = new Date().toLocaleString('en-GB');
 
+            currentUser = {...$user};
+
         } catch (error) {
+            alert('Could not create the user');
             console.error('createUser error' + error);
         }
     }
@@ -162,24 +151,26 @@
     async function updateUser() {
         try {
 
-            const response = await sendJson('/api/auth/user', 'PUT', {
-                id: $user.id,
-                first_name: $user.first_name,
-                last_name: $user.last_name,
-                email: $user.email,
-                phone: $user.phone,
-                role: $user.role,
-                active: $user.active,
-            });
+            const changes = {id};
 
-            if (response.status != 204) {
+            // adds the NEW values to the changes object
+            for (const field in $user) {
+                if ($user[field] !== currentUser[field]) changes[field] = $user[field];
+            }     
+
+            if (Object.keys(changes).length < 2) return; 
+
+            const response = await sendJson('/api/auth/user', 'PUT', changes);
+
+            if (response.status !== 204) {
                 const data = await response.json();
                 return alert(data.message);
             }
 
-            setState('view', true);
+            setState('view');
 
         } catch (error) {
+            alert('Could not update the user');
             console.error(error);
         }
     }
@@ -189,9 +180,11 @@
 <div class='segment'>
 
     <div class="menu">
-        <button id='new' on:click={() => {setState('new', true)}}>New</button>
-        <button id='edit' on:click={() => {setState('edit', true)}}>Edit</button>
-        <button id='cancel' on:click={() => {setState('cancel', true)}}>Cancel</button>
+        <button on:click={() => {setState('new', true)}} disabled={state.new || $account.role === 'Worker'}>New</button>
+        <!-- This one is gonna be fun-->
+        <button on:click={() => {setState('edit', true)}} disabled={(state.new || state.edit) || ($account.role === 'Worker' && $user.id !== $account.id )}>Edit</button>
+
+        <button on:click={() => {setState('cancel', true)}} disabled={!(state.new || state.edit)}>Cancel</button>
     </div>
     
     <form on:submit|preventDefault={handleSubmit}>
@@ -199,19 +192,19 @@
         <input id='id' type='text' bind:value={$user.id} disabled readonly>
 
         <label for='first_name'>Name</label>
-        <input id='first_name' type='text' bind:value={$user.first_name} disabled>
+        <input id='first_name' type='text' bind:value={$user.first_name} disabled={!(state.edit || state.new)}>
         
         <label for='last_name'>Make</label>
-        <input id='last_name' type='text' bind:value={$user.last_name} disabled>
+        <input id='last_name' type='text' bind:value={$user.last_name} disabled={!(state.edit || state.new)}>
         
         <label for='email'>Type</label>
-        <input id='email' type='text' bind:value={$user.email} disabled>
+        <input id='email' type='text' bind:value={$user.email} disabled={!(state.edit || state.new)}>
 
         <label for='phone'>Phone</label>
-        <input id='phone' type='text' bind:value={$user.phone} disabled>
+        <input id='phone' type='text' bind:value={$user.phone} disabled={!(state.edit || state.new)}>
 
         <label for='role'>Role</label>
-        <select id='role' bind:value={$user.role} disabled>
+        <select id='role' bind:value={$user.role} disabled={!(state.edit || state.new)}>
             <option value='Worker'>Worker</option>
             <option value='Basic'>Basic</option>
             <option value='Administrator'>Administrator</option>
@@ -219,12 +212,12 @@
         </select>
         
         <label for='active'>Active</label>
-        <input id='active' type='text' bind:value={$user.active} disabled readonly>
+        <input id='active' type='text' bind:value={$user.active} disabled={!(state.edit || state.new)} readonly>
         
         <label for='last_login'>Last Login</label>
         <input id='last_login' type='text' bind:value={$user.last_login} disabled readonly>
 
-        <input id='save' type="submit" value="Save" disabled>
+        <input id='save' type="submit" value="Save" disabled={!(state.edit || state.new)}>
 
     </form>
 
