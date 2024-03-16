@@ -10,7 +10,7 @@ export async function getUser() {
     const response = await fetch('/api/auth/user/me');
     const data = await response.json();
 
-    if (response.status != 200) return navigate('/login');
+    if (response.status !== 200) return navigate('/login');
 
     // @ts-ignore
     data.last_login = new Date(data.last_login);

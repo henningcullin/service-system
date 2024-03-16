@@ -1,72 +1,53 @@
 <script>
     // @ts-nocheck
-    import { onMount } from 'svelte';
-    import { el, sendDelete, sendJson } from '../../lib/helpers';
+    import { sendDelete, sendJson } from '../../lib/helpers';
 
     import { account, machine, machines } from '../../lib/stores';
     import { navigate } from 'svelte-navigator';
-    
-    resetMachine();
-
-    const urlParams = new URLSearchParams(window.location.search);
     
     const state = {
         edit: false,
         new: false
     };
+    
+    let currentMachine = {
+        id: '',
+        name: '',
+        make: '',
+        machine_type: '',
+        status: 'Inactive',
+        created: '',
+        edited: '',
+    };
+    
+    emptyMachine();
 
+    const urlParams = new URLSearchParams(window.location.search);
+    
     let id = urlParams.get('id');
     
-    if (Boolean(urlParams.get('new'))) setState('new', true);
-    if (Boolean(urlParams.get('edit'))) setState('edit', true);
+    if (Boolean(urlParams.get('new'))) setState('new');
+    if (Boolean(urlParams.get('edit'))) setState('edit');
     
 
     if (!state.new && (!id || id.length != 36)) navigate('/notfound');
+    else getMachine();
 
     if ((state.new || state.edit) && ($account['role'] == 'Worker' || $account == {})) window.history.back();  
-    
-    if(id) getMachine();
 
-    onMount(() => {
-        computeState();
-    })
-
-    /**
-     * true to turn on false to turn off
-     * @param {bool} state
-     */
-     function computeState() {
-        const combined = Boolean((state.new || state.edit));
-
-        if (!el('#name')) return;
-
-        el('#name').disabled = !combined;
-        el('#make').disabled = !combined;
-        el('#machine_type').disabled = !combined;
-        el('#status').disabled = !combined;
-        el('#save').disabled = !combined;
-
-        el('#new').disabled = state.new;
-        el('#edit').disabled = (state.new || state.edit);
-        el('#delete').disabled = state.new;
-        el('#cancel').disabled = !(state.new || state.edit)
-    }
-
-    function setState(prop, newState) {
-        if (newState != true && newState != false) return;
-
+    function setState(prop) {
         const path = location.pathname+location.search;
 
         switch (prop) {
             case 'new':
-                state.new = newState;
+                state.new = true;
                 state.edit = false;
-                resetMachine();
+                emptyMachine();
                 if (path !== '/machine?new=true') navigate('/machine?new=true');
                 break;
             case 'edit':
                 state.new = false;
-                state.edit = newState;
+                state.edit = true;
                 if (path !== `/machine?id=${id}&edit=true`) navigate(`/machine?id=${id}&edit=true`);
                 break;
             default:
@@ -77,13 +58,16 @@
                     navigate('/machines/');
                     return;
                 }
-                getMachine();
+                resetMachine();
                 break;
         };
-        computeState();
     }
 
     function resetMachine() {
+        machine.set(currentMachine);
+    }
+
+    function emptyMachine() {
         machine.set({
             id: '',
             name: '',
@@ -103,7 +87,7 @@
 
             const data = await response.json();
 
-            machine.set({
+            currentMachine = {
                 id: data.id,
                 name: data.name,
                 make: data.make,
@@ -111,7 +95,9 @@
                 status: data.status,
                 created: new Date(data.created).toLocaleString('en-GB'),
                 edited: new Date(data.edited).toLocaleString('en-GB'),
-            });
+            };
+
+            machine.set(currentMachine);
 
         } catch (error) {
             console.error(error)
@@ -147,13 +133,14 @@
     
             id = data.id;
     
-            setState('edit', true);
+            setState('edit');
     
             $machine.id = data.id;
             $machine.created = new Date().toLocaleString('en-GB');
             $machine.edited = new Date().toLocaleString('en-GB');
 
         } catch (error) {
+            alert('Could not create the machine');
             console.error('createMachine error' + error);
         }
     }
@@ -174,6 +161,7 @@
             }
 
         } catch (error) {
+            alert('Could not update the machine');
             console.error(error);
         }
     }
@@ -195,7 +183,7 @@
         
         id = '';
         
-        setState('new', true);
+        setState('new');
     }
 
 </script>
@@ -203,10 +191,13 @@
 <div class='segment'>
 
     <div class="menu">
-        <button id='new' on:click={() => {setState('new', true)}}>New</button>
-        <button id='edit' on:click={() => {setState('edit', true)}}>Edit</button>
-        <button id='delete' on:click={deleteMachine}>Delete</button>
-        <button id='cancel' on:click={() => {setState('cancel', true)}}>Cancel</button>
+        <button on:click={() => {setState('new')}}    disabled={state.new || $account.role === 'Worker'}>New</button>
+
+        <button on:click={() => {setState('edit')}}   disabled={(state.new || state.edit) || $account.role === 'Worker'}>Edit</button>
+
+        <button on:click={deleteMachine}              disabled={state.new || $account.role === 'Worker'}>Delete</button>
+
+        <button on:click={() => {setState('cancel')}} disabled={!(state.new || state.edit)} >Cancel</button>
     </div>
     
     <form on:submit|preventDefault={handleSubmit}>
@@ -214,27 +205,27 @@
         <input id='id' type='text' bind:value={$machine.id} disabled readonly>
 
         <label for='name'>Name</label>
-        <input id='name' type='text' bind:value={$machine.name} disabled>
+        <input type='text' bind:value={$machine.name} disabled={!(state.edit || state.new)}>
         
         <label for='make'>Make</label>
-        <input id='make' type='text' bind:value={$machine.make} disabled>
+        <input type='text' bind:value={$machine.make} disabled={!(state.edit || state.new)}>
         
         <label for='machine_type'>Type</label>
-        <input id='machine_type' type='text' bind:value={$machine.machine_type} disabled>
+        <input type='text' bind:value={$machine.machine_type} disabled={!(state.edit || state.new)}>
 
         <label for='status'>Status</label>
-        <select id='status' bind:value={$machine.status} disabled>
+        <select bind:value={$machine.status} disabled={!(state.edit || state.new)}>
             <option value='Inactive'>Inactive</option>
             <option value='Active'>Active</option>
         </select>
         
         <label for='created'>Created</label>
-        <input id='created' type='text' bind:value={$machine.created} disabled readonly>
+        <input type='text' bind:value={$machine.created} disabled readonly>
         
         <label for='edited'>Edited</label>
-        <input id='edited' type='text' bind:value={$machine.edited} disabled readonly>
+        <input type='text' bind:value={$machine.edited} disabled readonly>
 
-        <input id='save' type="submit" value="Save" disabled>
+        <input type="submit" value="Save" disabled={!(state.edit || state.new)}>
 
     </form>
 
@@ -270,10 +261,6 @@
         background-color: #343434;
     }
 
-    #save {
-        margin-top:15px;
-    }
-
     @media (min-width: 1200px) {
 
         .menu>button{
@@ -296,10 +283,6 @@
         form label {
             font-size: 1.4em;
         }
-
-/*         #save, #edited, #created, #status {
-            float:right;
-        } */
 
     }
 

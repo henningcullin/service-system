@@ -86,9 +86,11 @@
 <div class='segment'>
     <h2> Welcome to the Machine page!!</h2>
     
+    {#if $account.role !== 'Worker'}
     <div class='menu'>
         <Link to='/machine?new=true'>New</Link>
     </div>
+    {/if}
 
     <div class='mobile-grid'>
         {#each $machines.slice((currentPage - 1) * cardsPerPage, currentPage * cardsPerPage) as machine}
