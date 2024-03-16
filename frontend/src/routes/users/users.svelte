@@ -4,7 +4,6 @@
         import { DataHandler, Datatable, Th, ThFilter} from '@vincjo/datatables';
         import { Link, navigate } from 'svelte-navigator';
         import { account, users } from '../../lib/stores.js'
-        import { sendDelete } from '../../lib/helpers.js';
     
         let lastFetch = false;
     
@@ -33,12 +32,12 @@
     
                 users.set(formatted);
             } catch (error) {
-                console.log('Could not fetch products', error);
+                console.error('Could not fetch products', error);
             }
         };
     
         let currentPage = 1;
-        const cardsPerPage = 6;
+        const cardsPerPage = 4;
         $: pageCount = Math.ceil( ($users.length+1) / cardsPerPage);
     
         const handler = new DataHandler($users, {rowsPerPage: 10});
@@ -48,7 +47,7 @@
     
         async function editUser() {
     
-            if ($account.role == 'Worker') return;
+            if ($account.role === 'Worker') return;
     
             const id = this ? this.id : null;
     
@@ -62,9 +61,11 @@
     <div class='segment'>
         <h2> Users </h2>
         
-        <div class='menu'>
-            <Link to='/user?new=true'>New</Link>
-        </div>
+        {#if $account.role !== 'Worker'}
+            <div class='menu'>
+                <Link to='/user?new=true'>New</Link>
+            </div>
+        {/if}
     
         <div class='mobile-grid'>
             {#each $users.slice((currentPage - 1) * cardsPerPage, currentPage * cardsPerPage) as u}
@@ -76,7 +77,7 @@
                     <p>{u.role}</p>
                     <p class="{u.active}" >{u.active}</p>
                     <i>{u.last_login.toLocaleString('en-GB')}</i><br>
-                    {#if $account.role != 'Worker'}
+                    {#if $account.role !== 'Worker'}
                         <button on:click={editUser} id='{u.id}' class='cardEditButton'/>
                     {/if}
                 </div>
@@ -124,7 +125,7 @@
                         <Th {handler} orderBy='role'>Role</Th>
                         <Th {handler} orderBy='active'>Active</Th>
                         <Th {handler} orderBy='last_login'>Last Login</Th>
-                        {#if $account.role != 'Worker'}
+                        {#if $account.role !== 'Worker'}
                             <Th {handler} orderBy='none'>Edit</Th>
                         {/if}
                     </tr>
@@ -137,7 +138,7 @@
                         <ThFilter {handler} filterBy='role'/>
                         <ThFilter {handler} filterBy='active'/>
                         <ThFilter {handler} filterBy='last_login'/>
-                        {#if $account.role != 'Worker'}
+                        {#if $account.role !== 'Worker'}
                             <ThFilter {handler} filterBy='none'/>
                         {/if}
                     </tr>
@@ -153,7 +154,7 @@
                             <td>{row.role}</td>
                             <td class='{row.active}'>{row.active ? 'Active' : 'Deactivated'}</td>
                             <td>{row.last_login.toLocaleString('en-GB')}</td>
-                            {#if $account.role != 'Worker'}
+                            {#if $account.role !== 'Worker'}
                                 <td class='buttonCell'><button class='tableEditButton' id='{row.id}' on:click={editUser}></button></td>
                             {/if}
                         </tr>
