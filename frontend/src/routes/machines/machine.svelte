@@ -139,6 +139,8 @@
             $machine.created = new Date().toLocaleString('en-GB');
             $machine.edited = new Date().toLocaleString('en-GB');
 
+            currentMachine = {...$machine};
+
         } catch (error) {
             alert('Could not create the machine');
             console.error('createMachine error' + error);
