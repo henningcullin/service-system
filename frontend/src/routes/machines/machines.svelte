@@ -9,7 +9,6 @@
     let lastFetch = false;
 
     if (!$machines.length && !lastFetch) {
-        // @ts-ignore
         lastFetch = Date.now();
         getMachines();
     }
@@ -19,7 +18,6 @@
             const response = await fetch('/api/auth/machines');
             const data = await response.json();
 
-            // @ts-ignore
             const formatted = data.map((machine) => {
                 return {
                     id: machine.id,
@@ -34,7 +32,7 @@
 
             machines.set(formatted);
         } catch (error) {
-            console.log('Could not fetch products', error);
+            console.error('Could not get machines', error);
         }
     };
 
@@ -42,7 +40,6 @@
     const cardsPerPage = 6;
     $: pageCount = Math.ceil( ($machines.length+1) / cardsPerPage);
 
-    // @ts-ignore
     const handler = new DataHandler($machines, {rowsPerPage: 10});
     const rows = handler.getRows();
     
@@ -50,9 +47,8 @@
 
     async function deleteMachine() {
         
-        if ($account.role == 'Worker') return;
+        if ($account.role === 'Worker') return;
 
-        // @ts-ignore
         const id = this ? this.id : null;
 
         if (!id) return;
@@ -65,15 +61,13 @@
 
         if (response.status != 204) return alert('Could not delete');
 
-        // @ts-ignore
         machines.update(prev => prev.filter(m => m.id != id));
     }
 
     async function editMachine() {
 
-        if ($account.role == 'Worker') return;
+        if ($account.role === 'Worker') return;
 
-        // @ts-ignore
         const id = this ? this.id : null;
 
         if (!id) return;
@@ -87,9 +81,9 @@
     <h2> Welcome to the Machine page!!</h2>
     
     {#if $account.role !== 'Worker'}
-    <div class='menu'>
-        <Link to='/machine?new=true'>New</Link>
-    </div>
+        <div class='menu'>
+            <Link to='/machine?new=true'>New</Link>
+        </div>
     {/if}
 
     <div class='mobile-grid'>
