@@ -54,10 +54,7 @@
                 state.new = false;
                 state.edit = false;
                 if (id && path !== `/machine?id=${id}`) navigate(`/machine?id=${id}`)
-                else {
-                    navigate('/machines/');
-                    return;
-                }
+                else return navigate('/machines/');
                 resetMachine();
                 break;
         };
@@ -118,7 +115,7 @@
     async function createMachine() {
         try {
 
-            if (!state.new || $machine.name.length <= 0 || ($machine.status != 'Inactive' && $machine.status != 'Active')) return;
+            if (!state.new || $machine.name.length <= 0) return;
             
             const response = await sendJson('/api/auth/machine', 'POST', {
                 name: $machine.name,
@@ -154,8 +151,6 @@
 
             // adds the NEW values to the changes object
             for (const field in $machine) {
-                console.log($machine[field])
-                console.log(currentMachine[field])
                 if ($machine[field] !== currentMachine[field]) changes[field] = $machine[field];
             }            
 
@@ -163,10 +158,12 @@
 
             const response = await sendJson('/api/auth/machine', 'PUT', changes);
 
-            if (response.status != 204) {
+            if (response.status !== 204) {
                 const data = await response.json();
                 return alert(data.message);
             }
+
+            setState('view');
 
         } catch (error) {
             alert('Could not update the machine');
