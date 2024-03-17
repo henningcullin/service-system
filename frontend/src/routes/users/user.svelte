@@ -16,7 +16,7 @@
         last_name: '',
         email: '',
         phone: '',
-        role: '',
+        role: 'Worker',
         active: '',
         last_login: '',
     };
@@ -24,15 +24,14 @@
     emptyUser();
 
     const urlParams = new URLSearchParams(window.location.search);
-    
+
     let id = urlParams.get('id');
     
     if (Boolean(urlParams.get('new'))) setState('new');
     if (Boolean(urlParams.get('edit'))) setState('edit');
     
-
     if (!state.new && (!id || id.length !== 36)) navigate('/notfound');
-    else getUser();
+    else if (!state.new) getUser();
 
     if ((state.new || state.edit) && ($account['role'] === 'Worker' || $account === {})) window.history.back();  
 
@@ -41,14 +40,14 @@
 
         switch (prop) {
             case 'new':
-                state.new = newState;
+                state.new = true;
                 state.edit = false;
                 emptyUser();
                 if (path !== '/user?new=true') navigate('/user?new=true');
                 break;
             case 'edit':
                 state.new = false;
-                state.edit = newState;
+                state.edit = true;
                 if (path !== `/user?id=${id}&edit=true`) navigate(`/user?id=${id}&edit=true`);
                 break;
             default:
@@ -72,7 +71,7 @@
             last_name: '',
             email: '',
             phone: '',
-            role: '',
+            role: 'Worker',
             active: '',
             last_login: '',
         });
@@ -180,11 +179,11 @@
 <div class='segment'>
 
     <div class="menu">
-        <button on:click={() => {setState('new', true)}} disabled={state.new || $account.role === 'Worker'}>New</button>
+        <button on:click={() => {setState('new')}} disabled={state.new || $account.role === 'Worker'}>New</button>
         <!-- This one is gonna be fun-->
-        <button on:click={() => {setState('edit', true)}} disabled={(state.new || state.edit) || ($account.role === 'Worker' && $user.id !== $account.id )}>Edit</button>
+        <button on:click={() => {setState('edit')}} disabled={(state.new || state.edit) || ($account.role === 'Worker' && $user.id !== $account.id )}>Edit</button>
 
-        <button on:click={() => {setState('cancel', true)}} disabled={!(state.new || state.edit)}>Cancel</button>
+        <button on:click={() => {setState('cancel')}} disabled={!(state.new || state.edit)}>Cancel</button>
     </div>
     
     <form on:submit|preventDefault={handleSubmit}>

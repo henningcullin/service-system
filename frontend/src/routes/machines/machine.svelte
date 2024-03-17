@@ -28,10 +28,9 @@
     
     if (Boolean(urlParams.get('new'))) setState('new');
     if (Boolean(urlParams.get('edit'))) setState('edit');
-    
 
     if (!state.new && (!id || id.length != 36)) navigate('/notfound');
-    else getMachine();
+    else if (!state.new) getMachine();
 
     if ((state.new || state.edit) && ($account['role'] == 'Worker' || $account == {})) window.history.back();  
 
