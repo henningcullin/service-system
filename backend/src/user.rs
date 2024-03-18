@@ -468,6 +468,16 @@ pub async fn update(
         ));
     }
 
+    if ( body.role == Some(UserRole::Administrator) || body.role == Some(UserRole::Basic) ) && body.password.is_none() {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            Json(ResponseData {
+                status: Fail,
+                message: "You need to supply a password for this user".to_owned(),
+            }),
+        ));
+    }
+
     match user.role {
         UserRole::Worker => {
             if user.id != target_user.id {
@@ -596,8 +606,39 @@ pub async fn update(
         )
     })?;
 
-    let hashed_password = match body.password {
-        None => None,
+    let result = match body.password {
+        None => {
+            sqlx::query!(
+                "UPDATE user SET 
+                first_name = COALESCE(?, first_name), 
+                last_name = COALESCE(?, last_name), 
+                email = COALESCE(?, email), 
+                password = NULL, 
+                phone = COALESCE(?, phone), 
+                role = COALESCE(?, role),
+                active = COALESCE(?, active)
+                WHERE id = ?",
+                body.first_name,
+                body.last_name,
+                body.email,
+                body.phone,
+                body.role,
+                body.active,
+                body.id
+            )
+            .execute(&app_state.db)
+            .await
+            .map_err(|e| {
+                eprintln!("Error executing update for user::update: {:?}", e);
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(ResponseData {
+                        status: Fail,
+                        message: "Could not update the user in the database".to_owned(),
+                    }),
+                )
+            })?
+        }
         Some(password) => {
             let salt = SaltString::generate(&mut OsRng);
             let hashed_password = Argon2::default()
@@ -613,41 +654,40 @@ pub async fn update(
                     )
                 })
                 .map(|hash| hash.to_string())?;
-            Some(hashed_password)
+            
+            sqlx::query!(
+                "UPDATE user SET 
+                first_name = COALESCE(?, first_name), 
+                last_name = COALESCE(?, last_name), 
+                email = COALESCE(?, email), 
+                password = ?, 
+                phone = COALESCE(?, phone), 
+                role = COALESCE(?, role),
+                active = COALESCE(?, active)
+                WHERE id = ?",
+                body.first_name,
+                body.last_name,
+                body.email,
+                hashed_password,
+                body.phone,
+                body.role,
+                body.active,
+                body.id
+            )
+            .execute(&app_state.db)
+            .await
+            .map_err(|e| {
+                eprintln!("Error executing update for user::update: {:?}", e);
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(ResponseData {
+                        status: Fail,
+                        message: "Could not update the user in the database".to_owned(),
+                    }),
+                )
+            })?
         }
     };
-
-    let result = sqlx::query!(
-        "UPDATE user SET 
-        first_name = COALESCE(?, first_name), 
-        last_name = COALESCE(?, last_name), 
-        email = COALESCE(?, email), 
-        password = COALESCE(?, password), 
-        phone = COALESCE(?, phone), 
-        role = COALESCE(?, role),
-        active = COALESCE(?, active)
-        WHERE id = ?",
-        body.first_name,
-        body.last_name,
-        body.email,
-        hashed_password,
-        body.phone,
-        body.role,
-        body.active,
-        body.id
-    )
-    .execute(&app_state.db)
-    .await
-    .map_err(|e| {
-        eprintln!("Error executing update for user::update: {:?}", e);
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(ResponseData {
-                status: Fail,
-                message: "Could not update the user in the database".to_owned(),
-            }),
-        )
-    })?;
 
     if result.rows_affected() > 0 {
         Ok(StatusCode::NO_CONTENT)
