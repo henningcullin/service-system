@@ -10,18 +10,9 @@
         new: false
     };
 
-    let currentUser = {
-        id: '',
-        first_name: '',
-        last_name: '',
-        email: '',
-        phone: '',
-        role: 'Worker',
-        active: '',
-        last_login: '',
-    };
+    let currentUser = emptyUser();
 
-    emptyUser();
+    user.set(emptyUser());
 
     const urlParams = new URLSearchParams(window.location.search);
 
@@ -42,7 +33,7 @@
             case 'new':
                 state.new = true;
                 state.edit = false;
-                emptyUser();
+                user.set(emptyUser());
                 if (path !== '/user?new=true') navigate('/user?new=true');
                 break;
             case 'edit':
@@ -60,21 +51,42 @@
         };
     }
 
-    function resetUser() {
-        user.set({...currentUser});
-    }
-
     function emptyUser() {
-        user.set({
+        return {
             id: '',
             first_name: '',
             last_name: '',
             email: '',
+            password: '',
             phone: '',
             role: 'Worker',
-            active: '',
+            active: false,
             last_login: '',
-        });
+        };
+    }
+
+    function resetUser() {
+        user.set({...currentUser});
+    }
+
+    function setUser(newData) {
+
+        const {id, first_name, last_name, email, phone, role, active, last_login} = newData;
+
+        currentUser = {
+            id,
+            first_name,
+            last_name,
+            email,
+            password: '',
+            phone,
+            role,
+            active: Boolean(active),
+            last_login: new Date(last_login),
+        };
+
+        resetUser();
+
     }
 
     async function getUser() {
@@ -90,13 +102,14 @@
                 first_name: data.first_name,
                 last_name: data.last_name,
                 email: data.email,
+                password: data.password,
                 phone: data.phone,
                 role: data.role,
-                active: data.active,
+                active: Boolean(data.active),
                 last_login: new Date(data.last_login),
             };
 
-            user.set({...currentUser});
+            resetUser();
 
         } catch (error) {
             console.error(error)
@@ -118,15 +131,14 @@
         try {
 
             if (!state.new  || $user.role === 'Super') return;
-            
-            const response = await sendJson('/api/auth/user', 'POST', {
-                first_name: $user.first_name,
-                last_name: $user.last_name,
-                email: $user.email,
-                phone: $user.phone,
-                role: $user.role,
-                active: $user.active,
-            });
+
+            const newUser = Object.fromEntries(
+                Object.entries($user).filter(([key, value]) => !value !== true)
+            );
+
+            console.log(newUser);
+
+            const response = await sendJson('/api/auth/user', 'POST', newUser);
     
             const data = await response.json();
     
@@ -134,12 +146,9 @@
     
             id = data.id;
     
+            setUser(data);
+            
             setState('edit');
-    
-            $user.id = data.id;
-            $user.last_login = new Date().toLocaleString('en-GB');
-
-            currentUser = {...$user};
 
         } catch (error) {
             alert('Could not create the user');
@@ -157,14 +166,20 @@
                 if ($user[field] !== currentUser[field]) changes[field] = $user[field];
             }     
 
+            console.log(changes);
+
             if (Object.keys(changes).length < 2) return; 
 
             const response = await sendJson('/api/auth/user', 'PUT', changes);
+
+            console.log(response);
 
             if (response.status !== 204) {
                 const data = await response.json();
                 return alert(data.message);
             }
+            
+            currentUser = {...$user};
 
             setState('view');
 
@@ -178,7 +193,7 @@
 
 <div class='segment'>
 
-    <div class="menu">
+    <div class='menu'>
         <button on:click={() => {setState('new')}} disabled={state.new || $account.role === 'Worker'}>New</button>
         <!-- This one is gonna be fun-->
         <button on:click={() => {setState('edit')}} disabled={(state.new || state.edit) || ($account.role === 'Worker' && $user.id !== $account.id )}>Edit</button>
@@ -211,12 +226,12 @@
         </select>
         
         <label for='active'>Active</label>
-        <input id='active' type='text' bind:value={$user.active} disabled={!(state.edit || state.new)} readonly>
+        <input id='active' type='checkbox' bind:checked={$user.active} disabled={!(state.edit || state.new)}>
         
         <label for='last_login'>Last Login</label>
         <input id='last_login' type='text' bind:value={$user.last_login} disabled readonly>
 
-        <input id='save' type="submit" value="Save" disabled={!(state.edit || state.new)}>
+        <input id='save' type='submit' value='Save' disabled={!(state.edit || state.new)}>
 
     </form>
 
