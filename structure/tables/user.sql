@@ -8,7 +8,11 @@ CREATE TABLE user (
     role ENUM('Super', 'Administrator', 'Basic', 'Worker') NOT NULL DEFAULT 'Worker',
     active BOOLEAN NOT NULL DEFAULT TRUE,
     last_login TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CHECK (password IS NULL OR (role NOT IN ('Worker', 'Super') AND password IS NOT NULL) OR (role IN ('Worker', 'Super') AND password IS NULL))
+    CHECK (
+        (role IN ('Administrator', 'Basic') AND password IS NOT NULL)
+        OR
+        (role NOT IN ('Administrator', 'Basic') AND password IS NULL)
+    )
 );
 
 CREATE INDEX idx_email ON user (email);
