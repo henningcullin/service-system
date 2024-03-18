@@ -580,7 +580,8 @@ pub async fn update(
         email = COALESCE(?, email), 
         password = COALESCE(?, password), 
         phone = COALESCE(?, phone), 
-        role = COALESCE(?, role) 
+        role = COALESCE(?, role),
+        active = COALESCE(?, active)
         WHERE id = ?",
         body.first_name,
         body.last_name,
@@ -588,6 +589,7 @@ pub async fn update(
         hashed_password,
         body.phone,
         body.role,
+        body.active,
         body.id
     )
     .execute(&app_state.db)
