@@ -82,7 +82,7 @@
             phone,
             role,
             active: Boolean(active),
-            last_login: new Date(last_login),
+            last_login: last_login ? new Date(last_login) : '',
         };
 
         resetUser();
@@ -133,18 +133,25 @@
             if (!state.new  || $user.role === 'Super') return;
 
             const newUser = Object.fromEntries(
-                Object.entries($user).filter(([key, value]) => !value !== true)
+                Object.entries($user).filter(([key, value]) => {
+                    if (key === 'active') return true
+                    else return !value !== true
+                })
             );
+
+            console.log(newUser);
 
             const response = await sendJson('/api/auth/user', 'POST', newUser);
     
             const data = await response.json();
     
+            console.log(data);
+
             if (response.status != 201) return alert(data.message);
 
-            id = data.user.id;
+            id = data.id;
     
-            setUser(data.user);
+            setUser(data);
             
             setState('edit');
 
@@ -204,13 +211,13 @@
     
     <form on:submit|preventDefault={handleSubmit}>
         <label for='first_name'>First Name</label>
-        <input id='first_name' type='text' bind:value={$user.first_name} disabled={!(state.edit || state.new)}>
+        <input id='first_name' type='text' bind:value={$user.first_name} disabled={!(state.edit || state.new)} required>
         
         <label for='last_name'>Last Name</label>
-        <input id='last_name' type='text' bind:value={$user.last_name} disabled={!(state.edit || state.new)}>
+        <input id='last_name' type='text' bind:value={$user.last_name} disabled={!(state.edit || state.new)} required>
         
         <label for='email'>Email</label>
-        <input id='email' type='text' bind:value={$user.email} disabled={!(state.edit || state.new)}>
+        <input id='email' type='text' bind:value={$user.email} disabled={!(state.edit || state.new)} required>
 
         <label for='password'>Password</label>
         <input id='password' type='password' bind:value={$user.password} disabled={!(state.edit || state.new) || ($user.role === 'Worker' || $user.role === 'Super')}>
@@ -219,7 +226,7 @@
         <input id='phone' type='text' bind:value={$user.phone} disabled={!(state.edit || state.new)}>
 
         <label for='role'>Role</label>
-        <select id='role' bind:value={$user.role} disabled={!(state.edit || state.new)}>
+        <select id='role' bind:value={$user.role} disabled={!(state.edit || state.new)} required>
             <option value='Worker'>Worker</option>
             <option value='Basic'>Basic</option>
             <option value='Administrator'>Administrator</option>
