@@ -138,17 +138,6 @@ pub struct VerifyExternalUser {
     pub code: String,
 }
 
-#[derive(Debug, Serialize)]
-pub struct UserData {
-    pub user: FilteredUser,
-}
-
-#[derive(Debug, Serialize)]
-pub struct UserResponse {
-    pub status: String,
-    pub data: UserData,
-}
-
 pub async fn me(Extension(user): Extension<User>) -> Json<FilteredUser> {
     Json(user.to_filtered())
 }
@@ -234,7 +223,7 @@ pub async fn create(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<RegisterUser>,
-) -> Result<(StatusCode, Json<UserResponse>), (StatusCode, Json<ResponseData>)> {
+) -> Result<(StatusCode, Json<FilteredUser>), (StatusCode, Json<ResponseData>)> {
     match user.role {
         UserRole::Worker => {
             return Err((
@@ -341,22 +330,17 @@ pub async fn create(
             }))
         })?;
 
-        let user = FilteredUser {
-            id,
-            first_name: body.first_name.to_string(),
-            last_name: body.last_name.to_string(),
-            email: body.email,
-            phone: body.phone,
-            role: body.role,
-            active: body.active,
-            last_login: None,
-        };
-
         return Ok((
             StatusCode::CREATED,
-            Json(UserResponse {
-                status: "success".to_owned(),
-                data: UserData { user },
+            Json( FilteredUser {
+                id,
+                first_name: body.first_name.to_string(),
+                last_name: body.last_name.to_string(),
+                email: body.email,
+                phone: body.phone,
+                role: body.role,
+                active: body.active,
+                last_login: None,
             }),
         ));
 
@@ -417,22 +401,17 @@ pub async fn create(
         }))
     })?;
 
-    let user = FilteredUser {
-        id,
-        first_name: body.first_name.to_string(),
-        last_name: body.last_name.to_string(),
-        email: body.email,
-        phone: body.phone,
-        role: body.role,
-        active: body.active,
-        last_login: None,
-    };
-
     return Ok((
         StatusCode::CREATED,
-        Json(UserResponse {
-            status: "success".to_owned(),
-            data: UserData {user},
+        Json(FilteredUser {
+            id,
+            first_name: body.first_name.to_string(),
+            last_name: body.last_name.to_string(),
+            email: body.email,
+            phone: body.phone,
+            role: body.role,
+            active: body.active,
+            last_login: None,
         }),
     ));
 }
