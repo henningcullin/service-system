@@ -136,17 +136,15 @@
                 Object.entries($user).filter(([key, value]) => !value !== true)
             );
 
-            console.log(newUser);
-
             const response = await sendJson('/api/auth/user', 'POST', newUser);
     
             const data = await response.json();
     
             if (response.status != 201) return alert(data.message);
+
+            id = data.user.id;
     
-            id = data.id;
-    
-            setUser(data);
+            setUser(data.user);
             
             setState('edit');
 
@@ -175,6 +173,8 @@
                 return alert(data.message);
             }
             
+            $user.password = '';
+
             currentUser = {...$user};
 
             users.update(prev => prev.map(u => {
@@ -203,9 +203,6 @@
     </div>
     
     <form on:submit|preventDefault={handleSubmit}>
-        <label for='id'>ID</label>
-        <input id='id' type='text' bind:value={$user.id} disabled readonly>
-
         <label for='first_name'>First Name</label>
         <input id='first_name' type='text' bind:value={$user.first_name} disabled={!(state.edit || state.new)}>
         
@@ -214,6 +211,9 @@
         
         <label for='email'>Email</label>
         <input id='email' type='text' bind:value={$user.email} disabled={!(state.edit || state.new)}>
+
+        <label for='password'>Password</label>
+        <input id='password' type='password' bind:value={$user.password} disabled={!(state.edit || state.new) || ($user.role === 'Worker' || $user.role === 'Super')}>
 
         <label for='phone'>Phone</label>
         <input id='phone' type='text' bind:value={$user.phone} disabled={!(state.edit || state.new)}>
@@ -231,6 +231,9 @@
         
         <label for='last_login'>Last Login</label>
         <input id='last_login' type='text' bind:value={$user.last_login} disabled readonly>
+
+        <label for='id'>ID</label>
+        <input id='id' type='text' bind:value={$user.id} disabled readonly>
 
         <input id='save' type='submit' value='Save' disabled={!(state.edit || state.new)}>
 
