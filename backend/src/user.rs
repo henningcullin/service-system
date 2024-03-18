@@ -479,8 +479,27 @@ pub async fn update(
         }
     })?;
 
+    if user.id == target_user.id && body.active.is_some() {
+        return Err((
+            StatusCode::FORBIDDEN,
+            Json(ResponseData {
+                status: Fail,
+                message: "You can't deactivate your account".to_owned(),
+            }),
+        ));
+    }
+
     match user.role {
         UserRole::Worker => {
+            if user.id != target_user.id {
+                return Err((
+                    StatusCode::FORBIDDEN,
+                    Json(ResponseData {
+                        status: Fail,
+                        message: "You can't change other peoples information".to_owned(),
+                    }),
+                ));
+            } // WORKER CAN'T CHANGE OTHERS INFO
             if body.password.is_some() {
                 return Err((
                     StatusCode::FORBIDDEN,
@@ -490,15 +509,6 @@ pub async fn update(
                     }),
                 ));
             } // WORKERS CAN'T HAVE PASSWORD
-            if user.id != body.id {
-                return Err((
-                    StatusCode::FORBIDDEN,
-                    Json(ResponseData {
-                        status: Fail,
-                        message: "You can't change other peoples information".to_owned(),
-                    }),
-                ));
-            } // WORKER CAN'T CHANGE OTHERS INFO
             if body.email.is_some() {
                 return Err((
                     StatusCode::FORBIDDEN,
@@ -528,42 +538,39 @@ pub async fn update(
                     }),
                 ));
             } // BASIC CAN'T CHANGE PASSWORD HERE
-            if user.id != body.id {
+            if user.id != target_user.id && target_user.role != UserRole::Worker {
                 return Err((
                     StatusCode::FORBIDDEN,
                     Json(ResponseData {
                         status: Fail,
-                        message: "You can't change other peoples information".to_owned(),
+                        message: "You can only change workers information".to_owned(),
                     }),
                 ));
-            } // BASIC CAN'T CHANGE OTHERS INFO
+            } // BASIC CAN ONLY CHANGE WORKER INFO
             if body.role.is_some() {
                 return Err((
                     StatusCode::FORBIDDEN,
                     Json(ResponseData {
                         status: Fail,
-                        message: "You can't change your role".to_owned(),
+                        message: "You can't change roles".to_owned(),
                     }),
                 ));
             } // BASIC CAN'T CHANGE OWN ROLE
         }
         UserRole::Administrator => {
-            if body.password.is_some()
-                && (target_user.role == UserRole::Administrator
-                    || target_user.role == UserRole::Super)
-                && user.id != body.id
+            if (target_user.role == UserRole::Administrator || target_user.role == UserRole::Super) && user.id != target_user.id
             {
                 return Err((
                     StatusCode::FORBIDDEN,
                     Json(ResponseData {
                         status: Fail,
                         message: format!(
-                            "You can't change the password of people with role {:?}",
+                            "You can't change the information of people with the role {:?}",
                             target_user.role
                         ),
                     }),
                 ));
-            } // ADMINISTRATOR CAN'T CHANGE OTHER ADMINISTRATOR'S OR SUPER'S PASSWORD
+            } // ADMINISTRATOR CAN'T CHANGE OTHER ADMINISTRATOR'S OR SUPER'S INFO
             if body.role.is_some()
                 && (target_user.role == UserRole::Administrator
                     || target_user.role == UserRole::Super)
@@ -576,7 +583,7 @@ pub async fn update(
                     }),
                 ));
             } // ADMINISTRATOR CAN'T CHANGE ROLE TO ADMINISTRATOR OR SUPER
-            if user.id == body.id && body.role.is_some() {
+            if user.id == target_user.id && body.role.is_some() {
                 return Err((
                     StatusCode::FORBIDDEN,
                     Json(ResponseData {
@@ -587,7 +594,7 @@ pub async fn update(
             } // ADMINISTRATOR CAN'T CHANGE OWN ROLE
         }
         UserRole::Super => {
-            if user.id == body.id && body.role.is_some() {
+            if user.id == target_user.id && body.role.is_some() {
                 return Err((
                     StatusCode::FORBIDDEN,
                     Json(ResponseData {
@@ -598,6 +605,7 @@ pub async fn update(
             } // SUPER CAN'T CHANGE OWN ROLE
         }
     }
+
 
     body.validate().map_err(|_| {
         (
