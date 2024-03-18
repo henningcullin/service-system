@@ -166,13 +166,9 @@
                 if ($user[field] !== currentUser[field]) changes[field] = $user[field];
             }     
 
-            console.log(changes);
-
-            if (Object.keys(changes).length < 2) return; 
+            if (Object.keys(changes).length <= 1) return; 
 
             const response = await sendJson('/api/auth/user', 'PUT', changes);
-
-            console.log(response);
 
             if (response.status !== 204) {
                 const data = await response.json();
@@ -180,6 +176,11 @@
             }
             
             currentUser = {...$user};
+
+            users.update(prev => prev.map(u => {
+                if (u.id === id) return currentUser;
+                else return u;
+            }));
 
             setState('view');
 
