@@ -190,13 +190,13 @@
         <label for='id'>ID</label>
         <input id='id' type='text' bind:value={$user.id} disabled readonly>
 
-        <label for='first_name'>Name</label>
+        <label for='first_name'>First Name</label>
         <input id='first_name' type='text' bind:value={$user.first_name} disabled={!(state.edit || state.new)}>
         
-        <label for='last_name'>Make</label>
+        <label for='last_name'>Last Name</label>
         <input id='last_name' type='text' bind:value={$user.last_name} disabled={!(state.edit || state.new)}>
         
-        <label for='email'>Type</label>
+        <label for='email'>Email</label>
         <input id='email' type='text' bind:value={$user.email} disabled={!(state.edit || state.new)}>
 
         <label for='phone'>Phone</label>
