@@ -220,7 +220,7 @@
         <input id='email' type='text' bind:value={$user.email} disabled={!(state.edit || state.new)} required>
 
         <label for='password'>Password</label>
-        <input id='password' type='password' bind:value={$user.password} disabled={!(state.edit || state.new) || ($user.role === 'Worker' || $user.role === 'Super')}>
+        <input id='password' type='password' bind:value={$user.password} disabled={!(state.edit || state.new) || ($user.role === 'Worker' || $user.role === 'Super')} required={!($user.role === 'Worker' || $user.role === 'Super')}>
 
         <label for='phone'>Phone</label>
         <input id='phone' type='text' bind:value={$user.phone} disabled={!(state.edit || state.new)}>
