@@ -101,7 +101,7 @@ pub struct RegisterUser {
     pub last_name: String,
     #[validate(email)]
     pub email: String,
-    pub password: String,
+    pub password: Option<String>,
     pub phone: Option<String>,
     pub role: UserRole,
     pub active: bool,
@@ -137,7 +137,6 @@ pub struct LoginExternalUser {
 pub struct VerifyExternalUser {
     pub code: String,
 }
-
 
 #[derive(Debug, Serialize)]
 pub struct UserData {
@@ -319,22 +318,83 @@ pub async fn create(
         }
     }
 
-    let salt = SaltString::generate(&mut OsRng);
-    let hashed_password = Argon2::default()
-        .hash_password(body.password.as_bytes(), &salt)
+    let id = Uuid::new_v4();
+
+    if body.role == UserRole::Worker || body.role == UserRole::Super {
+        sqlx::query!(
+            "INSERT INTO user (id, first_name, last_name, email, phone, role, active) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            id,
+            body.first_name.to_string(),
+            body.last_name.to_string(),
+            body.email,
+            body.phone,
+            body.role.clone(),
+            body.active,
+        )
+        .execute(&app_state.db)
+        .await
         .map_err(|e| {
-            eprintln!("Error hashing password | user::create: {:?}", e);
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
+            eprintln!("Error creating user | user::register_user: {:?}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(ResponseData {
+                status: Fail,
+                message: "Could not create user".to_owned(),
+            }))
+        })?;
+
+        let user = FilteredUser {
+            id,
+            first_name: body.first_name.to_string(),
+            last_name: body.last_name.to_string(),
+            email: body.email,
+            phone: body.phone,
+            role: body.role,
+            active: body.active,
+            last_login: None,
+        };
+
+        return Ok((
+            StatusCode::CREATED,
+            Json(UserResponse {
+                status: "success".to_owned(),
+                data: UserData { user },
+            }),
+        ));
+
+    }
+
+    let salt = SaltString::generate(&mut OsRng);
+    let hashed_password = match body.password {
+
+        Some(password) => {
+            match Argon2::default()
+                .hash_password(password.as_bytes(), &salt)
+                .map(|hash| hash.to_string()) {
+                    Ok(value) => value,
+                    Err(e) => {
+                        eprintln!("Error hashing password | user::create: {:?}", e);
+                        return Err((
+                            StatusCode::INTERNAL_SERVER_ERROR,
+                            Json(ResponseData {
+                                status: Fail,
+                                message: "Password error".to_owned(),
+                            }),
+                        ))
+                    }
+                }
+    
+        }
+        None => {
+            return Err((
+                StatusCode::BAD_REQUEST,
                 Json(ResponseData {
                     status: Fail,
-                    message: "Password error".to_owned(),
-                }),
-            )
-        })
-        .map(|hash| hash.to_string())?;
+                    message: "You need to supply a password for this user".to_owned(),
+                })
+            ))
+        }
 
-    let id = Uuid::new_v4();
+    };
+
 
     sqlx::query!(
         "INSERT INTO user (id, first_name, last_name, email, password, phone, role, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -357,27 +417,24 @@ pub async fn create(
         }))
     })?;
 
-    let user = User {
+    let user = FilteredUser {
         id,
         first_name: body.first_name.to_string(),
         last_name: body.last_name.to_string(),
         email: body.email,
-        password: Some(hashed_password),
         phone: body.phone,
         role: body.role,
         active: body.active,
         last_login: None,
     };
 
-    Ok((
+    return Ok((
         StatusCode::CREATED,
         Json(UserResponse {
             status: "success".to_owned(),
-            data: UserData {
-                user: user.to_filtered(),
-            },
+            data: UserData {user},
         }),
-    ))
+    ));
 }
 
 pub async fn update(
