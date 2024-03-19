@@ -14,7 +14,8 @@ use jsonwebtoken::{decode, DecodingKey, Validation};
 
 use crate::{
     user::{TokenClaims, User},
-    AppState, ResponseData, ResponseType::Fail
+    AppState, ResponseData,
+    ResponseType::Fail,
 };
 
 pub async fn auth(

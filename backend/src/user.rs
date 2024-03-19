@@ -161,27 +161,27 @@ pub async fn details(
         WHERE id = ?",
         params.id
     )
-        .fetch_one(&app_state.db)
-        .await
-        .map_err(|e| {
-            eprintln!("Error executing query for user::details: {:?}", e);
-            match e {
-                sqlx::Error::RowNotFound => (
-                    StatusCode::NOT_FOUND,
-                    Json(ResponseData {
-                        status: Fail,
-                        message: "The specified user does not exist".to_owned(),
-                    }),
-                ),
-                _ => (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(ResponseData {
-                        status: Fail,
-                        message: "Server error".to_owned(),
-                    }),
-                ),
-            }
-        })?;
+    .fetch_one(&app_state.db)
+    .await
+    .map_err(|e| {
+        eprintln!("Error executing query for user::details: {:?}", e);
+        match e {
+            sqlx::Error::RowNotFound => (
+                StatusCode::NOT_FOUND,
+                Json(ResponseData {
+                    status: Fail,
+                    message: "The specified user does not exist".to_owned(),
+                }),
+            ),
+            _ => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ResponseData {
+                    status: Fail,
+                    message: "Server error".to_owned(),
+                }),
+            ),
+        }
+    })?;
 
     Ok(Json(user))
 }
@@ -277,23 +277,22 @@ pub async fn create(
         )
     })?;
 
-    let user_exists: Option<bool> =
-        sqlx::query_scalar_unchecked!(
-            "SELECT EXISTS(SELECT 1 FROM user WHERE email = ?)",
-            body.email.to_owned().to_ascii_lowercase()
+    let user_exists: Option<bool> = sqlx::query_scalar_unchecked!(
+        "SELECT EXISTS(SELECT 1 FROM user WHERE email = ?)",
+        body.email.to_owned().to_ascii_lowercase()
+    )
+    .fetch_one(&app_state.db)
+    .await
+    .map_err(|e| {
+        eprintln!("Error checking if user exist | user::create: {:?}", e);
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(ResponseData {
+                status: Fail,
+                message: "Database error".to_owned(),
+            }),
         )
-            .fetch_one(&app_state.db)
-            .await
-            .map_err(|e| {
-                eprintln!("Error checking if user exist | user::create: {:?}", e);
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(ResponseData {
-                        status: Fail,
-                        message: "Database error".to_owned(),
-                    }),
-                )
-            })?;
+    })?;
 
     if let Some(exists) = user_exists {
         if exists {
@@ -332,7 +331,7 @@ pub async fn create(
 
         return Ok((
             StatusCode::CREATED,
-            Json( FilteredUser {
+            Json(FilteredUser {
                 id,
                 first_name: body.first_name.to_string(),
                 last_name: body.last_name.to_string(),
@@ -343,29 +342,27 @@ pub async fn create(
                 last_login: None,
             }),
         ));
-
     }
 
     let salt = SaltString::generate(&mut OsRng);
     let hashed_password = match body.password {
-
         Some(password) => {
             match Argon2::default()
                 .hash_password(password.as_bytes(), &salt)
-                .map(|hash| hash.to_string()) {
-                    Ok(value) => value,
-                    Err(e) => {
-                        eprintln!("Error hashing password | user::create: {:?}", e);
-                        return Err((
-                            StatusCode::INTERNAL_SERVER_ERROR,
-                            Json(ResponseData {
-                                status: Fail,
-                                message: "Password error".to_owned(),
-                            }),
-                        ))
-                    }
+                .map(|hash| hash.to_string())
+            {
+                Ok(value) => value,
+                Err(e) => {
+                    eprintln!("Error hashing password | user::create: {:?}", e);
+                    return Err((
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        Json(ResponseData {
+                            status: Fail,
+                            message: "Password error".to_owned(),
+                        }),
+                    ));
                 }
-    
+            }
         }
         None => {
             return Err((
@@ -373,12 +370,10 @@ pub async fn create(
                 Json(ResponseData {
                     status: Fail,
                     message: "You need to supply a password for this user".to_owned(),
-                })
+                }),
             ))
         }
-
     };
-
 
     sqlx::query!(
         "INSERT INTO user (id, first_name, last_name, email, password, phone, role, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -468,7 +463,9 @@ pub async fn update(
         ));
     }
 
-    if ( body.role == Some(UserRole::Administrator) || body.role == Some(UserRole::Basic) ) && body.password.is_none() {
+    if (body.role == Some(UserRole::Administrator) || body.role == Some(UserRole::Basic))
+        && body.password.is_none()
+    {
         return Err((
             StatusCode::BAD_REQUEST,
             Json(ResponseData {
@@ -547,7 +544,8 @@ pub async fn update(
             } // BASIC CAN'T CHANGE OWN ROLE
         }
         UserRole::Administrator => {
-            if (target_user.role == UserRole::Administrator || target_user.role == UserRole::Super) && user.id != target_user.id
+            if (target_user.role == UserRole::Administrator || target_user.role == UserRole::Super)
+                && user.id != target_user.id
             {
                 return Err((
                     StatusCode::FORBIDDEN,
@@ -595,7 +593,6 @@ pub async fn update(
         }
     }
 
-
     body.validate().map_err(|_| {
         (
             StatusCode::BAD_REQUEST,
@@ -607,9 +604,8 @@ pub async fn update(
     })?;
 
     let result = match body.password {
-        None => {
-            sqlx::query!(
-                "UPDATE user SET 
+        None => sqlx::query!(
+            "UPDATE user SET 
                 first_name = COALESCE(?, first_name), 
                 last_name = COALESCE(?, last_name), 
                 email = COALESCE(?, email), 
@@ -618,27 +614,26 @@ pub async fn update(
                 role = COALESCE(?, role),
                 active = COALESCE(?, active)
                 WHERE id = ?",
-                body.first_name,
-                body.last_name,
-                body.email,
-                body.phone,
-                body.role,
-                body.active,
-                body.id
+            body.first_name,
+            body.last_name,
+            body.email,
+            body.phone,
+            body.role,
+            body.active,
+            body.id
+        )
+        .execute(&app_state.db)
+        .await
+        .map_err(|e| {
+            eprintln!("Error executing update for user::update: {:?}", e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ResponseData {
+                    status: Fail,
+                    message: "Could not update the user in the database".to_owned(),
+                }),
             )
-            .execute(&app_state.db)
-            .await
-            .map_err(|e| {
-                eprintln!("Error executing update for user::update: {:?}", e);
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(ResponseData {
-                        status: Fail,
-                        message: "Could not update the user in the database".to_owned(),
-                    }),
-                )
-            })?
-        }
+        })?,
         Some(password) => {
             let salt = SaltString::generate(&mut OsRng);
             let hashed_password = Argon2::default()
@@ -654,7 +649,7 @@ pub async fn update(
                     )
                 })
                 .map(|hash| hash.to_string())?;
-            
+
             sqlx::query!(
                 "UPDATE user SET 
                 first_name = COALESCE(?, first_name), 
@@ -876,18 +871,16 @@ pub async fn login_initiate(
             }),
         ));
     }
-    
+
     if user.role == UserRole::Administrator || user.role == UserRole::Basic {
-        return 
-        Err((
-            StatusCode::OK, 
+        return Err((
+            StatusCode::OK,
             Json(ResponseData {
                 status: Success,
                 message: "password".to_owned(),
-            })
+            }),
         ));
     }
-
 
     let mut rng = OsRng;
     let mut buffer = [0u8; 3];

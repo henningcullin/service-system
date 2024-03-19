@@ -163,7 +163,6 @@ pub async fn create(
     Ok((StatusCode::CREATED, Json(QueryTask { id })))
 }
 
-
 pub async fn delete(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
@@ -180,7 +179,7 @@ pub async fn delete(
     }
 
     let result = sqlx::query!("DELETE FROM task WHERE id = ?", params.id)
-    .execute(&app_state.db)
+        .execute(&app_state.db)
         .await
         .map_err(|e| {
             eprintln!("Error executing query for task::delete: {:?}", e);
@@ -192,26 +191,25 @@ pub async fn delete(
                 }),
             )
         })?;
-        
-        if result.rows_affected() > 0 {
-            Ok(StatusCode::NO_CONTENT)
-        } else {
-            Err((
-                StatusCode::NOT_FOUND,
-                Json(ResponseData {
-                    status: Fail,
-                    message: "The task was not found in the database".to_owned(),
-                }),
-            ))
-        }
+
+    if result.rows_affected() > 0 {
+        Ok(StatusCode::NO_CONTENT)
+    } else {
+        Err((
+            StatusCode::NOT_FOUND,
+            Json(ResponseData {
+                status: Fail,
+                message: "The task was not found in the database".to_owned(),
+            }),
+        ))
     }
-    
+}
+
 pub async fn update(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
-    Json(body): Json<UpdateTask>
+    Json(body): Json<UpdateTask>,
 ) -> Result<StatusCode, (StatusCode, Json<ResponseData>)> {
-
     let target_task = sqlx::query_as_unchecked!(
         Task,
         "SELECT
@@ -230,29 +228,31 @@ pub async fn update(
         WHERE id = ?",
         body.id
     )
-        .fetch_one(&app_state.db)
-        .await
-        .map_err(|e| {
-            eprintln!("Error executing query for task::update: {:?}", e);
-            match e {
-                sqlx::Error::RowNotFound => (
-                    StatusCode::NOT_FOUND,
-                    Json(ResponseData {
-                        status: Fail,
-                        message: "The specified task does not exist".to_owned(),
-                    }),
-                ),
-                _ => (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(ResponseData {
-                        status: Fail,
-                        message: "Server error".to_owned(),
-                    }),
-                ),
-            }
-        })?;
+    .fetch_one(&app_state.db)
+    .await
+    .map_err(|e| {
+        eprintln!("Error executing query for task::update: {:?}", e);
+        match e {
+            sqlx::Error::RowNotFound => (
+                StatusCode::NOT_FOUND,
+                Json(ResponseData {
+                    status: Fail,
+                    message: "The specified task does not exist".to_owned(),
+                }),
+            ),
+            _ => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(ResponseData {
+                    status: Fail,
+                    message: "Server error".to_owned(),
+                }),
+            ),
+        }
+    })?;
 
-    if user.role == UserRole::Worker && (target_task.creator != user.id || body.task_type != Some(TaskType::Suggestion)) {
+    if user.role == UserRole::Worker
+        && (target_task.creator != user.id || body.task_type != Some(TaskType::Suggestion))
+    {
         return Err((
             StatusCode::FORBIDDEN,
             Json(ResponseData {
@@ -281,18 +281,18 @@ pub async fn update(
         body.machine,
         body.id
     )
-        .execute(&app_state.db)
-        .await
-        .map_err(|e| {
-            eprintln!("Error executing update for task::update: {:?}", e);
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(ResponseData {
-                    status: Fail,
-                    message: "Could not update the task in the database".to_owned(),
-                }),
-            )
-        })?;
+    .execute(&app_state.db)
+    .await
+    .map_err(|e| {
+        eprintln!("Error executing update for task::update: {:?}", e);
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(ResponseData {
+                status: Fail,
+                message: "Could not update the task in the database".to_owned(),
+            }),
+        )
+    })?;
 
     if result.rows_affected() > 0 {
         Ok(StatusCode::NO_CONTENT)

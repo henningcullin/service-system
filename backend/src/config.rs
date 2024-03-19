@@ -26,7 +26,7 @@ impl Config {
             jwt_maxage: jwt_maxage
                 .parse::<i32>()
                 .expect("Could not parse JWT_MAXAGE to i32"),
-            frontend_url
+            frontend_url,
         }
     }
 }
