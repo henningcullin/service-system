@@ -1,7 +1,7 @@
 <script>
 
     import { navigate } from 'svelte-navigator';
-    import { getUser } from '../lib/helpers';
+    import { getLoggedIn } from '../lib/helpers';
     import { el } from '../lib/helpers';
 
     let email = '';
@@ -83,7 +83,7 @@
 
         if (response.status != 200) return alert(data.message);
 
-        getUser();
+        getLoggedIn();
 
         navigate('/');
     }

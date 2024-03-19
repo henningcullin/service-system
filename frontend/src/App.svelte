@@ -4,7 +4,7 @@
   import { Router, Route, Link} from 'svelte-navigator';
 
   import { account } from './lib/stores';
-  import { getUser } from './lib/helpers';
+  import { getLoggedIn } from './lib/helpers';
 
   import Home from './routes/home.svelte';
   import NotFound from './routes/notFound.svelte';
@@ -22,7 +22,7 @@
   import Account from './routes/account.svelte';
 
   if (Object.keys($account).length == 0) {
-    getUser();
+    getLoggedIn();
   }
   
 </script>
