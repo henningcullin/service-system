@@ -16,7 +16,7 @@
   import Users from './routes/users/users.svelte';
   
 
-  import Tasks from './routes/tasks.svelte';
+  import Tasks from './routes/tasks/tasks.svelte';
 
   import Login from './routes/login.svelte'
   import Account from './routes/account.svelte';
