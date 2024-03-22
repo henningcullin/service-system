@@ -15,7 +15,7 @@
   import User from './routes/users/user.svelte';
   import Users from './routes/users/users.svelte';
   
-
+  import Task from './routes/tasks/task.svelte';
   import Tasks from './routes/tasks/tasks.svelte';
 
   import Login from './routes/login.svelte'
@@ -51,7 +51,8 @@
     <Route path='/users/' component={Users} />
     <Route path='/user/' component={User} />
 
-    <Route path='/tasks/*' component={Tasks} />
+    <Route path='/tasks/' component={Tasks} />
+    <Route path='/task/' component={Task} />
     
 
     <Route path='/login/*' component={Login} />
