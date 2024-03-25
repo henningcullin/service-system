@@ -1,3 +1,4 @@
+import { derived } from 'svelte/store';
 import { account, tasks, machines, users} from './stores';
 import { navigate } from 'svelte-navigator';
 
@@ -57,6 +58,7 @@ export function ƒ(selector) {
 
 /**
  * Loads the tasks from the server into the store
+ * @returns {void}
  */
 export async function getTasks() {
 	try {
@@ -88,6 +90,7 @@ export async function getTasks() {
 
 /**
  * Loads the machines from the server into the store
+ * @returns {void}
  */
 export async function getMachines() {
 	try {
@@ -115,6 +118,7 @@ export async function getMachines() {
 
 /**
  * Loads the users from the server into the store
+ * @returns {void}
  */
 export async function getUsers() {
 	try {
@@ -140,3 +144,14 @@ export async function getUsers() {
 		console.error('Could not fetch products', error);
 	}
 };
+
+/**
+ * Returns the user with a specific id
+ * @param {string} id UUID identifier for the sought after user
+ * @returns {{id: string, first_name: string, last_name: string, email: string, phone: string | null, role: string, active: boolean, last_login: Date | string | null} | null}
+ */
+export function getUserById(id) {
+	return derived(users, ($users) => {
+		return $users.find((u) => u.id === id);
+	});
+}
