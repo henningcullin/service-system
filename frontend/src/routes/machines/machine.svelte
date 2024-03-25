@@ -1,6 +1,6 @@
 <script>
     // @ts-nocheck
-    import { sendDelete, sendJson } from '../../lib/helpers';
+    import { sendDelete, sendJson } from '../../lib/utils';
 
     import { account, machine, machines } from '../../lib/stores';
     import { navigate } from 'svelte-navigator';

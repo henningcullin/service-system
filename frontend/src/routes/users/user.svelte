@@ -1,6 +1,6 @@
 <script>
     // @ts-nocheck
-    import { sendJson } from '../../lib/helpers';
+    import { sendJson } from '../../lib/utils';
 
     import { account, user, users } from '../../lib/stores';
     import { navigate } from 'svelte-navigator';
@@ -97,19 +97,7 @@
 
             const data = await response.json();
 
-           currentUser = {
-                id: data.id,
-                first_name: data.first_name,
-                last_name: data.last_name,
-                email: data.email,
-                password: data.password,
-                phone: data.phone,
-                role: data.role,
-                active: Boolean(data.active),
-                last_login: new Date(data.last_login),
-            };
-
-            resetUser();
+           setUser(data);
 
         } catch (error) {
             console.error(error)

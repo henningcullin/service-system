@@ -4,7 +4,7 @@
         import { DataHandler, Datatable, Th, ThFilter} from '@vincjo/datatables';
         import { Link, navigate } from 'svelte-navigator';
         import { account, tasks, users, machines} from '../../lib/stores.js'
-        import { sendDelete, getTasks } from '../../lib/helpers.js';
+        import { sendDelete, getTasks } from '../../lib/utils.js';
     
         let lastFetch = false;
     

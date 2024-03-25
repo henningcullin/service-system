@@ -1,8 +1,8 @@
 <script>
 
     import { navigate } from 'svelte-navigator';
-    import { getLoggedIn } from '../lib/helpers';
-    import { ƒ } from '../lib/helpers';
+    import { getLoggedIn } from '../lib/utils';
+    import { ƒ } from '../lib/utils';
 
     let email = '';
     let type = '';

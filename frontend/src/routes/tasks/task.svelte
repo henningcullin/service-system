@@ -1,6 +1,6 @@
 <script>
     // @ts-nocheck
-    import { sendJson, /* getMachines */ } from '../../lib/helpers';
+    import { sendJson, getMachines, getUsers } from '../../lib/utils';
 
     import { account, task, tasks, users, machines } from '../../lib/stores';
     import { navigate } from 'svelte-navigator';
@@ -26,53 +26,6 @@
     else if (!state.new) getTask();
     
     if ((state.new || state.edit) && ($account['role'] === 'Worker' || $account === {})) window.history.back();  
-    
-    async function getMachines() {
-        try {
-            const response = await fetch('/api/auth/machines');
-            const data = await response.json();
-
-            const formatted = data.map((machine) => {
-                return {
-                    id: machine.id,
-                    name: machine.name,
-                    make: machine.make,
-                    type: machine.machine_type,
-                    status: machine.status,
-                    created: new Date(machine.created),
-                    edited: new Date(machine.edited),
-                };
-            });
-
-            machines.set(formatted);
-        } catch (error) {
-            console.error('Could not get machines', error);
-        }
-    }
-
-    async function getUsers() {
-        try {
-            const response = await fetch('/api/auth/users');
-            const data = await response.json();
-
-            const formatted = data.map((u) => {
-                return {
-                    id: u.id,
-                    first_name: u.first_name,
-                    last_name: u.last_name,
-                    email: u.email,
-                    phone: u.phone,
-                    role: u.role,
-                    active: u.active,
-                    last_login: new Date(u.last_login),
-                };
-            })
-
-            users.set(formatted);
-        } catch (error) {
-            console.error('Could not fetch products', error);
-        }
-    };
 
     getMachines();
     getUsers();

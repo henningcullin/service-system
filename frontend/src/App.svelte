@@ -4,7 +4,7 @@
   import { Router, Route, Link} from 'svelte-navigator';
 
   import { account } from './lib/stores';
-  import { getLoggedIn } from './lib/helpers';
+  import { getLoggedIn } from './lib/utils';
 
   import Home from './routes/home.svelte';
   import NotFound from './routes/notFound.svelte';
