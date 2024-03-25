@@ -4,15 +4,17 @@
         import { DataHandler, Datatable, Th, ThFilter} from '@vincjo/datatables';
         import { Link, navigate } from 'svelte-navigator';
         import { account, tasks, users, machines} from '../../lib/stores.js'
-        import { sendDelete, getTasks } from '../../lib/utils.js';
+        import { sendDelete, getTasks, getUsers, getMachines, getUserById } from '../../lib/utils.js';
     
         let lastFetch = false;
     
         if (!$tasks.length && !lastFetch) {
             lastFetch = Date.now();
             getTasks();
+            getUsers();
+            getMachines();
         }
-    
+
         let currentPage = 1;
         const cardsPerPage = 6;
         $: pageCount = Math.ceil( ($tasks.length+1) / cardsPerPage);
@@ -52,6 +54,12 @@
             navigate(`/task?id=${id}&edit=true`);
         }
     
+        console.log(getUserById('b400f784-6cf0-4217-9de1-ad5a4f643108'));
+
+        setTimeout(() => {
+            console.log(getUserById('b400f784-6cf0-4217-9de1-ad5a4f643108'));
+        }, 3000);
+
     </script>
     
     <div class='segment'>
@@ -156,7 +164,7 @@
                             <td>{row.task_type}</td>
                             <td class='{row.status}'>{row.status}</td>
                             <td>{row.archived}</td>
-                            <td>{row.creator}</td>
+                            <td>{getUserById(row.creator)}</td>
                             <td>{row.executor}</td>
                             <td>{row.machine}</td>
                             <td>{row.created.toLocaleString('en-GB')}</td>
@@ -170,7 +178,7 @@
                 </tbody>
             </table>
         </Datatable>
-    
+
     </div>
     
     
