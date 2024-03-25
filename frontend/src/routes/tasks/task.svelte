@@ -50,7 +50,32 @@
         }
     }
 
+    async function getUsers() {
+        try {
+            const response = await fetch('/api/auth/users');
+            const data = await response.json();
+
+            const formatted = data.map((u) => {
+                return {
+                    id: u.id,
+                    first_name: u.first_name,
+                    last_name: u.last_name,
+                    email: u.email,
+                    phone: u.phone,
+                    role: u.role,
+                    active: u.active,
+                    last_login: new Date(u.last_login),
+                };
+            })
+
+            users.set(formatted);
+        } catch (error) {
+            console.error('Could not fetch products', error);
+        }
+    };
+
     getMachines();
+    getUsers();
 
     function setState(prop) {
         const path = location.pathname+location.search;
@@ -82,12 +107,14 @@
             id: '',
             title: '',
             description: '',
-            email: '',
-            password: '',
-            phone: '',
-            role: 'Worker',
-            active: false,
-            last_login: '',
+            task_type: 'Other',
+            status: 'Pending',
+            archived: false,
+            created: '',
+            edited: '',
+            creator: '',
+            executor: '',
+            machine: '',
         };
     }
 
@@ -97,18 +124,20 @@
 
     function setTask(newData) {
 
-        const {id, title, description, email, phone, role, active, last_login} = newData;
+        const {id, title, description, task_type, status, archived, created, edited, creator, executor, machine} = newData;
 
         currentTask = {
             id,
             title,
-            description,
-            email,
-            password: '',
-            phone,
-            role,
-            active: Boolean(active),
-            last_login: last_login ? new Date(last_login) : '',
+            description: description ? description : '',
+            task_type,
+            status,
+            archived: Boolean(archived),
+            created: created ? new Date(created) : '',
+            edited: edited ? new Date(edited) : '',
+            creator,
+            executor: executor ? executor : '',
+            machine: machine ? machine : '',
         };
 
         resetTask();
@@ -123,19 +152,7 @@
 
             const data = await response.json();
 
-           currentTask = {
-                id: data.id,
-                title: data.title,
-                description: data.description,
-                email: data.email,
-                password: data.password,
-                phone: data.phone,
-                role: data.role,
-                active: Boolean(data.active),
-                last_login: new Date(data.last_login),
-            };
-
-            resetTask();
+            setTask(data);
 
         } catch (error) {
             console.error(error)
@@ -156,11 +173,11 @@
     async function createTask() {
         try {
 
-            if (!state.new  || $task.role === 'Super') return;
+            if (!state.new) return;
 
             const newTask = Object.fromEntries(
                 Object.entries($task).filter(([key, value]) => {
-                    if (key === 'active') return true
+                    if (key === 'archived') return true
                     else return !value !== true
                 })
             );
@@ -177,6 +194,9 @@
 
             id = data.id;
     
+            data.created = Date.now();
+            data.edited = Date.now();
+
             setTask(data);
             
             setState('edit');
@@ -261,14 +281,15 @@
         <input id='creator' bind:value={$task.creator} disabled readonly>
 
         <label for="executor">Executor</label>
-        <select id='executor' bind:value={$task.executor} disabled={!(state.edit || state.new)} required>
+        <select id='executor' bind:value={$task.executor} disabled={!(state.edit || state.new)}>
+            <option value=''>Not Set</option>
             {#each $users as u}
                 <option value='{u.id}'>{u.first_name}, {u.last_name}</option>
             {/each}
         </select>
 
         <label for="machine">Machine</label>
-        <select id='machine' bind:value={$task.machine} disabled={!(state.edit || state.new)} required>
+        <select id='machine' bind:value={$task.machine} disabled={!(state.edit || state.new)}>
             <option value=''>Not Set</option>
             {#each $machines as m}
                 <option value='{m.id}'>{m.make ? `${m.name}, ${m.make}` : m.name}</option>
