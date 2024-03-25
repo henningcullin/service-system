@@ -258,11 +258,7 @@
         </select>
 
         <label for="creator">Creator</label>
-        <select id='creator' bind:value={$task.creator} disabled={!(state.edit || state.new)} required>
-            {#each $users as u}
-                <option value='{u.id}'>{u.first_name}, {u.last_name}</option>
-            {/each}
-        </select>
+        <input id='creator' bind:value={$task.creator} disabled readonly>
 
         <label for="executor">Executor</label>
         <select id='executor' bind:value={$task.executor} disabled={!(state.edit || state.new)} required>
@@ -288,25 +284,8 @@
         <label for='edited'>Edited</label>
         <input type='text' bind:value={$task.edited} disabled readonly>
         
-        <!-- <label for='email'>Email</label>
-        <input id='email' type='text' bind:value={$task.email} disabled={!(state.edit || state.new)} required>
-
-        <label for='password'>Password</label>
-        <input id='password' type='password' bind:value={$task.password} disabled={!(state.edit || state.new) || ($task.role === 'Worker' || $task.role === 'Super')} required={!($task.role === 'Worker' || $task.role === 'Super')}>
-
-        <label for='phone'>Phone</label>
-        <input id='phone' type='text' bind:value={$task.phone} disabled={!(state.edit || state.new)}>
-
-        <label for='role'>Role</label>
-        <select id='role' bind:value={$task.role} disabled={!(state.edit || state.new)} required>
-            <option value='Worker'>Worker</option>
-            <option value='Basic'>Basic</option>
-            <option value='Administrator'>Administrator</option>
-            <option value='Super'>Super</option>
-        </select>
-
         <label for='id'>ID</label>
-        <input id='id' type='text' bind:value={$task.id} disabled readonly> -->
+        <input id='id' type='text' bind:value={$task.id} disabled readonly>
 
         <input id='save' type='submit' value='Save' disabled={!(state.edit || state.new)}>
 
