@@ -4,7 +4,7 @@
     import { DataHandler, Datatable, Th, ThFilter} from '@vincjo/datatables';
     import { Link, navigate } from 'svelte-navigator';
     import { account, machines } from '../../lib/stores.js'
-    import { sendDelete } from '../../lib/helpers.js';
+    import { sendDelete, getMachines} from '../../lib/helpers.js';
 
     let lastFetch = false;
 
@@ -12,29 +12,6 @@
         lastFetch = Date.now();
         getMachines();
     }
-    
-    async function getMachines() {
-        try {
-            const response = await fetch('/api/auth/machines');
-            const data = await response.json();
-
-            const formatted = data.map((machine) => {
-                return {
-                    id: machine.id,
-                    name: machine.name,
-                    make: machine.make,
-                    type: machine.machine_type,
-                    status: machine.status,
-                    created: new Date(machine.created),
-                    edited: new Date(machine.edited),
-                };
-            })
-
-            machines.set(formatted);
-        } catch (error) {
-            console.error('Could not get machines', error);
-        }
-    };
 
     let currentPage = 1;
     const cardsPerPage = 6;

@@ -3,8 +3,8 @@
     
         import { DataHandler, Datatable, Th, ThFilter} from '@vincjo/datatables';
         import { Link, navigate } from 'svelte-navigator';
-        import { account, tasks } from '../../lib/stores.js'
-        import { sendDelete } from '../../lib/helpers.js';
+        import { account, tasks, users, machines} from '../../lib/stores.js'
+        import { sendDelete, getTasks } from '../../lib/helpers.js';
     
         let lastFetch = false;
     
@@ -12,29 +12,6 @@
             lastFetch = Date.now();
             getTasks();
         }
-        
-        async function getTasks() {
-            try {
-                const response = await fetch('/api/auth/tasks');
-                const data = await response.json();
-    
-                const formatted = data.map((task) => {
-                    return {
-                        id: task.id,
-                        name: task.name,
-                        make: task.make,
-                        type: task.task_type,
-                        status: task.status,
-                        created: new Date(task.created),
-                        edited: new Date(task.edited),
-                    };
-                })
-    
-                tasks.set(formatted);
-            } catch (error) {
-                console.error('Could not get tasks', error);
-            }
-        };
     
         let currentPage = 1;
         const cardsPerPage = 6;
@@ -137,10 +114,14 @@
                 <thead>
                     <tr>
                         <Th {handler} orderBy='id'>Id</Th>
-                        <Th {handler} orderBy='name'>Name</Th>
-                        <Th {handler} orderBy='make'>Make</Th>
-                        <Th {handler} orderBy='type'>Type</Th>
+                        <Th {handler} orderBy='title'>Name</Th>
+                        <Th {handler} orderBy='description'>Description</Th>
+                        <Th {handler} orderBy='task_type'>Type</Th>
                         <Th {handler} orderBy='status'>Status</Th>
+                        <Th {handler} orderBy='archived'>Archived</Th>
+                        <Th {handler} orderBy='creator'>Creator</Th>
+                        <Th {handler} orderBy='executor'>Executor</Th>
+                        <Th {handler} orderBy='machine'>Machine</Th>
                         <Th {handler} orderBy='created'>Created</Th>
                         <Th {handler} orderBy='edited'>Edited</Th>
                         {#if $account.role != 'Worker'}
@@ -150,10 +131,14 @@
                     </tr>
                     <tr>
                         <ThFilter {handler} filterBy='id'/>
-                        <ThFilter {handler} filterBy='name'/>
-                        <ThFilter {handler} filterBy='make'/>
-                        <ThFilter {handler} filterBy='type'/>
+                        <ThFilter {handler} filterBy='title'/>
+                        <ThFilter {handler} filterBy='description'/>
+                        <ThFilter {handler} filterBy='task_type'/>
                         <ThFilter {handler} filterBy='status'/>
+                        <ThFilter {handler} filterBy='archived'/>
+                        <ThFilter {handler} filterBy='creator'/>
+                        <ThFilter {handler} filterBy='executor'/>
+                        <ThFilter {handler} filterBy='machine'/>
                         <ThFilter {handler} filterBy='created'/>
                         <ThFilter {handler} filterBy='edited'/>
                         {#if $account.role != 'Worker'}
@@ -166,10 +151,14 @@
                     {#each $rows as row}
                         <tr>
                             <td><Link to='/task?id={row.id}' class='itemLink'>{row.id}</Link></td>
-                            <td>{row.name}</td>
-                            <td>{row.make}</td>
-                            <td>{row.type}</td>
+                            <td>{row.title}</td>
+                            <td>{row.description}</td>
+                            <td>{row.task_type}</td>
                             <td class='{row.status}'>{row.status}</td>
+                            <td>{row.archived}</td>
+                            <td>{row.creator}</td>
+                            <td>{row.executor}</td>
+                            <td>{row.machine}</td>
                             <td>{row.created.toLocaleString('en-GB')}</td>
                             <td>{row.edited.toLocaleString('en-GB')}</td>
                             {#if $account.role != 'Worker'}

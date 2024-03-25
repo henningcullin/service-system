@@ -3,7 +3,8 @@
     
         import { DataHandler, Datatable, Th, ThFilter} from '@vincjo/datatables';
         import { Link, navigate } from 'svelte-navigator';
-        import { account, users } from '../../lib/stores.js'
+        import { account, users } from '../../lib/stores.js';
+        import { getUsers } from '../../lib/helpers.js';
     
         let lastFetch = false;
     
@@ -11,30 +12,6 @@
             lastFetch = Date.now();
             getUsers();
         }
-        
-        async function getUsers() {
-            try {
-                const response = await fetch('/api/auth/users');
-                const data = await response.json();
-    
-                const formatted = data.map((u) => {
-                    return {
-                        id: u.id,
-                        first_name: u.first_name,
-                        last_name: u.last_name,
-                        email: u.email,
-                        phone: u.phone,
-                        role: u.role,
-                        active: u.active,
-                        last_login: new Date(u.last_login),
-                    };
-                })
-    
-                users.set(formatted);
-            } catch (error) {
-                console.error('Could not fetch products', error);
-            }
-        };
     
         let currentPage = 1;
         const cardsPerPage = 4;
