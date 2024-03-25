@@ -2,7 +2,7 @@
 
     import { navigate } from 'svelte-navigator';
     import { getLoggedIn } from '../lib/helpers';
-    import { el } from '../lib/helpers';
+    import { ƒ } from '../lib/helpers';
 
     let email = '';
     let type = '';
@@ -32,8 +32,8 @@
         
         if (response.status != 200) return;
 
-        const codeField = el('#code-field');
-        const passwordField = el('#password-field');
+        const codeField = ƒ('#code-field');
+        const passwordField = ƒ('#password-field');
 
         if (!codeField || !passwordField) return console.error('Fatal rendering error');
 
@@ -48,8 +48,8 @@
             type = 'password';
         }
 
-        el('#emailForm')?.classList.add('hidden');
-        el('#loginForm')?.classList.remove('hidden');
+        ƒ('#emailForm')?.classList.add('hidden');
+        ƒ('#loginForm')?.classList.remove('hidden');
 
     }
 
