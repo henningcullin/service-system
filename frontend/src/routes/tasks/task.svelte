@@ -1,8 +1,7 @@
 <script>
     // @ts-nocheck
-    import { sendJson, getMachines, getUsers } from '../../lib/utils';
-
-    import { account, task, tasks, users, machines } from '../../lib/stores';
+    import { sendJson, getMachines, getUsers } from '$lib/utils';
+    import { account, task, tasks, users, machines } from '$lib/stores';
     import { navigate } from 'svelte-navigator';
     
     

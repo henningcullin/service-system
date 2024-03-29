@@ -3,8 +3,8 @@
     
         import { DataHandler, Datatable, Th, ThFilter} from '@vincjo/datatables';
         import { Link, navigate } from 'svelte-navigator';
-        import { account, users } from '../../lib/stores.js';
-        import { getUsers } from '../../lib/utils.js';
+        import { account, users } from '$lib/stores.js';
+        import { getUsers } from '$lib/utils.js';
     
         let lastFetch = false;
     

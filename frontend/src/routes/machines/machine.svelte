@@ -1,8 +1,8 @@
 <script>
     // @ts-nocheck
-    import { sendDelete, sendJson } from '../../lib/utils';
+    import { sendDelete, sendJson } from '$lib/utils';
 
-    import { account, machine, machines } from '../../lib/stores';
+    import { account, machine, machines } from '$lib/stores';
     import { navigate } from 'svelte-navigator';
     
     const state = {
