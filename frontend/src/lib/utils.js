@@ -107,7 +107,7 @@ export async function getMachines() {
 				id,
 				name,
 				make: make ? make : '',
-				type: machine_type ? machine_type : '',
+				machine_type: machine_type ? machine_type : '',
 				status,
 				created: new Date(created),
 				edited: new Date(edited),

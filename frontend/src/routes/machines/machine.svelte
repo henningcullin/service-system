@@ -32,7 +32,7 @@
     if (!state.new && (!id || id.length != 36)) navigate('/notfound');
     else if (!state.new) getMachine();
 
-    if ((state.new || state.edit) && ($account['role'] == 'Worker' || $account == {})) window.history.back();  
+    if ((state.new || state.edit) && ($account['role'] === 'Worker' || $account == {})) window.history.back();  
 
     function setState(prop) {
         const path = location.pathname+location.search;
@@ -110,7 +110,6 @@
 
     async function createMachine() {
         try {
-
             if (!state.new || $machine.name.length <= 0) return;
 
             const response = await sendJson('/api/auth/machine', 'POST', {
@@ -119,18 +118,19 @@
                 machine_type: $machine.machine_type,
                 status: $machine.status,
             });
+            
             const data = await response.json();
             if (response.status != 201) return alert(data.message);
 
             id = data.id;
-            setState('edit');
-    
             $machine.id = data.id;
             $machine.created = new Date().toLocaleString('en-GB');
             $machine.edited = new Date().toLocaleString('en-GB');
-
+            
             currentMachine = {...$machine};
 
+            machines.update(prev => prev.set(id, {...$machine}));
+            setState('edit');
         } catch (error) {
             alert('Could not create the machine');
             console.error('createMachine error' + error);
@@ -139,14 +139,13 @@
 
     async function updateMachine() {
         try {
-
             const changes = {id};
 
             // adds the NEW values to the changes object
             for (const field in $machine) {
                 if ($machine[field] !== currentMachine[field]) changes[field] = $machine[field];
             }            
-            if (Object.keys(changes).length < 2) return; 
+            if (Object.keys(changes).length <= 1) return; 
 
             const response = await sendJson('/api/auth/machine', 'PUT', changes);
             if (response.status !== 204) {
@@ -154,8 +153,10 @@
                 return alert(data.message);
             }
 
-            setState('view');
+            currentMachine = $machine;
+            machines.update(prev => prev.set(id, $machine));
 
+            setState('view');
         } catch (error) {
             alert('Could not update the machine');
             console.error(error);
@@ -172,9 +173,12 @@
         const response = await sendDelete(`/api/auth/machine?id=${id}`);
         if (response.status != 204) return alert('Could not delete');
 
-        machines.update(prev => prev.delete(id));
+        machines.update(prev => {
+            prev.delete(id);
+            return prev;
+        });
+
         id = '';
-        
         setState('new');
     }
 
@@ -184,11 +188,8 @@
 
     <div class="menu">
         <button on:click={() => {setState('new')}}    disabled={state.new || $account.role === 'Worker'}>New</button>
-
         <button on:click={() => {setState('edit')}}   disabled={(state.new || state.edit) || $account.role === 'Worker'}>Edit</button>
-
         <button on:click={deleteMachine}              disabled={state.new || $account.role === 'Worker'}>Delete</button>
-
         <button on:click={() => {setState('cancel')}} disabled={!(state.new || state.edit)} >Cancel</button>
     </div>
     

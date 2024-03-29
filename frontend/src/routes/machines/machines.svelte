@@ -23,7 +23,6 @@
     $: handler.setRows(machineArr)
 
     async function deleteMachine() {
-        
         if ($account.role === 'Worker') return;
 
         const id = this ? this.id : null;
@@ -35,17 +34,19 @@
         const response = await sendDelete(`/api/auth/machine?id=${id}`);
         if (response.status != 204) return alert('Could not delete');
 
-        machines.update(prev => prev.delete(id));
+        machines.update(prev => { 
+            prev.delete(id);
+            return prev;
+        });
     }
 
-    async function editMachine() {
-
+    function editMachine() {
         if ($account.role === 'Worker') return;
 
         const id = this ? this.id : null;
         if (!id) return;
 
-        navigate(`/machine?id=${id}&edit=true`);
+        return navigate(`/machine?id=${id}&edit=true`);
     }
 
 </script>
@@ -64,7 +65,7 @@
             <div class='mobile-card'> 
                 <Link to='/machine?id={machine.id}' class='itemLink' >{machine.name}</Link>
                 <p>{machine.make}</p>
-                <p>{machine.type}</p>
+                <p>{machine.machine_type}</p>
                 <p class='{machine.status}'>{machine.status}</p>
                 <i>{machine.created.toLocaleString('en-GB')}</i><br>
                 <i>{machine.edited.toLocaleString('en-GB')}</i><br>
@@ -112,7 +113,7 @@
                     <Th {handler} orderBy='id'>Id</Th>
                     <Th {handler} orderBy='name'>Name</Th>
                     <Th {handler} orderBy='make'>Make</Th>
-                    <Th {handler} orderBy='type'>Type</Th>
+                    <Th {handler} orderBy='machine_type'>Type</Th>
                     <Th {handler} orderBy='status'>Status</Th>
                     <Th {handler} orderBy='created'>Created</Th>
                     <Th {handler} orderBy='edited'>Edited</Th>
@@ -125,7 +126,7 @@
                     <ThFilter {handler} filterBy='id'/>
                     <ThFilter {handler} filterBy='name'/>
                     <ThFilter {handler} filterBy='make'/>
-                    <ThFilter {handler} filterBy='type'/>
+                    <ThFilter {handler} filterBy='machine_type'/>
                     <ThFilter {handler} filterBy='status'/>
                     <ThFilter {handler} filterBy='created'/>
                     <ThFilter {handler} filterBy='edited'/>
@@ -141,7 +142,7 @@
                         <td><Link to='/machine?id={row.id}' class='itemLink'>{row.id}</Link></td>
                         <td>{row.name}</td>
                         <td>{row.make}</td>
-                        <td>{row.type}</td>
+                        <td>{row.machine_type}</td>
                         <td class='{row.status}'>{row.status}</td>
                         <td>{row.created.toLocaleString('en-GB')}</td>
                         <td>{row.edited.toLocaleString('en-GB')}</td>
