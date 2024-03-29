@@ -78,11 +78,9 @@
     async function getMachine() {
         try {
             const response = await fetch(`/api/auth/machine?id=${id}`);
-
             if (response.status != 200) navigate('/notfound');
 
             const data = await response.json();
-
             currentMachine = {
                 id: data.id,
                 name: data.name,
@@ -94,7 +92,6 @@
             };
 
             machine.set({...currentMachine});
-
         } catch (error) {
             console.error(error)
         }
@@ -115,20 +112,17 @@
         try {
 
             if (!state.new || $machine.name.length <= 0) return;
-            
+
             const response = await sendJson('/api/auth/machine', 'POST', {
                 name: $machine.name,
                 make: $machine.make,
                 machine_type: $machine.machine_type,
                 status: $machine.status,
             });
-    
             const data = await response.json();
-    
             if (response.status != 201) return alert(data.message);
-    
+
             id = data.id;
-    
             setState('edit');
     
             $machine.id = data.id;
@@ -152,11 +146,9 @@
             for (const field in $machine) {
                 if ($machine[field] !== currentMachine[field]) changes[field] = $machine[field];
             }            
-
             if (Object.keys(changes).length < 2) return; 
 
             const response = await sendJson('/api/auth/machine', 'PUT', changes);
-
             if (response.status !== 204) {
                 const data = await response.json();
                 return alert(data.message);
@@ -172,19 +164,15 @@
 
     async function deleteMachine() {
         if ($account.role == 'Worker') return;
-
         if (!id) return;
         
         const choice = confirm(`Are you sure you want to delete this machine`);
-
         if (!choice) return;
 
         const response = await sendDelete(`/api/auth/machine?id=${id}`);
-
         if (response.status != 204) return alert('Could not delete');
 
-        machines.update(prev => prev.filter(m => m.id != id));
-        
+        machines.update(prev => prev.delete(id));
         id = '';
         
         setState('new');

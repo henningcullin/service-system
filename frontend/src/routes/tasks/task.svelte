@@ -235,7 +235,7 @@
         <label for="executor">Executor</label>
         <select id='executor' bind:value={$task.executor} disabled={!(state.edit || state.new)}>
             <option value=''>Not Set</option>
-            {#each $users as u}
+            {#each $users.values() as u}
                 <option value='{u.id}'>{u.first_name}, {u.last_name}</option>
             {/each}
         </select>
@@ -243,7 +243,7 @@
         <label for="machine">Machine</label>
         <select id='machine' bind:value={$task.machine} disabled={!(state.edit || state.new)}>
             <option value=''>Not Set</option>
-            {#each $machines as m}
+            {#each $machines.values() as m}
                 <option value='{m.id}'>{m.make ? `${m.name}, ${m.make}` : m.name}</option>
             {/each}
         </select>

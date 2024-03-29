@@ -1,5 +1,4 @@
 <script>
-// @ts-nocheck
 
     import { DataHandler, Datatable, Th, ThFilter} from '@vincjo/datatables';
     import { Link, navigate } from 'svelte-navigator';
@@ -8,37 +7,35 @@
 
     let lastFetch = false;
 
-    if (!$machines.length && !lastFetch) {
+    if (!lastFetch) {
         lastFetch = Date.now();
-        getMachines();
+        if (!$machines.size) getMachines();
     }
+
+    $: machineArr = $machines.size ? Array.from($machines.values()) : [];
 
     let currentPage = 1;
     const cardsPerPage = 6;
-    $: pageCount = Math.ceil( ($machines.length+1) / cardsPerPage);
+    $: pageCount = Math.ceil( (machineArr.length+1) / cardsPerPage);
 
-    const handler = new DataHandler($machines, {rowsPerPage: 10});
+    const handler = new DataHandler(machineArr, {rowsPerPage: 10});
     const rows = handler.getRows();
-    
-    $: handler.setRows($machines)
+    $: handler.setRows(machineArr)
 
     async function deleteMachine() {
         
         if ($account.role === 'Worker') return;
 
         const id = this ? this.id : null;
-
         if (!id) return;
         
         const choice = confirm(`Are you sure you want to delete this machine`);
-
         if (!choice) return;
 
         const response = await sendDelete(`/api/auth/machine?id=${id}`);
-
         if (response.status != 204) return alert('Could not delete');
 
-        machines.update(prev => prev.filter(m => m.id != id));
+        machines.update(prev => prev.delete(id));
     }
 
     async function editMachine() {
@@ -46,7 +43,6 @@
         if ($account.role === 'Worker') return;
 
         const id = this ? this.id : null;
-
         if (!id) return;
 
         navigate(`/machine?id=${id}&edit=true`);
@@ -64,7 +60,7 @@
     {/if}
 
     <div class='mobile-grid'>
-        {#each $machines.slice((currentPage - 1) * cardsPerPage, currentPage * cardsPerPage) as machine}
+        {#each machineArr.slice((currentPage - 1) * cardsPerPage, currentPage * cardsPerPage) as machine}
             <div class='mobile-card'> 
                 <Link to='/machine?id={machine.id}' class='itemLink' >{machine.name}</Link>
                 <p>{machine.make}</p>

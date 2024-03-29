@@ -8,19 +8,21 @@
     
         let lastFetch = false;
     
-        if (!$users.length && !lastFetch) {
+        if (!lastFetch) {
             lastFetch = Date.now();
-            getUsers();
+            if (!$users.size) getUsers();
         }
     
+        $: usersArr = $users.size ? Array.from($users.values()) : [];
+
         let currentPage = 1;
         const cardsPerPage = 4;
-        $: pageCount = Math.ceil( ($users.length+1) / cardsPerPage);
+        $: pageCount = Math.ceil( (usersArr.length+1) / cardsPerPage);
     
-        const handler = new DataHandler($users, {rowsPerPage: 10});
+        const handler = new DataHandler(usersArr, {rowsPerPage: 10});
         const rows = handler.getRows();
         
-        $: handler.setRows($users)
+        $: handler.setRows(usersArr)
     
         async function editUser() {
     
@@ -45,7 +47,7 @@
         {/if}
     
         <div class='mobile-grid'>
-            {#each $users.slice((currentPage - 1) * cardsPerPage, currentPage * cardsPerPage) as u}
+            {#each usersArr.slice((currentPage - 1) * cardsPerPage, currentPage * cardsPerPage) as u}
                 <div class='mobile-card'> 
                     <Link to='/user?id={u.id}' class='itemLink' >{u.first_name}</Link>
                     <p>{u.last_name}</p>

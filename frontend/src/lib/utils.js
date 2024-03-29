@@ -65,9 +65,11 @@ export async function getTasks() {
 		const response = await fetch('/api/auth/tasks');
 		const data = await response.json();
 
-		const formatted = data.map((t) => {
-			const {id, title, description, task_type, status, archived, created, edited, creator, executor, machine} = t;
-			return {
+		const map = new Map();
+
+		for (const task of data) {
+			const {id, title, description, task_type, status, archived, created, edited, creator, executor, machine} = task;
+			map.set(id, {
 				id,
 				title,
 				description: description ? description : '',
@@ -79,10 +81,10 @@ export async function getTasks() {
 				creator,
 				executor: executor ? executor : '',
 				machine: machine ? machine : '',
-			};
-		})
+			});
+		}
 
-		tasks.set(formatted);
+		tasks.set(map);
 	} catch (error) {
 		console.error('Could not get tasks', error);
 	}
@@ -97,9 +99,11 @@ export async function getMachines() {
 		const response = await fetch('/api/auth/machines');
 		const data = await response.json();
 
-		const formatted = data.map((m) => {
-			const {id, name, make, machine_type, status, created, edited} = m;
-			return {
+		const map = new Map();
+
+		for (const machine of data) {
+			const {id, name, make, machine_type, status, created, edited} = machine;
+			map.set(id, {
 				id,
 				name,
 				make: make ? make : '',
@@ -107,10 +111,10 @@ export async function getMachines() {
 				status,
 				created: new Date(created),
 				edited: new Date(edited),
-			};
-		})
+			});
+		}
 
-		machines.set(formatted);
+		machines.set(map);
 	} catch (error) {
 		console.error('Could not get machines', error);
 	}
@@ -125,9 +129,11 @@ export async function getUsers() {
 		const response = await fetch('/api/auth/users');
 		const data = await response.json();
 
-		const formatted = data.map((u) => {
-			const {id, first_name, last_name, email, phone, role, active, last_login} = u;
-			return {
+		const map = new Map();
+
+		for (const user of data) {
+			const {id, first_name, last_name, email, phone, role, active, last_login} = user;
+			map.set(id, {
 				id,
 				first_name,
 				last_name,
@@ -136,22 +142,11 @@ export async function getUsers() {
 				role,
 				active,
 				last_login: new Date(last_login),
-			};
-		})
+			});
+		}
 
-		users.set(formatted);
+		users.set(map);
 	} catch (error) {
 		console.error('Could not fetch products', error);
 	}
 };
-
-/**
- * Returns the user with a specific id
- * @param {string} id UUID identifier for the sought after user
- * @returns {{id: string, first_name: string, last_name: string, email: string, phone: string | null, role: string, active: boolean, last_login: Date | string | null} | null}
- */
-export function getUserById(id) {
-	return derived(users, ($users) => {
-		return $users.find((u) => u.id === id);
-	});
-}

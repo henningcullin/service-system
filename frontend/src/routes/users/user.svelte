@@ -91,12 +91,10 @@
     async function getUser() {
         try {
             const response = await fetch(`/api/auth/user?id=${id}`);
-
             if (response.status !== 200) navigate('/notfound');
 
             const data = await response.json();
-
-           setUser(data);
+            setUser(data);
 
         } catch (error) {
             console.error(error)
@@ -126,20 +124,13 @@
                 })
             );
 
-            console.log(newUser);
-
             const response = await sendJson('/api/auth/user', 'POST', newUser);
-    
             const data = await response.json();
-    
-            console.log(data);
 
             if (response.status != 201) return alert(data.message);
-
             id = data.id;
     
             setUser(data);
-            
             setState('edit');
 
         } catch (error) {
@@ -161,20 +152,15 @@
             if (Object.keys(changes).length <= 1) return; 
 
             const response = await sendJson('/api/auth/user', 'PUT', changes);
-
             if (response.status !== 204) {
                 const data = await response.json();
                 return alert(data.message);
             }
             
             $user.password = '';
-
             currentUser = {...$user};
 
-            users.update(prev => prev.map(u => {
-                if (u.id === id) return currentUser;
-                else return u;
-            }));
+            users.update(prev => prev.set(id, currentUser))
 
             setState('view');
 
