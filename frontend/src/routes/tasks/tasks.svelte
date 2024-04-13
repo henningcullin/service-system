@@ -52,129 +52,125 @@
 
 </script>
 
-<div class='segment'>
-    <h2> Welcome to the Task page!!</h2>
-    
-    {#if $account.role !== 'Worker'}
-        <div class='menu'>
-            <Link to='/task?new=true'>New</Link>
+<h2> Welcome to the Task page!!</h2>
+
+{#if $account.role !== 'Worker'}
+    <div class='menu'>
+        <Link to='/task?new=true'>New</Link>
+    </div>
+{/if}
+
+<div class='mobile-grid'>
+    {#each tasksArr.slice((currentPage - 1) * cardsPerPage, currentPage * cardsPerPage) as task}
+        <div class='mobile-card'> 
+            <Link to='/task?id={task.id}' class='itemLink' >{task.title}</Link>
+            <p>{task.description}</p>
+            <p>{task.task_type}</p>
+            <p class='{task.status}'>{task.status}</p>
+            <p class='{task.archived}'>{task.archived}</p>
+            <i>{task.created.toLocaleString('en-GB')}</i><br>
+            <i>{task.edited.toLocaleString('en-GB')}</i><br>
+            <p>{task.creator}</p>
+            <p>{task.executor}</p>
+            <p>{task.machine}</p>
+            {#if $account.role != 'Worker'}
+                <button on:click={deleteTask} id='{task.id}' class='cardDeleteButton'/>
+                <button on:click={editTask} id='{task.id}' class='cardEditButton'/>
+            {/if}
         </div>
-    {/if}
-
-    <div class='mobile-grid'>
-        {#each tasksArr.slice((currentPage - 1) * cardsPerPage, currentPage * cardsPerPage) as task}
-            <div class='mobile-card'> 
-                <Link to='/task?id={task.id}' class='itemLink' >{task.title}</Link>
-                <p>{task.description}</p>
-                <p>{task.task_type}</p>
-                <p class='{task.status}'>{task.status}</p>
-                <p class='{task.archived}'>{task.archived}</p>
-                <i>{task.created.toLocaleString('en-GB')}</i><br>
-                <i>{task.edited.toLocaleString('en-GB')}</i><br>
-                <p>{task.creator}</p>
-                <p>{task.executor}</p>
-                <p>{task.machine}</p>
-                {#if $account.role != 'Worker'}
-                    <button on:click={deleteTask} id='{task.id}' class='cardDeleteButton'/>
-                    <button on:click={editTask} id='{task.id}' class='cardEditButton'/>
-                {/if}
-            </div>
-        {/each}
-    </div>
-
-    <div class='pagination'>
-        {#if currentPage > 1}
-            <div><button on:click={() => currentPage -= 1}>Previous</button></div>
-            <div><button on:click={() => currentPage = 1}>1</button></div>
-        {:else}
-            <div><button disabled>Previous</button></div>
-        {/if}
-    
-        {#if currentPage - 1 > 1}
-            <div><button on:click={() => currentPage -= 1}>{currentPage - 1}</button></div>
-        {/if}
-    
-        <div><button disabled>{currentPage}</button></div>
-    
-        {#if currentPage + 1 <= pageCount}
-            <div><button on:click={() => currentPage += 1}>{currentPage + 1}</button></div>
-        {/if}
-    
-        {#if currentPage < pageCount-1}
-            <div><button on:click={() => currentPage = pageCount}>{pageCount}</button></div>
-        {/if}
-
-        {#if currentPage < pageCount}
-            <div><button on:click={() => currentPage += 1}>Next</button></div>
-        {:else}
-        <div><button disabled>Next</button></div>
-        {/if}
-    </div>
-    
-    <Datatable {handler}>
-        <table>
-            <thead>
-                <tr>
-                    <Th {handler} orderBy='id'>Id</Th>
-                    <Th {handler} orderBy='title'>Name</Th>
-                    <Th {handler} orderBy='description'>Description</Th>
-                    <Th {handler} orderBy='task_type'>Type</Th>
-                    <Th {handler} orderBy='status'>Status</Th>
-                    <Th {handler} orderBy='archived'>Archived</Th>
-                    <Th {handler} orderBy='creator'>Creator</Th>
-                    <Th {handler} orderBy='executor'>Executor</Th>
-                    <Th {handler} orderBy='machine'>Machine</Th>
-                    <Th {handler} orderBy='created'>Created</Th>
-                    <Th {handler} orderBy='edited'>Edited</Th>
-                    {#if $account.role != 'Worker'}
-                        <Th {handler} orderBy='none'>Delete</Th>
-                        <Th {handler} orderBy='none'>Edit</Th>
-                    {/if}
-                </tr>
-                <tr>
-                    <ThFilter {handler} filterBy='id'/>
-                    <ThFilter {handler} filterBy='title'/>
-                    <ThFilter {handler} filterBy='description'/>
-                    <ThFilter {handler} filterBy='task_type'/>
-                    <ThFilter {handler} filterBy='status'/>
-                    <ThFilter {handler} filterBy='archived'/>
-                    <ThFilter {handler} filterBy='creator'/>
-                    <ThFilter {handler} filterBy='executor'/>
-                    <ThFilter {handler} filterBy='machine'/>
-                    <ThFilter {handler} filterBy='created'/>
-                    <ThFilter {handler} filterBy='edited'/>
-                    {#if $account.role != 'Worker'}
-                        <ThFilter {handler} filterBy='none'/>
-                        <ThFilter {handler} filterBy='none'/>
-                    {/if}
-                </tr>
-            </thead>
-            <tbody>
-                {#each $rows as row}
-                    <tr>
-                        <td><Link to='/task?id={row.id}' class='itemLink'>{row.id}</Link></td>
-                        <td>{row.title}</td>
-                        <td>{row.description}</td>
-                        <td>{row.task_type}</td>
-                        <td class='{row.status}'>{row.status}</td>
-                        <td>{row.archived}</td>
-                        <td>{row.creator ? row.creator : 'Not Set'}</td>
-                        <td>{row.executor ? row.executor : 'Not Set'}</td>
-                        <td>{row.machine ? row.machine : 'Not Set'}</td>
-                        <td>{row.created.toLocaleString('en-GB')}</td>
-                        <td>{row.edited.toLocaleString('en-GB')}</td>
-                        {#if $account.role != 'Worker'}
-                            <td class='buttonCell'><button class='tableDeleteButton' id='{row.id}' on:click={deleteTask}></button></td>
-                            <td class='buttonCell'><button class='tableEditButton' id='{row.id}' on:click={editTask}></button></td>
-                        {/if}
-                    </tr>
-                {/each}
-            </tbody>
-        </table>
-    </Datatable>
-
+    {/each}
 </div>
 
+<div class='pagination'>
+    {#if currentPage > 1}
+        <div><button on:click={() => currentPage -= 1}>Previous</button></div>
+        <div><button on:click={() => currentPage = 1}>1</button></div>
+    {:else}
+        <div><button disabled>Previous</button></div>
+    {/if}
+
+    {#if currentPage - 1 > 1}
+        <div><button on:click={() => currentPage -= 1}>{currentPage - 1}</button></div>
+    {/if}
+
+    <div><button disabled>{currentPage}</button></div>
+
+    {#if currentPage + 1 <= pageCount}
+        <div><button on:click={() => currentPage += 1}>{currentPage + 1}</button></div>
+    {/if}
+
+    {#if currentPage < pageCount-1}
+        <div><button on:click={() => currentPage = pageCount}>{pageCount}</button></div>
+    {/if}
+
+    {#if currentPage < pageCount}
+        <div><button on:click={() => currentPage += 1}>Next</button></div>
+    {:else}
+    <div><button disabled>Next</button></div>
+    {/if}
+</div>
+
+<Datatable {handler}>
+    <table>
+        <thead>
+            <tr>
+                <Th {handler} orderBy='id'>Id</Th>
+                <Th {handler} orderBy='title'>Name</Th>
+                <Th {handler} orderBy='description'>Description</Th>
+                <Th {handler} orderBy='task_type'>Type</Th>
+                <Th {handler} orderBy='status'>Status</Th>
+                <Th {handler} orderBy='archived'>Archived</Th>
+                <Th {handler} orderBy='creator'>Creator</Th>
+                <Th {handler} orderBy='executor'>Executor</Th>
+                <Th {handler} orderBy='machine'>Machine</Th>
+                <Th {handler} orderBy='created'>Created</Th>
+                <Th {handler} orderBy='edited'>Edited</Th>
+                {#if $account.role != 'Worker'}
+                    <Th {handler} orderBy='none'>Delete</Th>
+                    <Th {handler} orderBy='none'>Edit</Th>
+                {/if}
+            </tr>
+            <tr>
+                <ThFilter {handler} filterBy='id'/>
+                <ThFilter {handler} filterBy='title'/>
+                <ThFilter {handler} filterBy='description'/>
+                <ThFilter {handler} filterBy='task_type'/>
+                <ThFilter {handler} filterBy='status'/>
+                <ThFilter {handler} filterBy='archived'/>
+                <ThFilter {handler} filterBy='creator'/>
+                <ThFilter {handler} filterBy='executor'/>
+                <ThFilter {handler} filterBy='machine'/>
+                <ThFilter {handler} filterBy='created'/>
+                <ThFilter {handler} filterBy='edited'/>
+                {#if $account.role != 'Worker'}
+                    <ThFilter {handler} filterBy='none'/>
+                    <ThFilter {handler} filterBy='none'/>
+                {/if}
+            </tr>
+        </thead>
+        <tbody>
+            {#each $rows as row}
+                <tr>
+                    <td><Link to='/task?id={row.id}' class='itemLink'>{row.id}</Link></td>
+                    <td>{row.title}</td>
+                    <td>{row.description}</td>
+                    <td>{row.task_type}</td>
+                    <td class='{row.status}'>{row.status}</td>
+                    <td>{row.archived}</td>
+                    <td>{row.creator ? row.creator : 'Not Set'}</td>
+                    <td>{row.executor ? row.executor : 'Not Set'}</td>
+                    <td>{row.machine ? row.machine : 'Not Set'}</td>
+                    <td>{row.created.toLocaleString('en-GB')}</td>
+                    <td>{row.edited.toLocaleString('en-GB')}</td>
+                    {#if $account.role != 'Worker'}
+                        <td class='buttonCell'><button class='tableDeleteButton' id='{row.id}' on:click={deleteTask}></button></td>
+                        <td class='buttonCell'><button class='tableEditButton' id='{row.id}' on:click={editTask}></button></td>
+                    {/if}
+                </tr>
+            {/each}
+        </tbody>
+    </table>
+</Datatable>
 
 <style>
 

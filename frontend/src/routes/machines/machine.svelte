@@ -184,99 +184,38 @@
 
 </script>
 
-<div class='segment'>
-
-    <div class="menu">
-        <button on:click={() => {setState('new')}}    disabled={state.new || $account.role === 'Worker'}>New</button>
-        <button on:click={() => {setState('edit')}}   disabled={(state.new || state.edit) || $account.role === 'Worker'}>Edit</button>
-        <button on:click={deleteMachine}              disabled={state.new || $account.role === 'Worker'}>Delete</button>
-        <button on:click={() => {setState('cancel')}} disabled={!(state.new || state.edit)} >Cancel</button>
-    </div>
-    
-    <form on:submit|preventDefault={handleSubmit}>
-        <label for='id'>ID</label>
-        <input id='id' type='text' bind:value={$machine.id} disabled readonly>
-
-        <label for='name'>Name</label>
-        <input type='text' bind:value={$machine.name} disabled={!(state.edit || state.new)}>
-        
-        <label for='make'>Make</label>
-        <input type='text' bind:value={$machine.make} disabled={!(state.edit || state.new)}>
-        
-        <label for='machine_type'>Type</label>
-        <input type='text' bind:value={$machine.machine_type} disabled={!(state.edit || state.new)}>
-
-        <label for='status'>Status</label>
-        <select bind:value={$machine.status} disabled={!(state.edit || state.new)}>
-            <option value='Inactive'>Inactive</option>
-            <option value='Active'>Active</option>
-        </select>
-        
-        <label for='created'>Created</label>
-        <input type='text' bind:value={$machine.created} disabled readonly>
-        
-        <label for='edited'>Edited</label>
-        <input type='text' bind:value={$machine.edited} disabled readonly>
-
-        <input type="submit" value="Save" disabled={!(state.edit || state.new)}>
-
-    </form>
-
+<div>
+    <button on:click={() => {setState('new')}}    disabled={state.new || $account.role === 'Worker'}>New</button>
+    <button on:click={() => {setState('edit')}}   disabled={(state.new || state.edit) || $account.role === 'Worker'}>Edit</button>
+    <button on:click={deleteMachine}              disabled={state.new || $account.role === 'Worker'}>Delete</button>
+    <button on:click={() => {setState('cancel')}} disabled={!(state.new || state.edit)} >Cancel</button>
 </div>
 
-<style>
+<form on:submit|preventDefault={handleSubmit}>
+    <label for='id'>ID</label>
+    <input id='id' type='text' bind:value={$machine.id} disabled readonly>
 
-    label {
-        font-size:1.1em;
-        text-align: left;
-    }
+    <label for='name'>Name</label>
+    <input type='text' bind:value={$machine.name} disabled={!(state.edit || state.new)}>
+    
+    <label for='make'>Make</label>
+    <input type='text' bind:value={$machine.make} disabled={!(state.edit || state.new)}>
+    
+    <label for='machine_type'>Type</label>
+    <input type='text' bind:value={$machine.machine_type} disabled={!(state.edit || state.new)}>
 
-    input, select {
-        margin-bottom: 15px;
-        font-size:1em;
-        line-height: 1.5em;
-    }
+    <label for='status'>Status</label>
+    <select bind:value={$machine.status} disabled={!(state.edit || state.new)}>
+        <option value='Inactive'>Inactive</option>
+        <option value='Active'>Active</option>
+    </select>
+    
+    <label for='created'>Created</label>
+    <input type='text' bind:value={$machine.created} disabled readonly>
+    
+    <label for='edited'>Edited</label>
+    <input type='text' bind:value={$machine.edited} disabled readonly>
 
-    form {
-        margin-top:15px;
-    }
+    <input type="submit" value="Save" disabled={!(state.edit || state.new)}>
 
-    .menu>button {
-        flex:1;
-        height:100%;
-        width:100%;
-        display:grid;
-        place-items: center;
-        background-color: #242424;
-    }
-
-    .menu>button:hover {
-        background-color: #343434;
-    }
-
-    @media (min-width: 1200px) {
-
-        .menu>button{
-            font-size: 1.5em;
-        }
-
-        form {
-            margin-top: 50px;
-            display:grid;
-            grid-template-columns: 1fr 3fr 1fr 3fr;
-            grid-template-rows: 1fr 1fr 1fr;
-            gap: 35px;
-        }
-
-        form input, form select {
-            width:100%;
-            font-size: 1.4em;
-        }
-
-        form label {
-            font-size: 1.4em;
-        }
-
-    }
-
-</style>
+</form>

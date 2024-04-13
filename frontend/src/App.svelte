@@ -33,27 +33,38 @@
 
 <Router primary={false}>
 
-  <Header/>
   <Sidebar/>
+  
+  <div class="ui pusher">
+    <Header/>
 
-  <main class="ui segment">
-    <Route path='/' component={Home} />
+    <main class="ui segment">
+      <Route path='/' component={Home} />
+  
+      <Route path='/machines/' component={Machines} />
+      <Route path='/machine/' component={Machine}/>
+      
+      <Route path='/users/' component={Users} />
+      <Route path='/user/' component={User} />
+  
+      <Route path='/tasks/' component={Tasks} />
+      <Route path='/task/' component={Task} />
+      
+  
+      <Route path='/login/*' component={Login} />
+      <Route path='/account/*' component={Account} />
+      <Route path='*' component={NotFound} />
+    </main>
 
-    <Route path='/machines/' component={Machines} />
-    <Route path='/machine/' component={Machine}/>
-    
-    <Route path='/users/' component={Users} />
-    <Route path='/user/' component={User} />
-
-    <Route path='/tasks/' component={Tasks} />
-    <Route path='/task/' component={Task} />
-    
-
-    <Route path='/login/*' component={Login} />
-    <Route path='/account/*' component={Account} />
-    <Route path='*' component={NotFound} />
-  </main>
-
-  <Footer/>
+    <Footer/>
+  </div>
   
 </Router>
+
+<style>
+
+main {
+  min-height: 100dvh;
+}
+
+</style>

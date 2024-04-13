@@ -172,54 +172,50 @@
 
 </script>
 
-<div class='segment'>
+<div class='menu'>
+    <button on:click={() => {setState('new')}} disabled={state.new || $account.role === 'Worker'}>New</button>
+    <!-- This one is gonna be fun-->
+    <button on:click={() => {setState('edit')}} disabled={(state.new || state.edit) || ($account.role === 'Worker' && $user.id !== $account.id )}>Edit</button>
 
-    <div class='menu'>
-        <button on:click={() => {setState('new')}} disabled={state.new || $account.role === 'Worker'}>New</button>
-        <!-- This one is gonna be fun-->
-        <button on:click={() => {setState('edit')}} disabled={(state.new || state.edit) || ($account.role === 'Worker' && $user.id !== $account.id )}>Edit</button>
-
-        <button on:click={() => {setState('cancel')}} disabled={!(state.new || state.edit)}>Cancel</button>
-    </div>
-    
-    <form on:submit|preventDefault={handleSubmit}>
-        <label for='first_name'>First Name</label>
-        <input id='first_name' type='text' bind:value={$user.first_name} disabled={!(state.edit || state.new)} required>
-        
-        <label for='last_name'>Last Name</label>
-        <input id='last_name' type='text' bind:value={$user.last_name} disabled={!(state.edit || state.new)} required>
-        
-        <label for='email'>Email</label>
-        <input id='email' type='text' bind:value={$user.email} disabled={!(state.edit || state.new)} required>
-
-        <label for='password'>Password</label>
-        <input id='password' type='password' bind:value={$user.password} disabled={!(state.edit || state.new) || ($user.role === 'Worker' || $user.role === 'Super')} required={!($user.role === 'Worker' || $user.role === 'Super')}>
-
-        <label for='phone'>Phone</label>
-        <input id='phone' type='text' bind:value={$user.phone} disabled={!(state.edit || state.new)}>
-
-        <label for='role'>Role</label>
-        <select id='role' bind:value={$user.role} disabled={!(state.edit || state.new)} required>
-            <option value='Worker'>Worker</option>
-            <option value='Basic'>Basic</option>
-            <option value='Administrator'>Administrator</option>
-            <option value='Super'>Super</option>
-        </select>
-        
-        <label for='active'>Active</label>
-        <input id='active' type='checkbox' bind:checked={$user.active} disabled={!(state.edit || state.new)}>
-        
-        <label for='last_login'>Last Login</label>
-        <input id='last_login' type='text' bind:value={$user.last_login} disabled readonly>
-
-        <label for='id'>ID</label>
-        <input id='id' type='text' bind:value={$user.id} disabled readonly>
-
-        <input id='save' type='submit' value='Save' disabled={!(state.edit || state.new)}>
-
-    </form>
-
+    <button on:click={() => {setState('cancel')}} disabled={!(state.new || state.edit)}>Cancel</button>
 </div>
+
+<form on:submit|preventDefault={handleSubmit}>
+    <label for='first_name'>First Name</label>
+    <input id='first_name' type='text' bind:value={$user.first_name} disabled={!(state.edit || state.new)} required>
+    
+    <label for='last_name'>Last Name</label>
+    <input id='last_name' type='text' bind:value={$user.last_name} disabled={!(state.edit || state.new)} required>
+    
+    <label for='email'>Email</label>
+    <input id='email' type='text' bind:value={$user.email} disabled={!(state.edit || state.new)} required>
+
+    <label for='password'>Password</label>
+    <input id='password' type='password' bind:value={$user.password} disabled={!(state.edit || state.new) || ($user.role === 'Worker' || $user.role === 'Super')} required={!($user.role === 'Worker' || $user.role === 'Super')}>
+
+    <label for='phone'>Phone</label>
+    <input id='phone' type='text' bind:value={$user.phone} disabled={!(state.edit || state.new)}>
+
+    <label for='role'>Role</label>
+    <select id='role' bind:value={$user.role} disabled={!(state.edit || state.new)} required>
+        <option value='Worker'>Worker</option>
+        <option value='Basic'>Basic</option>
+        <option value='Administrator'>Administrator</option>
+        <option value='Super'>Super</option>
+    </select>
+    
+    <label for='active'>Active</label>
+    <input id='active' type='checkbox' bind:checked={$user.active} disabled={!(state.edit || state.new)}>
+    
+    <label for='last_login'>Last Login</label>
+    <input id='last_login' type='text' bind:value={$user.last_login} disabled readonly>
+
+    <label for='id'>ID</label>
+    <input id='id' type='text' bind:value={$user.id} disabled readonly>
+
+    <input id='save' type='submit' value='Save' disabled={!(state.edit || state.new)}>
+
+</form>
 
 <style>
 

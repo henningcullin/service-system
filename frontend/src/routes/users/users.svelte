@@ -37,113 +37,109 @@
     
     </script>
     
-    <div class='segment'>
-        <h2> Users </h2>
-        
-        {#if $account.role !== 'Worker'}
-            <div class='menu'>
-                <Link to='/user?new=true'>New</Link>
+    <h2> Users </h2>
+    
+    {#if $account.role !== 'Worker'}
+        <div class='menu'>
+            <Link to='/user?new=true'>New</Link>
+        </div>
+    {/if}
+
+    <div class='mobile-grid'>
+        {#each usersArr.slice((currentPage - 1) * cardsPerPage, currentPage * cardsPerPage) as u}
+            <div class='mobile-card'> 
+                <Link to='/user?id={u.id}' class='itemLink' >{u.first_name}</Link>
+                <p>{u.last_name}</p>
+                <p>{u.email}</p>
+                <p>{u.phone}</p>
+                <p>{u.role}</p>
+                <p class="{u.active}" >{u.active}</p>
+                <i>{u.last_login.toLocaleString('en-GB')}</i><br>
+                {#if $account.role !== 'Worker'}
+                    <button on:click={editUser} id='{u.id}' class='cardEditButton'/>
+                {/if}
             </div>
+        {/each}
+    </div>
+
+    <div class='pagination'>
+        {#if currentPage > 1}
+            <div><button on:click={() => currentPage -= 1}>Previous</button></div>
+            <div><button on:click={() => currentPage = 1}>1</button></div>
+        {:else}
+            <div><button disabled>Previous</button></div>
         {/if}
     
-        <div class='mobile-grid'>
-            {#each usersArr.slice((currentPage - 1) * cardsPerPage, currentPage * cardsPerPage) as u}
-                <div class='mobile-card'> 
-                    <Link to='/user?id={u.id}' class='itemLink' >{u.first_name}</Link>
-                    <p>{u.last_name}</p>
-                    <p>{u.email}</p>
-                    <p>{u.phone}</p>
-                    <p>{u.role}</p>
-                    <p class="{u.active}" >{u.active}</p>
-                    <i>{u.last_login.toLocaleString('en-GB')}</i><br>
-                    {#if $account.role !== 'Worker'}
-                        <button on:click={editUser} id='{u.id}' class='cardEditButton'/>
-                    {/if}
-                </div>
-            {/each}
-        </div>
+        {#if currentPage - 1 > 1}
+            <div><button on:click={() => currentPage -= 1}>{currentPage - 1}</button></div>
+        {/if}
     
-        <div class='pagination'>
-            {#if currentPage > 1}
-                <div><button on:click={() => currentPage -= 1}>Previous</button></div>
-                <div><button on:click={() => currentPage = 1}>1</button></div>
-            {:else}
-                <div><button disabled>Previous</button></div>
-            {/if}
-        
-            {#if currentPage - 1 > 1}
-                <div><button on:click={() => currentPage -= 1}>{currentPage - 1}</button></div>
-            {/if}
-        
-            <div><button disabled>{currentPage}</button></div>
-        
-            {#if currentPage + 1 <= pageCount}
-                <div><button on:click={() => currentPage += 1}>{currentPage + 1}</button></div>
-            {/if}
-        
-            {#if currentPage < pageCount-1}
-                <div><button on:click={() => currentPage = pageCount}>{pageCount}</button></div>
-            {/if}
+        <div><button disabled>{currentPage}</button></div>
     
-            {#if currentPage < pageCount}
-                <div><button on:click={() => currentPage += 1}>Next</button></div>
-            {:else}
-            <div><button disabled>Next</button></div>
-            {/if}
-        </div>
-        
-        <Datatable {handler}>
-            <table>
-                <thead>
-                    <tr>
-                        <Th {handler} orderBy='id'>Id</Th>
-                        <Th {handler} orderBy='first_name'>First Name</Th>
-                        <Th {handler} orderBy='last_name'>Last Name</Th>
-                        <Th {handler} orderBy='email'>Email</Th>
-                        <Th {handler} orderBy='phone'>Phone</Th>
-                        <Th {handler} orderBy='role'>Role</Th>
-                        <Th {handler} orderBy='active'>Active</Th>
-                        <Th {handler} orderBy='last_login'>Last Login</Th>
-                        {#if $account.role !== 'Worker'}
-                            <Th {handler} orderBy='none'>Edit</Th>
-                        {/if}
-                    </tr>
-                    <tr>
-                        <ThFilter {handler} filterBy='id'/>
-                        <ThFilter {handler} filterBy='first_name'/>
-                        <ThFilter {handler} filterBy='last_name'/>
-                        <ThFilter {handler} filterBy='email'/>
-                        <ThFilter {handler} filterBy='phone'/>
-                        <ThFilter {handler} filterBy='role'/>
-                        <ThFilter {handler} filterBy='active'/>
-                        <ThFilter {handler} filterBy='last_login'/>
-                        {#if $account.role !== 'Worker'}
-                            <ThFilter {handler} filterBy='none'/>
-                        {/if}
-                    </tr>
-                </thead>
-                <tbody>
-                    {#each $rows as row}
-                        <tr>
-                            <td><Link to='/user?id={row.id}' class='itemLink'>{row.id}</Link></td>
-                            <td>{row.first_name}</td>
-                            <td>{row.last_name}</td>
-                            <td>{row.email}</td>
-                            <td>{row.phone ? row.phone : ''}</td>
-                            <td>{row.role}</td>
-                            <td class='{row.active}'>{row.active ? 'Active' : 'Deactivated'}</td>
-                            <td>{row.last_login.toLocaleString('en-GB')}</td>
-                            {#if $account.role !== 'Worker'}
-                                <td class='buttonCell'><button class='tableEditButton' id='{row.id}' on:click={editUser}></button></td>
-                            {/if}
-                        </tr>
-                    {/each}
-                </tbody>
-            </table>
-        </Datatable>
+        {#if currentPage + 1 <= pageCount}
+            <div><button on:click={() => currentPage += 1}>{currentPage + 1}</button></div>
+        {/if}
     
+        {#if currentPage < pageCount-1}
+            <div><button on:click={() => currentPage = pageCount}>{pageCount}</button></div>
+        {/if}
+
+        {#if currentPage < pageCount}
+            <div><button on:click={() => currentPage += 1}>Next</button></div>
+        {:else}
+        <div><button disabled>Next</button></div>
+        {/if}
     </div>
     
+    <Datatable {handler}>
+        <table>
+            <thead>
+                <tr>
+                    <Th {handler} orderBy='id'>Id</Th>
+                    <Th {handler} orderBy='first_name'>First Name</Th>
+                    <Th {handler} orderBy='last_name'>Last Name</Th>
+                    <Th {handler} orderBy='email'>Email</Th>
+                    <Th {handler} orderBy='phone'>Phone</Th>
+                    <Th {handler} orderBy='role'>Role</Th>
+                    <Th {handler} orderBy='active'>Active</Th>
+                    <Th {handler} orderBy='last_login'>Last Login</Th>
+                    {#if $account.role !== 'Worker'}
+                        <Th {handler} orderBy='none'>Edit</Th>
+                    {/if}
+                </tr>
+                <tr>
+                    <ThFilter {handler} filterBy='id'/>
+                    <ThFilter {handler} filterBy='first_name'/>
+                    <ThFilter {handler} filterBy='last_name'/>
+                    <ThFilter {handler} filterBy='email'/>
+                    <ThFilter {handler} filterBy='phone'/>
+                    <ThFilter {handler} filterBy='role'/>
+                    <ThFilter {handler} filterBy='active'/>
+                    <ThFilter {handler} filterBy='last_login'/>
+                    {#if $account.role !== 'Worker'}
+                        <ThFilter {handler} filterBy='none'/>
+                    {/if}
+                </tr>
+            </thead>
+            <tbody>
+                {#each $rows as row}
+                    <tr>
+                        <td><Link to='/user?id={row.id}' class='itemLink'>{row.id}</Link></td>
+                        <td>{row.first_name}</td>
+                        <td>{row.last_name}</td>
+                        <td>{row.email}</td>
+                        <td>{row.phone ? row.phone : ''}</td>
+                        <td>{row.role}</td>
+                        <td class='{row.active}'>{row.active ? 'Active' : 'Deactivated'}</td>
+                        <td>{row.last_login.toLocaleString('en-GB')}</td>
+                        {#if $account.role !== 'Worker'}
+                            <td class='buttonCell'><button class='tableEditButton' id='{row.id}' on:click={editUser}></button></td>
+                        {/if}
+                    </tr>
+                {/each}
+            </tbody>
+        </table>
+    </Datatable>
     
     <style>
     

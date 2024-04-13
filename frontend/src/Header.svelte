@@ -1,19 +1,31 @@
 <script>
     import { Link } from "svelte-navigator";
     import { account } from "$lib/stores";
+
+    function toggleSidebar() {
+        const sideBar = document.querySelector('.ui.sidebar');
+        
+        const isOpen = sideBar.getAttribute('class').includes('visible');
+
+        if (isOpen) {
+            sideBar.classList.replace('visible', 'animating');
+            setTimeout(() => {
+                sideBar.classList.remove('animating');
+            }, 300);
+        } else {
+            sideBar.classList.add('pusher', 'visible');
+        }
+    }
+
 </script>
 
 <header class="ui huge fixed menu">
-    <div class="item">
+    <a class="item" on:click={toggleSidebar}>
         <i class="bars icon"></i>
-    </div>
+    </a>
     {#if $account.id}
-            <Link to='/' class='header item'>Home</Link>
-            <Link to='/machines' class='item'>Machines</Link>
-            <Link to='/users' class='item'>Users</Link>
-            <Link to='/tasks' class='item'>Tasks</Link>
-            <Link to='/account' class='right item'>{$account.first_name}</Link>
-        {:else}
-            <Link to='/login' class='item'>Login</Link>
-        {/if}
+        <Link to='/account' class='right item'>{$account.first_name}</Link>
+    {:else}
+        <Link to='/login' class='item'>Login</Link>
+    {/if}
 </header>

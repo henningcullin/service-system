@@ -197,74 +197,70 @@
 
 </script>
 
-<div class='segment'>
+<div class='menu'>
+    <button on:click={() => {setState('new')}} disabled={state.new || $account.role === 'Worker'}>New</button>
+    <!-- This one is gonna be fun-->
+    <button on:click={() => {setState('edit')}} disabled={(state.new || state.edit) || ($account.role === 'Worker' && $task.id !== $account.id )}>Edit</button>
 
-    <div class='menu'>
-        <button on:click={() => {setState('new')}} disabled={state.new || $account.role === 'Worker'}>New</button>
-        <!-- This one is gonna be fun-->
-        <button on:click={() => {setState('edit')}} disabled={(state.new || state.edit) || ($account.role === 'Worker' && $task.id !== $account.id )}>Edit</button>
-
-        <button on:click={() => {setState('cancel')}} disabled={!(state.new || state.edit)}>Cancel</button>
-    </div>
-    
-    <form on:submit|preventDefault={handleSubmit}>
-        <label for='title'>Title</label>
-        <input id='title' type='text' bind:value={$task.title} disabled={!(state.edit || state.new)} required>
-        
-        <label for='description'>Description</label>
-        <input id='description' type='text' bind:value={$task.description} disabled={!(state.edit || state.new)} required>
-        
-        <label for='task_type'>Task Type</label>
-        <select id='task_type' bind:value={$task.task_type} disabled={!(state.edit || state.new)} required>
-            <option value='Suggestion'>Suggestion</option>
-            <option value='Issue'>Issue</option>
-            <option value='Service'>Service</option>
-            <option value='Other'>Other</option>
-        </select>
-        
-        <label for='status'>Task Type</label>
-        <select id='status' bind:value={$task.status} disabled={!(state.edit || state.new)} required>
-            <option value='Pending'>Pending</option>
-            <option value='Active'>Active</option>
-            <option value='Completed'>Completed</option>
-        </select>
-
-        <label for="creator">Creator</label>
-        <input id='creator' bind:value={$task.creator} disabled readonly>
-
-        <label for="executor">Executor</label>
-        <select id='executor' bind:value={$task.executor} disabled={!(state.edit || state.new)}>
-            <option value=''>Not Set</option>
-            {#each $users.values() as u}
-                <option value='{u.id}'>{u.first_name}, {u.last_name}</option>
-            {/each}
-        </select>
-
-        <label for="machine">Machine</label>
-        <select id='machine' bind:value={$task.machine} disabled={!(state.edit || state.new)}>
-            <option value=''>Not Set</option>
-            {#each $machines.values() as m}
-                <option value='{m.id}'>{m.make ? `${m.name}, ${m.make}` : m.name}</option>
-            {/each}
-        </select>
-
-        <label for='archived'>Archived</label>
-        <input id='archived' type='checkbox' bind:checked={$task.archived} disabled={!(state.edit || state.new)}>
-
-        <label for='created'>Created</label>
-        <input type='text' bind:value={$task.created} disabled readonly>
-        
-        <label for='edited'>Edited</label>
-        <input type='text' bind:value={$task.edited} disabled readonly>
-        
-        <label for='id'>ID</label>
-        <input id='id' type='text' bind:value={$task.id} disabled readonly>
-
-        <input id='save' type='submit' value='Save' disabled={!(state.edit || state.new)}>
-
-    </form>
-
+    <button on:click={() => {setState('cancel')}} disabled={!(state.new || state.edit)}>Cancel</button>
 </div>
+
+<form on:submit|preventDefault={handleSubmit}>
+    <label for='title'>Title</label>
+    <input id='title' type='text' bind:value={$task.title} disabled={!(state.edit || state.new)} required>
+    
+    <label for='description'>Description</label>
+    <input id='description' type='text' bind:value={$task.description} disabled={!(state.edit || state.new)} required>
+    
+    <label for='task_type'>Task Type</label>
+    <select id='task_type' bind:value={$task.task_type} disabled={!(state.edit || state.new)} required>
+        <option value='Suggestion'>Suggestion</option>
+        <option value='Issue'>Issue</option>
+        <option value='Service'>Service</option>
+        <option value='Other'>Other</option>
+    </select>
+    
+    <label for='status'>Task Type</label>
+    <select id='status' bind:value={$task.status} disabled={!(state.edit || state.new)} required>
+        <option value='Pending'>Pending</option>
+        <option value='Active'>Active</option>
+        <option value='Completed'>Completed</option>
+    </select>
+
+    <label for="creator">Creator</label>
+    <input id='creator' bind:value={$task.creator} disabled readonly>
+
+    <label for="executor">Executor</label>
+    <select id='executor' bind:value={$task.executor} disabled={!(state.edit || state.new)}>
+        <option value=''>Not Set</option>
+        {#each $users.values() as u}
+            <option value='{u.id}'>{u.first_name}, {u.last_name}</option>
+        {/each}
+    </select>
+
+    <label for="machine">Machine</label>
+    <select id='machine' bind:value={$task.machine} disabled={!(state.edit || state.new)}>
+        <option value=''>Not Set</option>
+        {#each $machines.values() as m}
+            <option value='{m.id}'>{m.make ? `${m.name}, ${m.make}` : m.name}</option>
+        {/each}
+    </select>
+
+    <label for='archived'>Archived</label>
+    <input id='archived' type='checkbox' bind:checked={$task.archived} disabled={!(state.edit || state.new)}>
+
+    <label for='created'>Created</label>
+    <input type='text' bind:value={$task.created} disabled readonly>
+    
+    <label for='edited'>Edited</label>
+    <input type='text' bind:value={$task.edited} disabled readonly>
+    
+    <label for='id'>ID</label>
+    <input id='id' type='text' bind:value={$task.id} disabled readonly>
+
+    <input id='save' type='submit' value='Save' disabled={!(state.edit || state.new)}>
+
+</form>
 
 <style>
 
