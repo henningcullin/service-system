@@ -5,4 +5,4 @@
 </script>
 
 
-<h2> The Homepage! </h2>
+<h2 class="ui massive centered header"> The Homepage! </h2>
