@@ -1,4 +1,3 @@
-import { derived } from 'svelte/store';
 import { account, tasks, machines, users} from './stores';
 import { navigate } from 'svelte-navigator';
 
@@ -11,13 +10,16 @@ export async function getLoggedIn() {
 		const response = await fetch('/api/auth/user/me');
 		const data = await response.json();
 
-		if (response.status !== 200) return navigate('/login');
+		if (response.status !== 200) {
+			account.set({});
+			return navigate('/login');
+		}
 
 		data.last_login = new Date(data.last_login);
 
 		account.set(data);
 	} catch (error) {
-		console.log('Could not fetch products', error);
+		console.log('Could not get logged in status', error);
 	}
 }
 

@@ -90,20 +90,37 @@
 
 </script>
 
-<h2 class="ui huge centered header">Log in</h2>
+<div class="ui middle aligned center aligned grid">
+    <div class="column">
 
-<form id='emailForm' on:submit|preventDefault={submitEmailForm} class="ui form">
-    <input type='email' placeholder='email' bind:value={email}><br>
-    <input class="ui primary button" type='submit' value='Send'>
-</form>
+        <h2 class="ui huge centered header">Log in</h2>
 
-<form id='loginForm' class='ui form hidden' on:submit|preventDefault={submitLoginForm}>
-    <input class="ui input" type='email' readonly bind:value={email}><br>
-    <input type='text' placeholder='code' id='code-field' class='hidden' bind:value={code}><br>
-    <input type='password' placeholder='password' id='password-field' bind:value={password}><br>
-    <input class="ui primary button" type='submit' value='Login'>
-</form>
+        <form id='emailForm' class="ui large form {type === '' ? '' : 'hidden'}" on:submit|preventDefault={submitEmailForm}>
+            <div class="ui stacked segment">
+                <div class="field"><input type='email' placeholder='email' bind:value={email}></div>
+                <input class="ui fluid large olive submit button" type='submit' value='Send'>
+            </div>
+        </form>
+        
+        <form id='loginForm' class='ui large form {type !== '' ? '' : 'hidden'}' on:submit|preventDefault={submitLoginForm}>
+            <div class="ui stacked segment">
+                <div class="field"><input class="ui input" type='email' readonly bind:value={email}></div>
+                <div class="field"><input type='text' placeholder='code' id='code-field' class='hidden' bind:value={code}></div>
+                <div class="field"><input type='password' placeholder='password' id='password-field' bind:value={password}></div>
+                <input class="ui fluid large olive submit button" type='submit' value='Login'>
+            </div>
+        </form>
+    </div>
+</div>
+
 
 <style>
 
+    .ui.middle.aligned.center.aligned.grid {
+        min-height: 100dvh;
+    }
+
+    .column {
+        max-width: 55em;
+    }
 </style>

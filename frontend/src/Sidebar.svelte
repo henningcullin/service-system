@@ -2,13 +2,17 @@
 
     import {Link} from 'svelte-navigator';
     import {account} from '$lib/stores';
+    import {ƒ} from '$lib/utils';
 
     function goToPage() {
-        const sideBar = document.querySelector('.ui.sidebar');
+        const sideBar = ƒ('.ui.sidebar');
+        const mainPage = ƒ('#mainPage');
+        mainPage.classList.add('closing')
         sideBar.classList.replace('visible', 'animating');
         setTimeout(() => {
+            mainPage.classList.remove('closing', 'dimmed')
             sideBar.classList.remove('animating');
-        }, 300);
+        }, 500);
     }
 
 </script>

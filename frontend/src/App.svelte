@@ -10,7 +10,7 @@
   import { account } from '$lib/stores';
   import { getLoggedIn } from '$lib/utils';
 
-  import Home from './routes/home.svelte';
+  import Home from './routes/Home.svelte';
   import NotFound from './routes/notFound.svelte';
 
   import Machine from './routes/machines/machine.svelte';
@@ -22,8 +22,8 @@
   import Task from './routes/tasks/task.svelte';
   import Tasks from './routes/tasks/tasks.svelte';
 
-  import Login from './routes/login.svelte'
-  import Account from './routes/account.svelte';
+  import Login from './routes/Login.svelte'
+  import Account from './routes/Account.svelte';
 
   if (Object.keys($account).length == 0) {
     getLoggedIn();
@@ -35,7 +35,7 @@
 
   <Sidebar/>
   
-  <div class="ui pusher">
+  <div id="mainPage" class="ui pusher">
     <Header/>
 
     <main class="ui segment">
@@ -65,6 +65,10 @@
 
 main {
   min-height: 100dvh;
+}
+
+.ui.pusher {
+  padding-top:2em;
 }
 
 </style>
