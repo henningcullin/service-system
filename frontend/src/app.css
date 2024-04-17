@@ -1,9 +1,11 @@
-.pushable {
-  padding: 0;
-  margin: 0;
-  box-sizing: inherit;
-}
-
 .hidden {
   display:none;
+}
+
+#app {
+  padding-top: 2.5em;
+}
+
+main {
+  min-height: 100dvh;
 }

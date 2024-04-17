@@ -34,41 +34,26 @@
 <Router primary={false}>
 
   <Sidebar/>
-  
-  <div id="mainPage" class="ui pusher">
-    <Header/>
 
-    <main class="ui segment">
-      <Route path='/' component={Home} />
-  
-      <Route path='/machines/' component={Machines} />
-      <Route path='/machine/' component={Machine}/>
-      
-      <Route path='/users/' component={Users} />
-      <Route path='/user/' component={User} />
-  
-      <Route path='/tasks/' component={Tasks} />
-      <Route path='/task/' component={Task} />
-      
-  
-      <Route path='/login/*' component={Login} />
-      <Route path='/account/*' component={Account} />
-      <Route path='*' component={NotFound} />
-    </main>
+  <Header/>
+  <main class="ui segment">
+    <Route path='/' component={Home} />
 
-    <Footer/>
-  </div>
+    <Route path='/machines/' component={Machines} />
+    <Route path='/machine/' component={Machine}/>
+    
+    <Route path='/users/' component={Users} />
+    <Route path='/user/' component={User} />
+
+    <Route path='/tasks/' component={Tasks} />
+    <Route path='/task/' component={Task} />
+    
+
+    <Route path='/login/*' component={Login} />
+    <Route path='/account/*' component={Account} />
+    <Route path='*' component={NotFound} />
+  </main>
+
+  <Footer/>
   
 </Router>
-
-<style>
-
-main {
-  min-height: 100dvh;
-}
-
-.ui.pusher {
-  padding-top:2em;
-}
-
-</style>
