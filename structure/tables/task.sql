@@ -1,16 +1,42 @@
+CREATE TABLE task_type (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL UNIQUE
+);
+
+CREATE TABLE task_status (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL UNIQUE
+);
+
 CREATE TABLE task (
-    id BINARY(16) PRIMARY KEY DEFAULT (UUID_TO_BIN(UUID(), true)),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title VARCHAR(255) NOT NULL,
-    description TEXT,
-    task_type ENUM('Suggestion', 'Issue', 'Service', 'Other') NOT NULL DEFAULT 'Other',
-    status ENUM('Pending', 'Active', 'Completed') NOT NULL DEFAULT 'Pending',
+    description TEXT NOT NULL,
+    task_type UUID NOT NULL REFERENCES task_type(id),
+    status UUID NOT NULL REFERENCES task_status(id),
     archived BOOLEAN NOT NULL DEFAULT FALSE,
-    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    edited TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    creator BINARY(16) NOT NULL,
-    executor BINARY(16),
-    machine BINARY(16),
-    FOREIGN KEY (creator) REFERENCES user(id),
-    FOREIGN KEY (executor) REFERENCES user(id),
-    FOREIGN KEY (machine) REFERENCES machine(id)
+    creator UUID NOT NULL REFERENCES user(id),
+    machine UUID REFERENCES machine(id),
+    created TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    edited TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    due_at TIMESTAMPTZ
+);
+
+CREATE TRIGGER update_task_edited
+BEFORE UPDATE ON task
+FOR EACH ROW
+EXECUTE PROCEDURE update_edited_column();
+
+CREATE TABLE task_executor (
+    task_id UUID NOT NULL REFERENCES task(id),
+    user_id UUID NOT NULL REFERENCES user(id),
+    PRIMARY KEY (task_id, user_id)
+);
+
+CREATE TABLE task_document (
+    task_id UUID NOT NULL REFERENCES task(id),
+    uri VARCHAR(512) NOT NULL,
+    name VARCHAR(255),
+    description TEXT,
+    PRIMARY KEY (task_id, uri)
 );
