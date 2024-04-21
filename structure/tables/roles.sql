@@ -1,4 +1,4 @@
-CREATE TABLE role (
+CREATE TABLE roles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(255) NOT NULL UNIQUE,
     level INT NOT NULL UNIQUE CHECK (level >= 0),
@@ -25,7 +25,7 @@ CREATE TABLE role (
     facility_delete BOOLEAN NOT NULL DEFAULT FALSE
 );
 
-INSERT INTO role (
+INSERT INTO roles (
     name, level, has_password, user_view, user_create, user_edit, user_delete, 
     machine_view, machine_create, machine_edit, machine_delete, task_view, task_create, task_edit, task_delete, 
     report_view, report_create, report_edit, report_delete, facility_view, facility_create, facility_edit, facility_delete
