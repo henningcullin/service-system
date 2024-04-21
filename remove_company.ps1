@@ -1,15 +1,21 @@
 Write-Host "Remove a Company / Database / Customer"
 
 if (!($server = Read-Host "Enter Server / Host (127.0.0.1)")) { $server = "127.0.0.1" }
-$root_username = 'root'
+$root_username = 'postgres'
 $root_password = Read-Host "Enter Root Password"
 
 $company_name = Read-Host "Enter company name"
 
-$mysql = "E:\Program Files\MySQL\MySQL Server 8.0\bin\mysql"          # CHANGE MYSQL PATH HERE
+$psql = "C:\Program Files\PostgreSQL\16\bin\psql.exe"          # CHANGE POSTGRESQL PATH HERE
 
-$drop_database_sql = "DROP DATABASE $company_name;"
-& $mysql -u "$root_username" -p"$root_password" -h "$server" -e "$drop_database_sql"
+$env:PGPASSWORD = $root_password
+
+$drop_database_sql = "DROP DATABASE $company_name WITH (FORCE);"
+& $psql -U "$root_username" -h "$server" -c "$drop_database_sql"
 
 $drop_user_sql = "DROP USER $company_name;"
-& $mysql -u "$root_username" -p"$root_password" -h "$server" -e "$drop_user_sql"
+& $psql -U "$root_username" -h "$server" -c "$drop_user_sql"
+
+Remove-Item Env:\PGPASSWORD
+
+Read-Host "Press any key to exit"
