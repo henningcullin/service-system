@@ -22,7 +22,7 @@ CREATE TABLE machines (
     status UUID NOT NULL REFERENCES machine_statuses(id),
     created TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     edited TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    facility UUID NOT NULL REFERENCES facilities(id),
+    facility UUID REFERENCES facilities(id),
     image VARCHAR(512)
 );
 
