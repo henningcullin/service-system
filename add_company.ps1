@@ -49,7 +49,7 @@ $grantQuery2 = "GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO $company_user
 & $psql -U "$root_username" -h "$server" -d "$company_name" -c "$grantQuery2"
 
 #CREATE ENV FILE WITH DATABASE URL
-$database_url = "DATABASE_URL=postgresql://${company_user_name}:${company_user_password}@${server}:${port}/${company_name}"
+$database_url = "DATABASE_URL=postgres://${company_user_name}:${company_user_password}@${server}:${port}/${company_name}"
 
 $env_file_path = Join-Path (Get-Location).Path -ChildPath "envs\${company_name}.env"
 
