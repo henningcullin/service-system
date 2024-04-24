@@ -1511,7 +1511,6 @@ dependencies = [
  "jsonwebtoken",
  "rand_core",
  "serde",
- "serde_derive",
  "serde_json",
  "sqlx",
  "time",

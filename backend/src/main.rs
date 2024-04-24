@@ -1,9 +1,6 @@
-mod auth;
 mod config;
-mod machine;
+mod machines;
 mod router;
-mod task;
-mod user;
 
 use axum::http::{
     header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
@@ -13,13 +10,16 @@ use config::Config;
 use dotenv::dotenv;
 use router::create_router;
 use serde::Serialize;
-use sqlx::{mysql::MySqlPoolOptions, MySql, Pool};
+use sqlx::{
+    postgres::{PgPool, PgPoolOptions},
+    Pool, Postgres
+};
 use std::{sync::Arc, time::Duration};
 use tower_http::cors::CorsLayer;
 
 #[derive(Clone)]
 pub struct AppState {
-    db: Pool<MySql>,
+    db: Pool<Postgres>,
     env: Config,
 }
 
@@ -41,8 +41,8 @@ async fn main() {
 
     let config = Config::init();
 
-    let pool = MySqlPoolOptions::new()
-        .max_connections(7)
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
         .acquire_timeout(Duration::from_secs(3))
         .connect(&config.database_url)
         .await
