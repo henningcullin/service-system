@@ -1,6 +1,7 @@
 mod config;
 mod machines;
 mod router;
+mod utils;
 
 use axum::http::{
     header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
@@ -14,6 +15,7 @@ use sqlx::{
     postgres::{PgPool, PgPoolOptions},
     Pool, Postgres
 };
+use utils::tracing::init_tracing;
 use std::{sync::Arc, time::Duration};
 use tower_http::cors::CorsLayer;
 
@@ -38,6 +40,8 @@ pub struct ResponseData {
 #[tokio::main(flavor = "multi_thread", worker_threads = 6)]
 async fn main() {
     dotenv().ok();
+
+    init_tracing();
 
     let config = Config::init();
 
@@ -64,6 +68,9 @@ async fn main() {
     let listener = tokio::net::TcpListener::bind("0.0.0.0:80")
         .await
         .expect("Can't start listener");
+
+    tracing::info!("Listening on 0.0.0.0:80");
+
     axum::serve(listener, app)
         .await
         .expect("Can't start server");
