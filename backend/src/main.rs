@@ -11,17 +11,14 @@ use config::Config;
 use dotenv::dotenv;
 use router::create_router;
 use serde::Serialize;
-use sqlx::{
-    postgres::{PgPool, PgPoolOptions},
-    Pool, Postgres
-};
+use sqlx::postgres::{PgPool, PgPoolOptions};
 use utils::tracing::init_tracing;
 use std::{sync::Arc, time::Duration};
 use tower_http::cors::CorsLayer;
 
 #[derive(Clone)]
 pub struct AppState {
-    db: Pool<Postgres>,
+    db: PgPool,
     env: Config,
 }
 
