@@ -1,6 +1,6 @@
 use axum::{body::Body, http::{Response, StatusCode}, response::IntoResponse, Json};
 use sqlx::Error as SqlxError;
-
+use tracing::error;
 
 #[derive(Debug)]
 pub enum ApiError {
@@ -15,8 +15,11 @@ impl From<SqlxError> for ApiError {
 
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response<Body> {
+        let error_message = format!("{:?}", self);
+        error!(error_message);
+
         match self {
-            Self::DatabaseError(err) => {
+            Self::DatabaseError(_) => {
                 let message = "Database error";
                 let response_body = Json(message);
                 (StatusCode::INTERNAL_SERVER_ERROR, response_body).into_response()
