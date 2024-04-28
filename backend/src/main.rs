@@ -12,9 +12,10 @@ use dotenv::dotenv;
 use router::create_router;
 use serde::Serialize;
 use sqlx::postgres::{PgPool, PgPoolOptions};
-use utils::tracing::init_tracing;
 use std::{sync::Arc, time::Duration};
 use tower_http::cors::CorsLayer;
+use tracing::info;
+use utils::tracing::init_tracing;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -38,9 +39,9 @@ pub struct ResponseData {
 async fn main() {
     dotenv().ok();
 
-    init_tracing();
-
     let config = Config::init();
+
+    let _guard = init_tracing(&config.log_path);
 
     let pool = PgPoolOptions::new()
         .max_connections(5)
@@ -60,13 +61,14 @@ async fn main() {
         .allow_credentials(true)
         .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE]);
 
-    let app = create_router(Arc::new(state)).layer(cors);
+    let app = create_router(Arc::new(state))
+        .layer(cors);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:80")
         .await
         .expect("Can't start listener");
 
-    tracing::info!("Listening on 0.0.0.0:80");
+    info!("Listening on 0.0.0.0:80");
 
     axum::serve(listener, app)
         .await
