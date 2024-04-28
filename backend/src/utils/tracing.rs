@@ -2,7 +2,7 @@ use tracing::{level_filters::LevelFilter, Level};
 use tracing_appender::{non_blocking, rolling::daily, non_blocking::WorkerGuard};
 use tracing_subscriber::{fmt, prelude::*, registry::Registry};
 
-pub fn init_tracing(log_path: &str) -> (WorkerGuard, WorkerGuard) {
+pub fn init(log_path: &str) -> (WorkerGuard, WorkerGuard) {
     let (file_appender, file_guard) = non_blocking(daily(log_path, "service_system_log"));
     let file_layer = fmt::Layer::default()
         .event_format(fmt::format().json())
