@@ -41,7 +41,7 @@ async fn main() {
 
     let config = Config::init();
 
-    let _guard = init_tracing(&config.log_path);
+    let (_file_guard, _terminal_guard) = init_tracing(&config.log_path);
 
     let pool = PgPoolOptions::new()
         .max_connections(5)
