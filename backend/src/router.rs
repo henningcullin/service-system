@@ -14,6 +14,7 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
     ));
 
     let auth = Router::new()
+        .route("/machine", get(machines::details))
         .route("/machines", get(machines::index));
 
     let api = Router::new()

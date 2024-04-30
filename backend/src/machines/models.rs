@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sqlx::prelude::Type;
 use uuid::Uuid;
 
@@ -33,4 +33,10 @@ pub struct Facility {
     pub id: Option<Uuid>,
     pub name: Option<String>,
     pub address: Option<String>,
+}
+
+// Details
+#[derive(Deserialize)]
+pub struct QueryMachine {
+    pub id: Uuid
 }
