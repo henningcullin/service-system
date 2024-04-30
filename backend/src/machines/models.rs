@@ -25,7 +25,7 @@ pub struct MachineType {
 #[derive(Serialize, Type)]
 pub struct MachineStatus {
     pub id: Uuid,
-    pub name: Option<String>,
+    pub name: String,
 }
 
 #[derive(Serialize, Type)]
