@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Serialize)]
@@ -27,4 +27,9 @@ pub struct Role {
     pub facility_create: bool,
     pub facility_edit: bool,
     pub facility_delete: bool,
+}
+
+#[derive(Deserialize)]
+pub struct QueryRole {
+    pub id: Uuid
 }
