@@ -30,7 +30,7 @@ pub struct MachineStatus {
 
 #[derive(Serialize, Type)]
 pub struct Facility {
-    pub id: Uuid,
+    pub id: Option<Uuid>,
     pub name: Option<String>,
     pub address: Option<String>,
 }
