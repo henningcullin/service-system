@@ -19,10 +19,19 @@ impl IntoResponse for ApiError {
         error!(error_message);
 
         match self {
-            Self::DatabaseError(_) => {
-                let message = "Database error";
-                let response_body = Json(message);
-                (StatusCode::INTERNAL_SERVER_ERROR, response_body).into_response()
+            Self::DatabaseError(error) => {
+                match error {
+                    SqlxError::RowNotFound => {
+                        let message = "Not found";
+                        let response_body = Json(message);
+                        (StatusCode::NOT_FOUND, response_body).into_response()
+                    } 
+                    _ => {
+                        let message = "Database error";
+                        let response_body = Json(message);
+                        (StatusCode::INTERNAL_SERVER_ERROR, response_body).into_response()
+                    }
+                }
             }
         }
     }
