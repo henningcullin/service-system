@@ -1,37 +1,36 @@
 use chrono::{DateTime, Utc};
+use serde::Serialize;
+use sqlx::prelude::Type;
 use uuid::Uuid;
 
+#[derive(Serialize)]
 pub struct Machine {
-    id: Uuid,
-    name: String,
-    make: Option<String>,
-    machine_type: MachineType,
-    status: MachineStatus,
-    created: DateTime<Utc>,
-    edited: DateTime<Utc>,
-    facility: Option<Facility>,
-    image: Option<String>,
+    pub id: Uuid,
+    pub name: String,
+    pub make: Option<String>,
+    pub machine_type: MachineType,
+    pub status: MachineStatus,
+    pub created: DateTime<Utc>,
+    pub edited: DateTime<Utc>,
+    pub facility: Option<Facility>,
+    pub image: Option<String>,
 }
 
+#[derive(Serialize, Type)]
 pub struct MachineType {
-    id: Uuid,
-    name: String,
+    pub id: Uuid,
+    pub name: String,
 }
 
+#[derive(Serialize, Type)]
 pub struct MachineStatus {
-    id: Uuid,
-    name: String,
+    pub id: Uuid,
+    pub name: Option<String>,
 }
 
+#[derive(Serialize, Type)]
 pub struct Facility {
-    id: Uuid,
-    name: String,
-    address: Option<String>,
-}
-
-pub struct MachineShort {
-    id: Uuid,
-    name: String,
-    make: Option<String>,
-    image: String,
+    pub id: Uuid,
+    pub name: Option<String>,
+    pub address: Option<String>,
 }

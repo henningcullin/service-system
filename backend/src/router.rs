@@ -1,7 +1,6 @@
-use crate::{auth::auth, machine, task, user, AppState};
+use crate::{/* auth::auth, machine, task, user, */ machines, AppState};
 use axum::{
-    middleware,
-    routing::{delete, get, get_service, post, put},
+    routing::{get, get_service},
     Router,
 };
 use std::sync::Arc;
@@ -15,28 +14,9 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
     ));
 
     let auth = Router::new()
-        .route("/machine", get(machine::details))
-        .route("/machines", get(machine::index))
-        .route("/machine", post(machine::create))
-        .route("/machine", delete(machine::delete))
-        .route("/machine", put(machine::update))
-        .route("/user/me", get(user::me))
-        .route("/user", get(user::details))
-        .route("/users", get(user::index))
-        .route("/user", post(user::create))
-        .route("/user", put(user::update))
-        .route("/user/logout", get(user::logout))
-        .route("/task", get(task::details))
-        .route("/tasks", get(task::index))
-        .route("/task", post(task::create))
-        .route("/task", delete(task::delete))
-        .route("/task", put(task::update))
-        .layer(middleware::from_fn_with_state(app_state.clone(), auth));
+        .route("/machines", get(machines::index));
 
     let api = Router::new()
-        .route("/user/internal/login", post(user::login_internal))
-        .route("/user/login", post(user::login_initiate))
-        .route("/user/external/verify", post(user::verify_external))
         .nest("/auth", auth);
 
     let app = Router::new()
