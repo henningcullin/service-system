@@ -7,7 +7,7 @@ use axum::{
 };
 use sqlx::{Postgres, QueryBuilder};
 
-use crate::{utils::errors::ApiError, AppState};
+use crate::{update_field, utils::errors::ApiError, AppState};
 
 use super::models::{NewRole, QueryRole, Role, UpdateRole};
 
@@ -143,14 +143,6 @@ pub async fn create(
     .map_err(ApiError::from)?;
 
     Ok((StatusCode::CREATED, Json(role)))
-}
-
-macro_rules! update_field {
-    ($query:expr, $field:expr, $value:expr) => {
-        if let Some(val) = $value {
-            $query.push(concat!(" ", $field, " = ")).push_bind(val);
-        }
-    };
 }
 
 pub async fn update(
