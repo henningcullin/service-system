@@ -1,5 +1,6 @@
 mod config;
 mod machines;
+mod roles;
 mod router;
 mod utils;
 
