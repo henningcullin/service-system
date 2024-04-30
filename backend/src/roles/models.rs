@@ -64,3 +64,33 @@ pub struct NewRole {
     pub facility_edit: Option<bool>,
     pub facility_delete: Option<bool>,
 }
+
+// Update
+
+#[derive(Deserialize)]
+pub struct UpdateRole {
+    pub id: Uuid,
+    pub name: Option<String>,
+    pub level: Option<i32>,
+    pub has_password: Option<bool>,
+    pub user_view: Option<bool>,
+    pub user_create: Option<bool>,
+    pub user_edit: Option<bool>,
+    pub user_delete: Option<bool>,
+    pub machine_view: Option<bool>,
+    pub machine_create: Option<bool>,
+    pub machine_edit: Option<bool>,
+    pub machine_delete: Option<bool>,
+    pub task_view: Option<bool>,
+    pub task_create: Option<bool>,
+    pub task_edit: Option<bool>,
+    pub task_delete: Option<bool>,
+    pub report_view: Option<bool>,
+    pub report_create: Option<bool>,
+    pub report_edit: Option<bool>,
+    pub report_delete: Option<bool>,
+    pub facility_view: Option<bool>,
+    pub facility_create: Option<bool>,
+    pub facility_edit: Option<bool>,
+    pub facility_delete: Option<bool>,
+}
