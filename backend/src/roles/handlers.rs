@@ -5,7 +5,7 @@ use axum::{
     http::StatusCode,
     Json,
 };
-use sqlx::{Postgres, QueryBuilder};
+use sqlx::{query, query_as, Postgres, QueryBuilder};
 
 use crate::{update_field, utils::errors::ApiError, AppState};
 
@@ -15,7 +15,7 @@ pub async fn details(
     State(app_state): State<Arc<AppState>>,
     Query(params): Query<QueryRole>,
 ) -> Result<Json<Role>, ApiError> {
-    let role = sqlx::query_as!(
+    let role = query_as!(
         Role,
         r#"
         SELECT
@@ -35,7 +35,7 @@ pub async fn details(
 }
 
 pub async fn index(State(app_state): State<Arc<AppState>>) -> Result<Json<Vec<Role>>, ApiError> {
-    let roles = sqlx::query_as!(
+    let roles = query_as!(
         Role,
         r#"
         SELECT 
@@ -55,7 +55,7 @@ pub async fn create(
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<NewRole>,
 ) -> Result<(StatusCode, Json<Role>), ApiError> {
-    let role = sqlx::query_as!(
+    let role = query_as!(
         Role,
         r#"
         INSERT INTO 
@@ -179,6 +179,28 @@ pub async fn update(
     query.push_bind(body.id);
 
     let result = query.build()
+        .execute(&app_state.db)
+        .await
+        .map_err(ApiError::from)?;
+
+    match result.rows_affected() {
+        1 => {
+            Ok(StatusCode::OK)
+        }
+        _ => {
+            Ok(StatusCode::NOT_FOUND)
+        }
+    }
+}
+
+pub async fn delete(
+    State(app_state): State<Arc<AppState>>,
+    Query(params): Query<QueryRole>,
+) -> Result<StatusCode, ApiError> {
+    let result = query!(
+        r#"DELETE FROM roles WHERE id = $1"#,
+        params.id
+    )
         .execute(&app_state.db)
         .await
         .map_err(ApiError::from)?;

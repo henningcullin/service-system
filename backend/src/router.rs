@@ -1,6 +1,6 @@
 use crate::{/* auth::auth, machine, task, user, */ machines, roles, AppState};
 use axum::{
-    routing::{get, get_service, post, put},
+    routing::{delete, get, get_service, post, put},
     Router,
 };
 use std::sync::Arc;
@@ -19,6 +19,7 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/roles", get(roles::index))
         .route("/role", post(roles::create))
         .route("/role", put(roles::update))
+        .route("/role", delete(roles::delete))
         // Machines
         .route("/machine", get(machines::details))
         .route("/machines", get(machines::index));
