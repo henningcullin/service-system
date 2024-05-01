@@ -15,3 +15,21 @@ macro_rules! update_field {
         }
     };
 }
+
+#[macro_export]
+macro_rules! insert_param {
+    ($query_builder:expr, $value:expr) => {
+        match $value {
+            Field::Str(Some(val)) => {
+                $query_builder.push_bind(val);
+            }
+            Field::Int(Some(val)) => {
+                $query_builder.push_bind(val);
+            }
+            Field::Bool(Some(val)) => {
+                $query_builder.push_bind(val);
+            }
+            _ => {}
+        }
+    };
+}

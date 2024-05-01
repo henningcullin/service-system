@@ -10,12 +10,11 @@ enum Field {
     Str(Option<String>),
     Int(Option<i32>),
     Bool(Option<bool>),
-    // Add more variants here as needed
 }
 
 use sqlx::{query, query_as, Postgres, QueryBuilder};
 
-use crate::{update_field, utils::errors::ApiError, AppState};
+use crate::{insert_param, update_field, utils::errors::ApiError, AppState};
 
 use super::models::{NewRole, QueryRole, Role, UpdateRole};
 
@@ -63,92 +62,61 @@ pub async fn create(
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<NewRole>,
 ) -> Result<(StatusCode, Json<Role>), ApiError> {
-    let role = query_as!(
-        Role,
-        r#"
-        INSERT INTO 
-            roles 
-        (
-            name, 
-            level, 
-            has_password, 
-            user_view, 
-            user_create, 
-            user_edit, 
-            user_delete, 
-            machine_view, 
-            machine_create, 
-            machine_edit, 
-            machine_delete, 
-            task_view, 
-            task_create, 
-            task_edit, 
-            task_delete, 
-            report_view, 
-            report_create, 
-            report_edit, 
-            report_delete, 
-            facility_view, 
-            facility_create, 
-            facility_edit, 
-            facility_delete
-        )
-        VALUES 
-        (
-            $1, 
-            $2, 
-            $3, 
-            $4, 
-            $5, 
-            $6, 
-            $7, 
-            $8, 
-            $9, 
-            $10, 
-            $11, 
-            $12, 
-            $13, 
-            $14, 
-            $15, 
-            $16, 
-            $17, 
-            $18, 
-            $19, 
-            $20, 
-            $21, 
-            $22, 
-            $23
-        )
-        RETURNING
-            *
-        "#,
-        body.name,
-        body.level,
-        body.has_password.unwrap_or(true),
-        body.user_view.unwrap_or(false),
-        body.user_create.unwrap_or(false),
-        body.user_edit.unwrap_or(false),
-        body.user_delete.unwrap_or(false),
-        body.machine_view.unwrap_or(false),
-        body.machine_create.unwrap_or(false),
-        body.machine_edit.unwrap_or(false),
-        body.machine_delete.unwrap_or(false),
-        body.task_view.unwrap_or(false),
-        body.task_create.unwrap_or(false),
-        body.task_edit.unwrap_or(false),
-        body.task_delete.unwrap_or(false),
-        body.report_view.unwrap_or(false),
-        body.report_create.unwrap_or(false),
-        body.report_edit.unwrap_or(false),
-        body.report_delete.unwrap_or(false),
-        body.facility_view.unwrap_or(false),
-        body.facility_create.unwrap_or(false),
-        body.facility_edit.unwrap_or(false),
-        body.facility_delete.unwrap_or(false)
-    )
-    .fetch_one(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    let mut query_builder = QueryBuilder::<Postgres>::new("INSERT INTO roles ( ");
+    let mut separated_list = query_builder.separated(", ");
+
+    let fields = vec![
+        ("name", Field::Str(Some(body.name))),
+        ("level", Field::Int(Some(body.level))),
+        ("has_password", Field::Bool(body.has_password)),
+        ("user_view", Field::Bool(body.user_view)),
+        ("user_create", Field::Bool(body.user_create)),
+        ("user_edit", Field::Bool(body.user_edit)),
+        ("user_delete", Field::Bool(body.user_delete)),
+        ("machine_view", Field::Bool(body.machine_view)),
+        ("machine_create", Field::Bool(body.machine_create)),
+        ("machine_edit", Field::Bool(body.machine_edit)),
+        ("machine_delete", Field::Bool(body.machine_delete)),
+        ("task_view", Field::Bool(body.task_view)),
+        ("task_create", Field::Bool(body.task_create)),
+        ("task_edit", Field::Bool(body.task_edit)),
+        ("task_delete", Field::Bool(body.task_delete)),
+        ("report_view", Field::Bool(body.report_view)),
+        ("report_create", Field::Bool(body.report_create)),
+        ("report_edit", Field::Bool(body.report_edit)),
+        ("report_delete", Field::Bool(body.report_delete)),
+        ("facility_view", Field::Bool(body.facility_view)),
+        ("facility_create", Field::Bool(body.facility_create)),
+        ("facility_edit", Field::Bool(body.facility_edit)),
+        ("facility_delete", Field::Bool(body.facility_delete)),
+    ];
+
+    let fields: Vec<_> = fields.into_iter().filter(|(_, field)| {
+        match field {
+            Field::Str(ref value) => value.is_some(),
+            Field::Int(ref value) => value.is_some(),
+            Field::Bool(ref value) => value.is_some(),
+        }
+    }).collect();
+
+    for (field, _) in &fields {
+        separated_list.push(field);
+    }
+
+    query_builder.push(" ) VALUES ( ");    
+
+    let mut separated_list = query_builder.separated(", ");
+
+    for (_, value) in fields {
+        insert_param!(separated_list, value);
+    }
+
+    query_builder.push(" ) RETURNING *");
+
+    let role = query_builder.build_query_as::<Role>()
+        .fetch_one(&app_state.db)
+        .await
+        .map_err(ApiError::from)?;
 
     Ok((StatusCode::CREATED, Json(role)))
 }
