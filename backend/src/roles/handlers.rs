@@ -6,15 +6,9 @@ use axum::{
     Json,
 };
 
-enum Field {
-    Str(Option<String>),
-    Int(Option<i32>),
-    Bool(Option<bool>),
-}
-
 use sqlx::{query, query_as, Postgres, QueryBuilder};
 
-use crate::{insert_param, update_field, utils::errors::ApiError, AppState};
+use crate::{insert_param, update_field, utils::{errors::ApiError, misc::Field}, AppState};
 
 use super::models::{NewRole, QueryRole, Role, UpdateRole};
 
