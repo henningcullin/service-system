@@ -15,6 +15,7 @@ macro_rules! update_field {
         }
     };
 }
+
 #[macro_export]
 macro_rules! insert_fields {
     ($query_builder:expr, $fields:expr) => {
@@ -53,4 +54,22 @@ macro_rules! insert_fields {
 
         $query_builder.push(" )");
     };
+}
+
+#[macro_export]
+macro_rules! field_vec {
+    ($($name:ident => $values:expr),*) => {{
+
+        macro_rules! to_field {
+            ($value:expr) => {{
+                Field::from($value)
+            }};
+        }
+
+        vec![
+            $(
+                (stringify!($name), to_field!($values)),
+            )*
+        ]
+    }};
 }
