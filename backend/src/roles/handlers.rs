@@ -83,7 +83,7 @@ pub async fn create(
         facility_edit => body.facility_edit,
         facility_delete => body.facility_delete
     ];
-    
+
     insert_fields!(query_builder, fields);
 
     query_builder.push(" RETURNING *");
@@ -103,30 +103,30 @@ pub async fn update(
     let mut query_builder = QueryBuilder::<Postgres>::new("UPDATE roles SET");
     let mut separated_list = query_builder.separated(",");
 
-    let fields = vec![
-        ("name", Field::Str(body.name)),
-        ("level", Field::Int(body.level)),
-        ("has_password", Field::Bool(body.has_password)),
-        ("user_view", Field::Bool(body.user_view)),
-        ("user_create", Field::Bool(body.user_create)),
-        ("user_edit", Field::Bool(body.user_edit)),
-        ("user_delete", Field::Bool(body.user_delete)),
-        ("machine_view", Field::Bool(body.machine_view)),
-        ("machine_create", Field::Bool(body.machine_create)),
-        ("machine_edit", Field::Bool(body.machine_edit)),
-        ("machine_delete", Field::Bool(body.machine_delete)),
-        ("task_view", Field::Bool(body.task_view)),
-        ("task_create", Field::Bool(body.task_create)),
-        ("task_edit", Field::Bool(body.task_edit)),
-        ("task_delete", Field::Bool(body.task_delete)),
-        ("report_view", Field::Bool(body.report_view)),
-        ("report_create", Field::Bool(body.report_create)),
-        ("report_edit", Field::Bool(body.report_edit)),
-        ("report_delete", Field::Bool(body.report_delete)),
-        ("facility_view", Field::Bool(body.facility_view)),
-        ("facility_create", Field::Bool(body.facility_create)),
-        ("facility_edit", Field::Bool(body.facility_edit)),
-        ("facility_delete", Field::Bool(body.facility_delete)),
+    let fields = field_vec![
+        name => body.name,
+        level => body.level,
+        has_password => body.has_password,
+        user_view => body.user_view,
+        user_create => body.user_create,
+        user_edit => body.user_edit,
+        user_delete => body.user_delete,
+        machine_view => body.machine_view,
+        machine_create => body.machine_create,
+        machine_edit => body.machine_edit,
+        machine_delete => body.machine_delete,
+        task_view => body.task_view,
+        task_create => body.task_create,
+        task_edit => body.task_edit,
+        task_delete => body.task_delete,
+        report_view => body.report_view,
+        report_create => body.report_create,
+        report_edit => body.report_edit,
+        report_delete => body.report_delete,
+        facility_view => body.facility_view,
+        facility_create => body.facility_create,
+        facility_edit => body.facility_edit,
+        facility_delete => body.facility_delete
     ];
 
     for (field, value) in fields {
