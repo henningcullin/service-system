@@ -8,7 +8,7 @@ use axum::{
 
 use sqlx::{query, query_as, Postgres, QueryBuilder};
 
-use crate::{insert_param, update_field, utils::{errors::ApiError, misc::Field}, AppState};
+use crate::{insert_fields, update_field, utils::{errors::ApiError, misc::Field}, AppState};
 
 use super::models::{NewRole, QueryRole, Role, UpdateRole};
 
@@ -57,7 +57,6 @@ pub async fn create(
     Json(body): Json<NewRole>,
 ) -> Result<(StatusCode, Json<Role>), ApiError> {
     let mut query_builder = QueryBuilder::<Postgres>::new("INSERT INTO roles ( ");
-    let mut separated_list = query_builder.separated(", ");
 
     let fields = vec![
         ("name", Field::Str(Some(body.name))),
@@ -85,27 +84,9 @@ pub async fn create(
         ("facility_delete", Field::Bool(body.facility_delete)),
     ];
 
-    let fields: Vec<_> = fields.into_iter().filter(|(_, field)| {
-        match field {
-            Field::Str(ref value) => value.is_some(),
-            Field::Int(ref value) => value.is_some(),
-            Field::Bool(ref value) => value.is_some(),
-        }
-    }).collect();
+    insert_fields!(query_builder, fields);
 
-    for (field, _) in &fields {
-        separated_list.push(field);
-    }
-
-    query_builder.push(" ) VALUES ( ");    
-
-    let mut separated_list = query_builder.separated(", ");
-
-    for (_, value) in fields {
-        insert_param!(separated_list, value);
-    }
-
-    query_builder.push(" ) RETURNING *");
+    query_builder.push(" RETURNING *");
 
     let role = query_builder.build_query_as::<Role>()
         .fetch_one(&app_state.db)
