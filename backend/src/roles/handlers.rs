@@ -199,12 +199,8 @@ pub async fn update(
         .map_err(ApiError::from)?;
 
     match result.rows_affected() {
-        1 => {
-            Ok(StatusCode::OK)
-        }
-        _ => {
-            Ok(StatusCode::NOT_FOUND)
-        }
+        1 => Ok(StatusCode::OK),
+        _ => Ok(StatusCode::NOT_FOUND)
     }
 }
 
@@ -221,11 +217,7 @@ pub async fn delete(
         .map_err(ApiError::from)?;
 
     match result.rows_affected() {
-        1 => {
-            Ok(StatusCode::OK)
-        }
-        _ => {
-            Ok(StatusCode::NOT_FOUND)
-        }
+        1 => Ok(StatusCode::OK),
+        _ => Ok(StatusCode::NOT_FOUND)
     }
 }
