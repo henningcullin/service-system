@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::prelude::Type;
 use uuid::Uuid;
 
+use super::facilities::Facility;
+
 #[derive(Serialize)]
 pub struct Machine {
     pub id: Uuid,
@@ -26,13 +28,6 @@ pub struct MachineType {
 pub struct MachineStatus {
     pub id: Uuid,
     pub name: String,
-}
-
-#[derive(Serialize, Type)]
-pub struct Facility {
-    pub id: Option<Uuid>,
-    pub name: Option<String>,
-    pub address: Option<String>,
 }
 
 // Details

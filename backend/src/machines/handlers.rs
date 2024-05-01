@@ -4,7 +4,8 @@ use axum::{extract::{Query, State}, Json};
 
 use crate::{utils::errors::ApiError, AppState};
 
-use super::models::{Facility, Machine, MachineStatus, MachineType, QueryMachine};
+use super::{facilities::Facility, models::{Machine, MachineStatus, MachineType, QueryMachine}};
+
 
 pub async fn details(
     State(app_state): State<Arc<AppState>>,
