@@ -5,6 +5,14 @@ use axum::{
     http::StatusCode,
     Json,
 };
+
+enum Field {
+    Str(Option<String>),
+    Int(Option<i32>),
+    Bool(Option<bool>),
+    // Add more variants here as needed
+}
+
 use sqlx::{query, query_as, Postgres, QueryBuilder};
 
 use crate::{update_field, utils::errors::ApiError, AppState};
@@ -149,36 +157,43 @@ pub async fn update(
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<UpdateRole>,
 ) -> Result<StatusCode, ApiError> {
-    let mut query = QueryBuilder::<Postgres>::new("UPDATE roles SET");
+    let mut query_builder = QueryBuilder::<Postgres>::new("UPDATE roles SET");
+    let mut separated_list = query_builder.separated(",");
 
-    update_field!(query, "name", body.name);
-    update_field!(query, "level", body.level);
-    update_field!(query, "has_password", body.has_password);
-    update_field!(query, "user_view", body.user_view);
-    update_field!(query, "user_create", body.user_create);
-    update_field!(query, "user_edit", body.user_edit);
-    update_field!(query, "user_delete", body.user_delete);
-    update_field!(query, "machine_view", body.machine_view);
-    update_field!(query, "machine_create", body.machine_create);
-    update_field!(query, "machine_edit", body.machine_edit);
-    update_field!(query, "machine_delete", body.machine_delete);
-    update_field!(query, "task_view", body.task_view);
-    update_field!(query, "task_create", body.task_create);
-    update_field!(query, "task_edit", body.task_edit);
-    update_field!(query, "task_delete", body.task_delete);
-    update_field!(query, "report_view", body.report_view);
-    update_field!(query, "report_create", body.report_create);
-    update_field!(query, "report_edit", body.report_edit);
-    update_field!(query, "report_delete", body.report_delete);
-    update_field!(query, "facility_view", body.facility_view);
-    update_field!(query, "facility_create", body.facility_create);
-    update_field!(query, "facility_edit", body.facility_edit);
-    update_field!(query, "facility_delete", body.facility_delete);
+    let fields = vec![
+        ("name", Field::Str(body.name)),
+        ("level", Field::Int(body.level)),
+        ("has_password", Field::Bool(body.has_password)),
+        ("user_view", Field::Bool(body.user_view)),
+        ("user_create", Field::Bool(body.user_create)),
+        ("user_edit", Field::Bool(body.user_edit)),
+        ("user_delete", Field::Bool(body.user_delete)),
+        ("machine_view", Field::Bool(body.machine_view)),
+        ("machine_create", Field::Bool(body.machine_create)),
+        ("machine_edit", Field::Bool(body.machine_edit)),
+        ("machine_delete", Field::Bool(body.machine_delete)),
+        ("task_view", Field::Bool(body.task_view)),
+        ("task_create", Field::Bool(body.task_create)),
+        ("task_edit", Field::Bool(body.task_edit)),
+        ("task_delete", Field::Bool(body.task_delete)),
+        ("report_view", Field::Bool(body.report_view)),
+        ("report_create", Field::Bool(body.report_create)),
+        ("report_edit", Field::Bool(body.report_edit)),
+        ("report_delete", Field::Bool(body.report_delete)),
+        ("facility_view", Field::Bool(body.facility_view)),
+        ("facility_create", Field::Bool(body.facility_create)),
+        ("facility_edit", Field::Bool(body.facility_edit)),
+        ("facility_delete", Field::Bool(body.facility_delete)),
+    ];
 
-    query.push(" WHERE id = ");
-    query.push_bind(body.id);
+    for (field, value) in fields {
+        update_field!(separated_list, field, value);
+    }
 
-    let result = query.build()
+    query_builder.push(" WHERE id = ");
+    query_builder.push_bind(body.id);
+
+    let result = query_builder.build()
         .execute(&app_state.db)
         .await
         .map_err(ApiError::from)?;
