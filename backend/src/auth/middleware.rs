@@ -11,8 +11,17 @@ use axum::{
 
 use axum_extra::extract::cookie::CookieJar;
 use jsonwebtoken::{decode, DecodingKey, Validation};
+use sqlx::query_as;
+use uuid::Uuid;
 
-use crate::{auth::models::TokenClaims, utils::errors::ApiError, AppState};
+use crate::{
+    auth::models::TokenClaims,
+    machines::facilities::Facility,
+    user_from_id,
+    users::{models::User, roles::models::Role},
+    utils::errors::ApiError,
+    AppState,
+};
 
 pub async fn auth(
     cookie_jar: CookieJar,
@@ -30,14 +39,28 @@ pub async fn auth(
                 .and_then(|auth_value| {
                     if auth_value.starts_with("Bearer ") {
                         Some(auth_value[7..].to_owned())
-                    }
-                    else {
+                    } else {
                         None
                     }
                 })
         });
 
     let token = token.ok_or_else(|| ApiError::Unauthorized)?;
+
+    let claims = decode::<TokenClaims>(
+        &token,
+        &DecodingKey::from_secret(app_state.env.jwt_secret.as_ref()),
+        &Validation::default(),
+    )
+    .map_err(ApiError::from)?
+    .claims;
+
+    let user_id = Uuid::parse_str(&claims.sub).map_err(ApiError::from)?;
+
+    let user: User = user_from_id!(user_id)
+        .fetch_one(&app_state.db)
+        .await
+        .map_err(ApiError::from)?;
 
     todo!()
 }
