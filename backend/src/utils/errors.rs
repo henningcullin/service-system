@@ -1,13 +1,21 @@
 use axum::{body::Body, http::{Response, StatusCode}, response::IntoResponse, Json};
-use sqlx::Error as SqlxError;
+use uuid::Error as UuidError;
 use jsonwebtoken::errors::Error as JWTError;
+use sqlx::Error as SqlxError;
 use tracing::error;
 
 #[derive(Debug)]
 pub enum ApiError {
     Unauthorized,
+    UuidError(UuidError),
     InvalidToken(JWTError),
     DatabaseError(SqlxError),
+}
+
+impl From<UuidError> for ApiError {
+    fn from(err: UuidError) -> Self {
+        Self::UuidError(err)
+    }
 }
 
 impl From<JWTError> for ApiError {
@@ -29,6 +37,11 @@ impl IntoResponse for ApiError {
         error!(error_message);
 
         match self {
+            Self::UuidError(_) => {
+                let message = "Internal server error";
+                let response_body = Json(message);
+                (StatusCode::INTERNAL_SERVER_ERROR, response_body).into_response()
+            }
             Self::Unauthorized => {
                 let message = "You are not logged in";
                 let response_body = Json(message);
