@@ -1,4 +1,4 @@
-use crate::{/* auth::auth, machine, task, user, */ machines::{self, facilities}, roles, AppState};
+use crate::{/* auth::auth, machine, task, user, */ machines::{self, facilities}, users::roles, AppState};
 use axum::{
     routing::{delete, get, get_service, post, put},
     Router,
