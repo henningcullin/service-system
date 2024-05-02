@@ -3,6 +3,7 @@ mod machines;
 mod users;
 mod router;
 mod utils;
+mod auth;
 
 use axum::http::{
     header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
