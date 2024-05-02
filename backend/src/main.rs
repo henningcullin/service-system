@@ -1,9 +1,9 @@
+mod auth;
 mod config;
 mod machines;
-mod users;
 mod router;
+mod users;
 mod utils;
-mod auth;
 
 use axum::http::{
     header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
@@ -62,8 +62,7 @@ async fn main() {
         .allow_credentials(true)
         .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE]);
 
-    let app = create_router(Arc::new(state))
-        .layer(cors);
+    let app = create_router(Arc::new(state)).layer(cors);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:80")
         .await

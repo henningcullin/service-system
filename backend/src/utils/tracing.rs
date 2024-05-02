@@ -1,5 +1,5 @@
 use tracing::{level_filters::LevelFilter, Level};
-use tracing_appender::{non_blocking, rolling::daily, non_blocking::WorkerGuard};
+use tracing_appender::{non_blocking, non_blocking::WorkerGuard, rolling::daily};
 use tracing_subscriber::{fmt, prelude::*, registry::Registry};
 
 pub fn init(log_path: &str) -> (WorkerGuard, WorkerGuard) {

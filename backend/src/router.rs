@@ -1,4 +1,8 @@
-use crate::{/* auth::auth, machine, task, user, */ machines::{self, facilities}, users::{self, roles}, AppState};
+use crate::{
+    machines::{self, facilities},
+    users::{self, roles},
+    AppState,
+};
 use axum::{
     routing::{delete, get, get_service, post, put},
     Router,
@@ -17,7 +21,6 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         // Users
         .route("/user", get(users::details))
         .route("/users", get(users::index))
-        
         // Roles
         .route("/role", get(roles::details))
         .route("/roles", get(roles::index))
@@ -26,15 +29,11 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/role", delete(roles::delete))
         // Facilities
         .route("/facilities", get(facilities::index))
-
-
         // Machines
         .route("/machine", get(machines::details))
         .route("/machines", get(machines::index));
 
-
-    let api = Router::new()
-        .nest("/auth", auth);
+    let api = Router::new().nest("/auth", auth);
 
     let app = Router::new()
         .nest("/api", api)

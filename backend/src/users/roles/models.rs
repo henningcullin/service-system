@@ -34,7 +34,7 @@ pub struct Role {
 
 #[derive(Deserialize)]
 pub struct QueryRole {
-    pub id: Uuid
+    pub id: Uuid,
 }
 
 // Create

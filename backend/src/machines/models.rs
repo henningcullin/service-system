@@ -33,5 +33,5 @@ pub struct MachineStatus {
 // Details
 #[derive(Deserialize)]
 pub struct QueryMachine {
-    pub id: Uuid
+    pub id: Uuid,
 }

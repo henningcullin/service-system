@@ -13,5 +13,5 @@ pub struct Facility {
 
 #[derive(Deserialize)]
 pub struct QueryFacility {
-    pub id: Uuid
+    pub id: Uuid,
 }

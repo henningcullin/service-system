@@ -1,17 +1,22 @@
 use std::sync::Arc;
 
-use axum::{extract::{Query, State}, Json};
+use axum::{
+    extract::{Query, State},
+    Json,
+};
 use sqlx::query_as;
 
 use crate::{machines::facilities::Facility, utils::errors::ApiError, AppState};
 
-use super::{models::{QueryUser, User}, roles::models::Role};
+use super::{
+    models::{QueryUser, User},
+    roles::models::Role,
+};
 
 pub async fn details(
     State(app_state): State<Arc<AppState>>,
     Query(params): Query<QueryUser>,
 ) -> Result<Json<User>, ApiError> {
-
     let user = query_as!(
         User,
         r#"
@@ -71,17 +76,14 @@ pub async fn details(
         "#,
         params.id
     )
-        .fetch_one(&app_state.db)
-        .await
-        .map_err(ApiError::from)?;
-        
+    .fetch_one(&app_state.db)
+    .await
+    .map_err(ApiError::from)?;
 
     Ok(Json(user))
 }
 
-pub async fn index(
-    State(app_state): State<Arc<AppState>>,
-) -> Result<Json<Vec<User>>, ApiError> {
+pub async fn index(State(app_state): State<Arc<AppState>>) -> Result<Json<Vec<User>>, ApiError> {
     let users = query_as!(
         User,
         r#"
@@ -138,9 +140,9 @@ pub async fn index(
             u.facility = f.id
         "#
     )
-        .fetch_all(&app_state.db)
-        .await
-        .map_err(ApiError::from)?;
+    .fetch_all(&app_state.db)
+    .await
+    .map_err(ApiError::from)?;
 
     Ok(Json(users))
 }

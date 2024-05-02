@@ -6,7 +6,7 @@ pub struct Config {
     pub jwt_expires_in: i64,
     pub jwt_maxage: i32,
     pub frontend_url: String,
-    pub log_path: String
+    pub log_path: String,
 }
 
 impl Config {
@@ -29,7 +29,7 @@ impl Config {
                 .parse::<i32>()
                 .expect("Could not parse JWT_MAXAGE to i32"),
             frontend_url,
-            log_path
+            log_path,
         }
     }
 }

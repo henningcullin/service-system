@@ -1,17 +1,21 @@
 use std::sync::Arc;
 
-use axum::{extract::{Query, State}, Json};
+use axum::{
+    extract::{Query, State},
+    Json,
+};
 
 use crate::{utils::errors::ApiError, AppState};
 
-use super::{facilities::Facility, models::{Machine, MachineStatus, MachineType, QueryMachine}};
-
+use super::{
+    facilities::Facility,
+    models::{Machine, MachineStatus, MachineType, QueryMachine},
+};
 
 pub async fn details(
     State(app_state): State<Arc<AppState>>,
     Query(params): Query<QueryMachine>,
 ) -> Result<Json<Machine>, ApiError> {
-
     let machine = sqlx::query_as!(
         Machine,
         r#"
@@ -54,17 +58,14 @@ pub async fn details(
         "#,
         params.id
     )
-        .fetch_one(&app_state.db)
-        .await
-        .map_err(ApiError::from)?;
+    .fetch_one(&app_state.db)
+    .await
+    .map_err(ApiError::from)?;
 
     Ok(Json(machine))
-
 }
 
-pub async fn index(
-    State(app_state): State<Arc<AppState>>,
-) -> Result<Json<Vec<Machine>>, ApiError> {
+pub async fn index(State(app_state): State<Arc<AppState>>) -> Result<Json<Vec<Machine>>, ApiError> {
     let machines = sqlx::query_as!(
         Machine,
         r#"
@@ -104,9 +105,9 @@ pub async fn index(
             m.facility = f.id
         "#,
     )
-        .fetch_all(&app_state.db)
-        .await
-        .map_err(ApiError::from)?;
+    .fetch_all(&app_state.db)
+    .await
+    .map_err(ApiError::from)?;
 
     Ok(Json(machines))
 }

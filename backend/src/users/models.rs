@@ -18,12 +18,12 @@ pub struct User {
     pub last_login: DateTime<Utc>,
     pub occupation: Option<String>,
     pub image: Option<String>,
-    pub facility: Option<Facility>
+    pub facility: Option<Facility>,
 }
 
 // Details
 
 #[derive(Deserialize)]
 pub struct QueryUser {
-    pub id: Uuid
+    pub id: Uuid,
 }

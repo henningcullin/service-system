@@ -8,7 +8,11 @@ use axum::{
 
 use sqlx::{query, query_as, Postgres, QueryBuilder};
 
-use crate::{field_vec, insert_fields, update_field, utils::{errors::ApiError, misc::Field}, AppState};
+use crate::{
+    field_vec, insert_fields, update_field,
+    utils::{errors::ApiError, misc::Field},
+    AppState,
+};
 
 use super::models::{NewRole, QueryRole, Role, UpdateRole};
 
@@ -88,7 +92,8 @@ pub async fn create(
 
     query_builder.push(" RETURNING *");
 
-    let role = query_builder.build_query_as::<Role>()
+    let role = query_builder
+        .build_query_as::<Role>()
         .fetch_one(&app_state.db)
         .await
         .map_err(ApiError::from)?;
@@ -136,14 +141,15 @@ pub async fn update(
     query_builder.push(" WHERE id = ");
     query_builder.push_bind(body.id);
 
-    let result = query_builder.build()
+    let result = query_builder
+        .build()
         .execute(&app_state.db)
         .await
         .map_err(ApiError::from)?;
 
     match result.rows_affected() {
         1 => Ok(StatusCode::OK),
-        _ => Ok(StatusCode::NOT_FOUND)
+        _ => Ok(StatusCode::NOT_FOUND),
     }
 }
 
@@ -151,16 +157,13 @@ pub async fn delete(
     State(app_state): State<Arc<AppState>>,
     Query(params): Query<QueryRole>,
 ) -> Result<StatusCode, ApiError> {
-    let result = query!(
-        r#"DELETE FROM roles WHERE id = $1"#,
-        params.id
-    )
+    let result = query!(r#"DELETE FROM roles WHERE id = $1"#, params.id)
         .execute(&app_state.db)
         .await
         .map_err(ApiError::from)?;
 
     match result.rows_affected() {
         1 => Ok(StatusCode::OK),
-        _ => Ok(StatusCode::NOT_FOUND)
+        _ => Ok(StatusCode::NOT_FOUND),
     }
 }
