@@ -1,14 +1,9 @@
 use std::sync::Arc;
 
-use axum::{extract::{Query, State}, Json};
+use axum::{extract::State, Json};
 use sqlx::query_as;
 
 use crate::{machines::facilities::Facility, utils::errors::ApiError, AppState};
-
-use super::models::QueryFacility;
-
-
-
 
 
 pub async fn index(
