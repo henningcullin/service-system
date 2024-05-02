@@ -7,7 +7,7 @@ use axum::{
 };
 use jsonwebtoken::errors::Error as JWTError;
 use sqlx::Error as SqlxError;
-use tracing::error;
+use tracing::{error, warn};
 use uuid::Error as UuidError;
 use validator::ValidationErrors as ValidationError;
 
@@ -62,11 +62,16 @@ impl From<SqlxError> for ApiError {
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response<Body> {
         let error_message = format!("{:?}", self);
-        error!(error_message);
 
         let (code, msg) = match self {
-            Self::PasswordError(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error"),
-            Self::ValidationError(_) => (StatusCode::BAD_REQUEST, "Invalid email"),
+            Self::PasswordError(_) => {
+                error!(error_message);
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error")
+            }
+            Self::ValidationError(_) => {
+                error!(error_message);
+                (StatusCode::BAD_REQUEST, "Invalid email")
+            }
             Self::Forbidden(reason) => {
                 let message = match reason {
                     ForbiddenReason::MissingPermission => "You lack permission to do this action",
@@ -76,11 +81,23 @@ impl IntoResponse for ApiError {
                 (StatusCode::FORBIDDEN, message)
             }
             Self::Unauthorized => (StatusCode::UNAUTHORIZED, "You are not logged in"),
-            Self::UuidError(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error"),
-            Self::InvalidToken(_) => (StatusCode::UNAUTHORIZED, "Invalid token"),
+            Self::UuidError(_) => {
+                error!(error_message);
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error")
+            }
+            Self::InvalidToken(_) => {
+                error!(error_message);
+                (StatusCode::UNAUTHORIZED, "Invalid token")
+            }
             Self::DatabaseError(error) => match error {
-                SqlxError::RowNotFound => (StatusCode::NOT_FOUND, "Not found"),
-                _ => (StatusCode::INTERNAL_SERVER_ERROR, "Database error"),
+                SqlxError::RowNotFound => {
+                    warn!(error_message);
+                    (StatusCode::NOT_FOUND, "Not found")
+                }
+                _ => {
+                    error!(error_message);
+                    (StatusCode::INTERNAL_SERVER_ERROR, "Database error")
+                }
             },
         };
 
