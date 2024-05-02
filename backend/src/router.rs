@@ -1,4 +1,4 @@
-use crate::{/* auth::auth, machine, task, user, */ machines::{self, facilities}, users::roles, AppState};
+use crate::{/* auth::auth, machine, task, user, */ machines::{self, facilities}, users::{self, roles}, AppState};
 use axum::{
     routing::{delete, get, get_service, post, put},
     Router,
@@ -14,6 +14,9 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
     ));
 
     let auth = Router::new()
+        // Users
+        .route("/users", get(users::index))
+        
         // Roles
         .route("/role", get(roles::details))
         .route("/roles", get(roles::index))
