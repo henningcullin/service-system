@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::machines::facilities::Facility;
@@ -19,4 +19,11 @@ pub struct User {
     pub occupation: Option<String>,
     pub image: Option<String>,
     pub facility: Option<Facility>
+}
+
+// Details
+
+#[derive(Deserialize)]
+pub struct QueryUser {
+    pub id: Uuid
 }

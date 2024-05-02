@@ -15,6 +15,7 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
 
     let auth = Router::new()
         // Users
+        .route("/user", get(users::details))
         .route("/users", get(users::index))
         
         // Roles
