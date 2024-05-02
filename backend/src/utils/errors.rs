@@ -20,6 +20,7 @@ pub enum ApiError {
     ValidationError(ValidationError),
     InvalidToken(JWTError),
     DatabaseError(SqlxError),
+    GeneralOversight(String),
 }
 
 #[derive(Debug)]
@@ -27,6 +28,7 @@ pub enum ForbiddenReason {
     MissingPermission,
     AccountDeactivated,
     InvalidResource,
+    IncorrectPassword,
 }
 
 impl From<UuidError> for ApiError {
@@ -64,6 +66,10 @@ impl IntoResponse for ApiError {
         let error_message = format!("{:?}", self);
 
         let (code, msg) = match self {
+            Self::GeneralOversight(error) => {
+                error!(error);
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error")
+            }
             Self::PasswordError(_) => {
                 error!(error_message);
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error")
@@ -77,6 +83,7 @@ impl IntoResponse for ApiError {
                     ForbiddenReason::MissingPermission => "You lack permission to do this action",
                     ForbiddenReason::AccountDeactivated => "Your account has been deactivated",
                     ForbiddenReason::InvalidResource => "Invalid resource requested",
+                    ForbiddenReason::IncorrectPassword => "Incorrect password",
                 };
                 (StatusCode::FORBIDDEN, message)
             }

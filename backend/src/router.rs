@@ -1,4 +1,5 @@
 use crate::{
+    auth,
     machines::{self, facilities},
     users::{self, roles},
     AppState,
@@ -33,7 +34,10 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/machine", get(machines::details))
         .route("/machines", get(machines::index));
 
-    let api = Router::new().nest("/auth", auth);
+    let api = Router::new()
+        .nest("/auth", auth)
+        .route("/login", post(auth::login_initiate))
+        .route("/login/password", post(auth::login_password));
 
     let app = Router::new()
         .nest("/api", api)

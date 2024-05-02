@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
-use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
+use argon2::{password_hash::SaltString, Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 use axum::{
     extract::State,
-    http::header,
+    http::{header, StatusCode},
     response::{AppendHeaders, IntoResponse},
     Json,
 };
@@ -14,13 +14,13 @@ use sqlx::query;
 use validator::Validate;
 
 use crate::{
-    auth::models::LoginToken,
+    auth::models::{LoginToken, TokenClaims},
     users::roles::models::Role,
     utils::errors::{ApiError, ForbiddenReason},
     AppState,
 };
 
-use super::models::{LoginEmail, LoginKind};
+use super::models::{LoginEmail, LoginKind, LoginPasswordUser};
 
 pub async fn login_initiate(
     State(app_state): State<Arc<AppState>>,
@@ -140,5 +140,116 @@ pub async fn login_initiate(
     Ok((
         AppendHeaders([(header::SET_COOKIE, cookie)]),
         Json(LoginKind::OTP),
+    ))
+}
+
+pub async fn login_password(
+    State(app_state): State<Arc<AppState>>,
+    Json(body): Json<LoginPasswordUser>,
+) -> Result<impl IntoResponse, ApiError> {
+    body.validate().map_err(ApiError::from)?;
+
+    let user = query!(
+        r#"
+            SELECT
+                u.id,
+                u.email,
+                u.password,
+                (
+                    r.id,
+                    r.name,
+                    r.level,
+                    r.has_password,
+                    r.user_view,
+                    r.user_create,
+                    r.user_edit,
+                    r.user_delete,
+                    r.machine_view,
+                    r.machine_create,
+                    r.machine_edit,
+                    r.machine_delete,
+                    r.task_view,
+                    r.task_create,
+                    r.task_edit,
+                    r.task_delete,
+                    r.report_view,
+                    r.report_create,
+                    r.report_edit,
+                    r.report_delete,
+                    r.facility_view,
+                    r.facility_create,
+                    r.facility_edit,
+                    r.facility_delete
+                ) AS "role!: Role",
+                u.active
+            FROM
+                users u
+            INNER JOIN
+                roles r
+            ON
+                u.role = r.id
+            WHERE
+                u.email = $1
+        "#,
+        body.email.to_lowercase()
+    )
+    .fetch_one(&app_state.db)
+    .await
+    .map_err(ApiError::from)?;
+
+    if !user.role.has_password {
+        return Err(ApiError::Forbidden(ForbiddenReason::MissingPermission));
+    }
+
+    if !user.active {
+        return Err(ApiError::Forbidden(ForbiddenReason::AccountDeactivated));
+    }
+
+    let stored_password = match user.password {
+        Some(pw) => pw,
+        None => {
+            return Err(ApiError::GeneralOversight(format!(
+                "User with has_password true and null password, user: {user:?}"
+            )))
+        }
+    };
+
+    let passwords_match = match PasswordHash::new(&stored_password) {
+        Ok(parsed_hash) => Argon2::default()
+            .verify_password(body.password.as_bytes(), &parsed_hash)
+            .map_or(false, |_| true),
+        Err(_) => false,
+    };
+
+    if !passwords_match {
+        return Err(ApiError::Forbidden(ForbiddenReason::IncorrectPassword));
+    }
+
+    let now = chrono::Utc::now();
+    let iat = now.timestamp() as usize;
+    let exp = (now + chrono::Duration::minutes(app_state.env.jwt_expires_in)).timestamp() as usize;
+    let claims: TokenClaims = TokenClaims {
+        sub: user.id.to_string(),
+        exp,
+        iat,
+    };
+
+    let token = encode(
+        &Header::default(),
+        &claims,
+        &EncodingKey::from_secret(app_state.env.jwt_secret.as_ref()),
+    )
+    .map_err(ApiError::from)?;
+
+    let cookie = Cookie::build(("token", token.to_owned()))
+        .path("/")
+        .max_age(time::Duration::minutes(app_state.env.jwt_expires_in))
+        .same_site(SameSite::Lax)
+        .http_only(true)
+        .to_string();
+
+    Ok((
+        AppendHeaders([(header::SET_COOKIE, cookie)]),
+        StatusCode::OK,
     ))
 }
