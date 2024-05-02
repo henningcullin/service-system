@@ -11,10 +11,18 @@ use uuid::Error as UuidError;
 
 #[derive(Debug)]
 pub enum ApiError {
+    Forbidden(ForbiddenReason),
     Unauthorized,
     UuidError(UuidError),
     InvalidToken(JWTError),
     DatabaseError(SqlxError),
+}
+
+#[derive(Debug)]
+pub enum ForbiddenReason {
+    MissingPermission,
+    AccountDeactivated,
+    InvalidResource,
 }
 
 impl From<UuidError> for ApiError {
@@ -41,15 +49,24 @@ impl IntoResponse for ApiError {
         error!(error_message);
 
         match self {
-            Self::UuidError(_) => {
-                let message = "Internal server error";
+            Self::Forbidden(reason) => {
+                let message = match reason {
+                    ForbiddenReason::MissingPermission => "You lack permission to do this action",
+                    ForbiddenReason::AccountDeactivated => "Your account has been deactivated",
+                    ForbiddenReason::InvalidResource => "Invalid resource requested",
+                };
                 let response_body = Json(message);
-                (StatusCode::INTERNAL_SERVER_ERROR, response_body).into_response()
+                (StatusCode::FORBIDDEN, response_body).into_response()
             }
             Self::Unauthorized => {
                 let message = "You are not logged in";
                 let response_body = Json(message);
                 (StatusCode::UNAUTHORIZED, response_body).into_response()
+            }
+            Self::UuidError(_) => {
+                let message = "Internal server error";
+                let response_body = Json(message);
+                (StatusCode::INTERNAL_SERVER_ERROR, response_body).into_response()
             }
             Self::InvalidToken(_) => {
                 let message = "Invalid token"; // You can customize this message

@@ -6,7 +6,7 @@ use crate::machines::facilities::Facility;
 
 use super::roles::models::Role;
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct User {
     pub id: Uuid,
     pub first_name: String,

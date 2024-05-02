@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::prelude::{FromRow, Type};
 use uuid::Uuid;
 
-#[derive(Serialize, FromRow, Type)]
+#[derive(Serialize, FromRow, Type, Clone)]
 pub struct Role {
     pub id: Uuid,
     pub name: String,

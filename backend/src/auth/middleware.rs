@@ -3,10 +3,9 @@ use std::sync::Arc;
 use axum::{
     body::Body,
     extract::State,
-    http::{header, Request, StatusCode},
+    http::{header, Request},
     middleware::Next,
     response::Response,
-    Json,
 };
 
 use axum_extra::extract::cookie::CookieJar;
@@ -19,7 +18,7 @@ use crate::{
     machines::facilities::Facility,
     user_from_id,
     users::{models::User, roles::models::Role},
-    utils::errors::ApiError,
+    utils::errors::{ApiError, ForbiddenReason},
     AppState,
 };
 
@@ -62,5 +61,10 @@ pub async fn auth(
         .await
         .map_err(ApiError::from)?;
 
-    todo!()
+    if !user.active {
+        Err(ApiError::Forbidden(ForbiddenReason::AccountDeactivated))?
+    }
+
+    req.extensions_mut().insert(user);
+    Ok(next.run(req).await)
 }

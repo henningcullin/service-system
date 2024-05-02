@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::prelude::Type;
 use uuid::Uuid;
 
-#[derive(Serialize, Type)]
+#[derive(Serialize, Type, Clone)]
 pub struct Facility {
     pub id: Option<Uuid>,
     pub name: Option<String>,
