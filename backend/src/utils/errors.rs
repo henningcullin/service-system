@@ -1,3 +1,4 @@
+use argon2::password_hash::Error as Argon2Error;
 use axum::{
     body::Body,
     http::{Response, StatusCode},
@@ -8,12 +9,15 @@ use jsonwebtoken::errors::Error as JWTError;
 use sqlx::Error as SqlxError;
 use tracing::error;
 use uuid::Error as UuidError;
+use validator::ValidationErrors as ValidationError;
 
 #[derive(Debug)]
 pub enum ApiError {
     Forbidden(ForbiddenReason),
     Unauthorized,
     UuidError(UuidError),
+    PasswordError(Argon2Error),
+    ValidationError(ValidationError),
     InvalidToken(JWTError),
     DatabaseError(SqlxError),
 }
@@ -28,6 +32,18 @@ pub enum ForbiddenReason {
 impl From<UuidError> for ApiError {
     fn from(err: UuidError) -> Self {
         Self::UuidError(err)
+    }
+}
+
+impl From<ValidationError> for ApiError {
+    fn from(err: ValidationError) -> Self {
+        Self::ValidationError(err)
+    }
+}
+
+impl From<Argon2Error> for ApiError {
+    fn from(err: Argon2Error) -> Self {
+        Self::PasswordError(err)
     }
 }
 
@@ -48,43 +64,26 @@ impl IntoResponse for ApiError {
         let error_message = format!("{:?}", self);
         error!(error_message);
 
-        match self {
+        let (code, msg) = match self {
+            Self::PasswordError(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error"),
+            Self::ValidationError(_) => (StatusCode::BAD_REQUEST, "Invalid email"),
             Self::Forbidden(reason) => {
                 let message = match reason {
                     ForbiddenReason::MissingPermission => "You lack permission to do this action",
                     ForbiddenReason::AccountDeactivated => "Your account has been deactivated",
                     ForbiddenReason::InvalidResource => "Invalid resource requested",
                 };
-                let response_body = Json(message);
-                (StatusCode::FORBIDDEN, response_body).into_response()
+                (StatusCode::FORBIDDEN, message)
             }
-            Self::Unauthorized => {
-                let message = "You are not logged in";
-                let response_body = Json(message);
-                (StatusCode::UNAUTHORIZED, response_body).into_response()
-            }
-            Self::UuidError(_) => {
-                let message = "Internal server error";
-                let response_body = Json(message);
-                (StatusCode::INTERNAL_SERVER_ERROR, response_body).into_response()
-            }
-            Self::InvalidToken(_) => {
-                let message = "Invalid token"; // You can customize this message
-                let response_body = Json(message);
-                (StatusCode::UNAUTHORIZED, response_body).into_response()
-            }
+            Self::Unauthorized => (StatusCode::UNAUTHORIZED, "You are not logged in"),
+            Self::UuidError(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error"),
+            Self::InvalidToken(_) => (StatusCode::UNAUTHORIZED, "Invalid token"),
             Self::DatabaseError(error) => match error {
-                SqlxError::RowNotFound => {
-                    let message = "Not found";
-                    let response_body = Json(message);
-                    (StatusCode::NOT_FOUND, response_body).into_response()
-                }
-                _ => {
-                    let message = "Database error";
-                    let response_body = Json(message);
-                    (StatusCode::INTERNAL_SERVER_ERROR, response_body).into_response()
-                }
+                SqlxError::RowNotFound => (StatusCode::NOT_FOUND, "Not found"),
+                _ => (StatusCode::INTERNAL_SERVER_ERROR, "Database error"),
             },
-        }
+        };
+
+        (code, Json(msg)).into_response()
     }
 }
