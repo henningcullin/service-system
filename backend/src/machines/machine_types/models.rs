@@ -8,6 +8,15 @@ pub struct MachineType {
     pub name: String,
 }
 
+// Details
+
+#[derive(Deserialize)]
+pub struct QueryMachineType {
+    pub id: Uuid,
+}
+
+// Create
+
 #[derive(Deserialize)]
 pub struct NewMachineType {
     pub name: String,
