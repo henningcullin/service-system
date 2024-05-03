@@ -1,3 +1,5 @@
+use super::errors::{ApiError, ForbiddenReason};
+
 pub enum Field {
     Str(Option<String>),
     Int(Option<i32>),
@@ -38,4 +40,11 @@ impl From<Option<bool>> for Field {
     fn from(value: Option<bool>) -> Self {
         Field::Bool(value)
     }
+}
+
+pub fn check_permission(permission: bool) -> Result<(), ApiError> {
+    if !permission {
+        return Err(ApiError::Forbidden(ForbiddenReason::MissingPermission));
+    }
+    Ok(())
 }

@@ -11,7 +11,11 @@ use sqlx::{query, query_as, Postgres, QueryBuilder};
 use crate::{
     field_vec, insert_fields, update_field,
     users::models::User,
-    utils::{errors::ApiError, misc::Field},
+    utils::{
+        check_permission,
+        errors::{ApiError, ForbiddenReason},
+        misc::Field,
+    },
     AppState,
 };
 
@@ -22,6 +26,8 @@ pub async fn details(
     State(app_state): State<Arc<AppState>>,
     Query(params): Query<QueryRole>,
 ) -> Result<Json<Role>, ApiError> {
+    check_permission(user.role.user_view)?;
+
     let role = query_as!(
         Role,
         r#"
@@ -45,6 +51,8 @@ pub async fn index(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
 ) -> Result<Json<Vec<Role>>, ApiError> {
+    check_permission(user.role.user_view)?;
+
     let roles = query_as!(
         Role,
         r#"
@@ -66,6 +74,12 @@ pub async fn create(
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<NewRole>,
 ) -> Result<(StatusCode, Json<Role>), ApiError> {
+    check_permission(user.role.user_create)?;
+
+    if body.level <= user.role.level {
+        return Err(ApiError::Forbidden(ForbiddenReason::MissingPermission))?;
+    }
+
     let mut query_builder = QueryBuilder::<Postgres>::new("INSERT INTO roles ( ");
 
     let fields = field_vec![
@@ -112,6 +126,34 @@ pub async fn update(
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<UpdateRole>,
 ) -> Result<StatusCode, ApiError> {
+    check_permission(user.role.user_edit)?;
+
+    let target_role = query_as!(
+        Role,
+        r#"
+        SELECT
+            *
+        FROM
+            roles r
+        WHERE
+            r.id = $1 
+        "#,
+        body.id
+    )
+    .fetch_one(&app_state.db)
+    .await
+    .map_err(ApiError::from)?;
+
+    if target_role.level <= user.role.level {
+        return Err(ApiError::Forbidden(ForbiddenReason::MissingPermission));
+    }
+
+    if let Some(level) = body.level {
+        if level <= user.role.level {
+            return Err(ApiError::Forbidden(ForbiddenReason::MissingPermission));
+        }
+    }
+
     let mut query_builder = QueryBuilder::<Postgres>::new("UPDATE roles SET");
     let mut separated_list = query_builder.separated(",");
 
@@ -165,6 +207,28 @@ pub async fn delete(
     State(app_state): State<Arc<AppState>>,
     Query(params): Query<QueryRole>,
 ) -> Result<StatusCode, ApiError> {
+    check_permission(user.role.user_delete)?;
+
+    let target_role = query_as!(
+        Role,
+        r#"
+        SELECT
+            *
+        FROM
+            roles r
+        WHERE
+            r.id = $1 
+        "#,
+        params.id
+    )
+    .fetch_one(&app_state.db)
+    .await
+    .map_err(ApiError::from)?;
+
+    if target_role.level <= user.role.level {
+        return Err(ApiError::Forbidden(ForbiddenReason::MissingPermission));
+    }
+
     let result = query!(r#"DELETE FROM roles WHERE id = $1"#, params.id)
         .execute(&app_state.db)
         .await
