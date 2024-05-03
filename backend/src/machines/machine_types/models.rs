@@ -21,3 +21,11 @@ pub struct QueryMachineType {
 pub struct NewMachineType {
     pub name: String,
 }
+
+// Update
+
+#[derive(Deserialize)]
+pub struct UpdateMachineType {
+    pub id: Uuid,
+    pub name: String,
+}

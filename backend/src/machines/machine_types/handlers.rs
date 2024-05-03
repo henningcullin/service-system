@@ -5,7 +5,7 @@ use axum::{
     http::StatusCode,
     Extension, Json,
 };
-use sqlx::query_as;
+use sqlx::{query, query_as};
 
 use crate::{
     users::models::User,
@@ -14,7 +14,7 @@ use crate::{
 };
 
 use super::{
-    models::{NewMachineType, QueryMachineType},
+    models::{NewMachineType, QueryMachineType, UpdateMachineType},
     MachineType,
 };
 
@@ -95,4 +95,33 @@ pub async fn create(
     .map_err(ApiError::from)?;
 
     Ok((StatusCode::CREATED, Json(machine_type)))
+}
+
+pub async fn update(
+    Extension(user): Extension<User>,
+    State(app_state): State<Arc<AppState>>,
+    Json(body): Json<UpdateMachineType>,
+) -> Result<StatusCode, ApiError> {
+    check_permission(user.role.machine_edit)?;
+
+    let result = query!(
+        r#"
+        UPDATE 
+            machine_types mt
+        SET
+            name = $1
+        WHERE
+            mt.id = $2
+        "#,
+        body.name,
+        body.id
+    )
+    .execute(&app_state.db)
+    .await
+    .map_err(ApiError::from)?;
+
+    match result.rows_affected() {
+        1 => Ok(StatusCode::OK),
+        _ => Ok(StatusCode::NOT_FOUND),
+    }
 }
