@@ -28,6 +28,17 @@ use crate::{
 
 use super::models::{LoginEmail, LoginKind, LoginOTPUser, LoginPasswordUser};
 
+pub async fn logout() -> impl IntoResponse {
+    let cookie = Cookie::build(("token", ""))
+        .path("/")
+        .max_age(time::Duration::hours(-1))
+        .same_site(SameSite::Lax)
+        .http_only(true)
+        .to_string();
+
+    AppendHeaders([(header::SET_COOKIE, cookie)])
+}
+
 pub async fn login_initiate(
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<LoginEmail>,
