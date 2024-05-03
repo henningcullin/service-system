@@ -1,10 +1,11 @@
 use crate::{
-    auth,
+    auth::{self, auth},
     machines::{self, facilities},
     users::{self, roles},
     AppState,
 };
 use axum::{
+    middleware,
     routing::{delete, get, get_service, post, put},
     Router,
 };
@@ -33,7 +34,8 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/facilities", get(facilities::index))
         // Machines
         .route("/machine", get(machines::details))
-        .route("/machines", get(machines::index));
+        .route("/machines", get(machines::index))
+        .layer(middleware::from_fn_with_state(app_state.clone(), auth));
 
     let api = Router::new()
         .nest("/auth", auth)

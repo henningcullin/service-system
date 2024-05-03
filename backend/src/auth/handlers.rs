@@ -13,12 +13,15 @@ use axum_extra::extract::{
 };
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use rand_core::{OsRng, RngCore};
-use sqlx::query;
+use sqlx::{query, query_as};
+use uuid::Uuid;
 use validator::Validate;
 
 use crate::{
     auth::models::{LoginToken, TokenClaims},
-    users::roles::models::Role,
+    machines::facilities::Facility,
+    user_from_id,
+    users::{models::User, roles::models::Role},
     utils::errors::{ApiError, ForbiddenReason},
     AppState,
 };
@@ -120,7 +123,7 @@ pub async fn login_initiate(
     let exp = (now + chrono::Duration::minutes(5)).timestamp() as usize;
 
     let claims = LoginToken {
-        sub: body.email,
+        sub: user.id.to_string(),
         iat,
         exp,
         hash,
@@ -287,11 +290,26 @@ pub async fn login_otp(
         return Err(ApiError::Forbidden(ForbiddenReason::IncorrectCode));
     }
 
+    let user_id = Uuid::parse_str(&claims.sub).map_err(ApiError::from)?;
+
+    let user = user_from_id!(user_id)
+        .fetch_one(&app_state.db)
+        .await
+        .map_err(ApiError::from)?;
+
+    if user.role.has_password {
+        return Err(ApiError::Forbidden(ForbiddenReason::MissingPermission));
+    }
+
+    if !user.active {
+        return Err(ApiError::Forbidden(ForbiddenReason::AccountDeactivated));
+    }
+
     let now = chrono::Utc::now();
     let iat = now.timestamp() as usize;
     let exp = (now + chrono::Duration::minutes(app_state.env.jwt_expires_in)).timestamp() as usize;
     let claims = TokenClaims {
-        sub: claims.sub,
+        sub: user.id.to_string(),
         iat,
         exp,
     };
