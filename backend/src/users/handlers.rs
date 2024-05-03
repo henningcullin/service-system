@@ -4,7 +4,7 @@ use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
 use axum::{
     extract::{Query, State},
     http::StatusCode,
-    Json,
+    Extension, Json,
 };
 use rand_core::OsRng;
 use sqlx::{query_as, query_scalar};
@@ -22,6 +22,7 @@ use super::{
 };
 
 pub async fn details(
+    Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
     Query(params): Query<QueryUser>,
 ) -> Result<Json<User>, ApiError> {
@@ -91,7 +92,10 @@ pub async fn details(
     Ok(Json(user))
 }
 
-pub async fn index(State(app_state): State<Arc<AppState>>) -> Result<Json<Vec<User>>, ApiError> {
+pub async fn index(
+    State(app_state): State<Arc<AppState>>,
+    Extension(user): Extension<User>,
+) -> Result<Json<Vec<User>>, ApiError> {
     let users = query_as!(
         User,
         r#"
@@ -156,6 +160,7 @@ pub async fn index(State(app_state): State<Arc<AppState>>) -> Result<Json<Vec<Us
 }
 
 pub async fn create(
+    Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<NewUser>,
 ) -> Result<(StatusCode, Json<User>), ApiError> {

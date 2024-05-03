@@ -3,13 +3,14 @@ use std::sync::Arc;
 use axum::{
     extract::{Query, State},
     http::StatusCode,
-    Json,
+    Extension, Json,
 };
 
 use sqlx::{query, query_as, Postgres, QueryBuilder};
 
 use crate::{
     field_vec, insert_fields, update_field,
+    users::models::User,
     utils::{errors::ApiError, misc::Field},
     AppState,
 };
@@ -17,6 +18,7 @@ use crate::{
 use super::models::{NewRole, QueryRole, Role, UpdateRole};
 
 pub async fn details(
+    Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
     Query(params): Query<QueryRole>,
 ) -> Result<Json<Role>, ApiError> {
@@ -39,7 +41,10 @@ pub async fn details(
     Ok(Json(role))
 }
 
-pub async fn index(State(app_state): State<Arc<AppState>>) -> Result<Json<Vec<Role>>, ApiError> {
+pub async fn index(
+    Extension(user): Extension<User>,
+    State(app_state): State<Arc<AppState>>,
+) -> Result<Json<Vec<Role>>, ApiError> {
     let roles = query_as!(
         Role,
         r#"
@@ -57,6 +62,7 @@ pub async fn index(State(app_state): State<Arc<AppState>>) -> Result<Json<Vec<Ro
 }
 
 pub async fn create(
+    Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<NewRole>,
 ) -> Result<(StatusCode, Json<Role>), ApiError> {
@@ -102,6 +108,7 @@ pub async fn create(
 }
 
 pub async fn update(
+    Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<UpdateRole>,
 ) -> Result<StatusCode, ApiError> {
@@ -154,6 +161,7 @@ pub async fn update(
 }
 
 pub async fn delete(
+    Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
     Query(params): Query<QueryRole>,
 ) -> Result<StatusCode, ApiError> {

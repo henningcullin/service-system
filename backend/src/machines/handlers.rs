@@ -2,10 +2,14 @@ use std::sync::Arc;
 
 use axum::{
     extract::{Query, State},
-    Json,
+    Extension, Json,
 };
 
-use crate::{utils::errors::ApiError, AppState};
+use crate::{
+    users::models::User,
+    utils::errors::{ApiError, ForbiddenReason},
+    AppState,
+};
 
 use super::{
     facilities::Facility,
@@ -13,9 +17,14 @@ use super::{
 };
 
 pub async fn details(
+    Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
     Query(params): Query<QueryMachine>,
 ) -> Result<Json<Machine>, ApiError> {
+    if !user.role.machine_view {
+        return Err(ApiError::Forbidden(ForbiddenReason::MissingPermission));
+    }
+
     let machine = sqlx::query_as!(
         Machine,
         r#"
@@ -65,7 +74,14 @@ pub async fn details(
     Ok(Json(machine))
 }
 
-pub async fn index(State(app_state): State<Arc<AppState>>) -> Result<Json<Vec<Machine>>, ApiError> {
+pub async fn index(
+    Extension(user): Extension<User>,
+    State(app_state): State<Arc<AppState>>,
+) -> Result<Json<Vec<Machine>>, ApiError> {
+    if !user.role.machine_view {
+        return Err(ApiError::Forbidden(ForbiddenReason::MissingPermission));
+    }
+
     let machines = sqlx::query_as!(
         Machine,
         r#"
