@@ -22,6 +22,7 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         // Users
         .route("/user", get(users::details))
         .route("/users", get(users::index))
+        .route("/user", post(users::create))
         // Roles
         .route("/role", get(roles::details))
         .route("/roles", get(roles::index))

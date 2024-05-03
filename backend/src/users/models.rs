@@ -1,6 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use validator::Validate;
 
 use crate::machines::facilities::Facility;
 
@@ -26,4 +27,21 @@ pub struct User {
 #[derive(Deserialize)]
 pub struct QueryUser {
     pub id: Uuid,
+}
+
+// Create
+
+#[derive(Validate, Deserialize)]
+pub struct NewUser {
+    pub first_name: String,
+    pub last_name: String,
+    #[validate(email)]
+    pub email: String,
+    pub password: Option<String>,
+    pub phone: Option<String>,
+    pub role: Uuid,
+    pub active: Option<bool>,
+    pub occupation: Option<String>,
+    pub image: Option<String>,
+    pub facility: Option<Uuid>,
 }

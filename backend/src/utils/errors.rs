@@ -14,6 +14,8 @@ use validator::ValidationErrors as ValidationError;
 #[derive(Debug)]
 pub enum ApiError {
     Forbidden(ForbiddenReason),
+    Conflict(ConflictReason),
+    InputInvalid(InputInvalidReason),
     Unauthorized,
     UuidError(UuidError),
     PasswordError(Argon2Error),
@@ -29,6 +31,16 @@ pub enum ForbiddenReason {
     AccountDeactivated,
     InvalidResource,
     IncorrectPassword,
+}
+
+#[derive(Debug)]
+pub enum InputInvalidReason {
+    NoPasswordSupplied,
+}
+
+#[derive(Debug)]
+pub enum ConflictReason {
+    EmailTaken,
 }
 
 impl From<UuidError> for ApiError {
@@ -66,6 +78,18 @@ impl IntoResponse for ApiError {
         let error_message = format!("{:?}", self);
 
         let (code, msg) = match self {
+            Self::InputInvalid(reason) => {
+                let message = match reason {
+                    InputInvalidReason::NoPasswordSupplied => "No password supplied",
+                };
+                (StatusCode::BAD_REQUEST, message)
+            }
+            Self::Conflict(reason) => {
+                let message = match reason {
+                    ConflictReason::EmailTaken => "This email is already taken",
+                };
+                (StatusCode::CONFLICT, message)
+            }
             Self::GeneralOversight(error) => {
                 error!(error);
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error")
