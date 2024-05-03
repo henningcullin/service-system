@@ -5,7 +5,7 @@ use axum::{
     extract::State,
     http::{header, StatusCode},
     response::{AppendHeaders, IntoResponse},
-    Json,
+    Extension, Json,
 };
 use axum_extra::extract::{
     cookie::{Cookie, SameSite},
@@ -37,6 +37,10 @@ pub async fn logout() -> impl IntoResponse {
         .to_string();
 
     AppendHeaders([(header::SET_COOKIE, cookie)])
+}
+
+pub async fn me(Extension(user): Extension<User>) -> Json<User> {
+    Json(user)
 }
 
 pub async fn login_initiate(
