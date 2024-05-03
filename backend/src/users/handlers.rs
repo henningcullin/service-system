@@ -12,7 +12,10 @@ use validator::Validate;
 
 use crate::{
     machines::facilities::Facility,
-    utils::errors::{ApiError, ConflictReason, InputInvalidReason},
+    utils::{
+        check_permission,
+        errors::{ApiError, ConflictReason, ForbiddenReason, InputInvalidReason},
+    },
     AppState,
 };
 
@@ -26,6 +29,8 @@ pub async fn details(
     State(app_state): State<Arc<AppState>>,
     Query(params): Query<QueryUser>,
 ) -> Result<Json<User>, ApiError> {
+    check_permission(user.role.user_view)?;
+
     let user = query_as!(
         User,
         r#"
@@ -96,6 +101,8 @@ pub async fn index(
     State(app_state): State<Arc<AppState>>,
     Extension(user): Extension<User>,
 ) -> Result<Json<Vec<User>>, ApiError> {
+    check_permission(user.role.user_view)?;
+
     let users = query_as!(
         User,
         r#"
@@ -164,6 +171,8 @@ pub async fn create(
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<NewUser>,
 ) -> Result<(StatusCode, Json<User>), ApiError> {
+    check_permission(user.role.user_create)?;
+
     body.validate().map_err(ApiError::from)?;
 
     let email = body.email.to_lowercase();
@@ -194,6 +203,10 @@ pub async fn create(
     .fetch_one(&app_state.db)
     .await
     .map_err(ApiError::from)?;
+
+    if role.level <= user.role.level {
+        return Err(ApiError::Forbidden(ForbiddenReason::MissingPermission));
+    }
 
     let password = match role.has_password {
         false => None,
