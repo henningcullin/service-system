@@ -35,6 +35,7 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/role", put(roles::update))
         .route("/role", delete(roles::delete))
         // Tasks
+        .route("/task", get(tasks::details))
         .route("/tasks", get(tasks::index))
         // TaskTypes
         .route("/task_type", get(task_types::details))

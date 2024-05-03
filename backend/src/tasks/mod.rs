@@ -6,4 +6,5 @@ pub mod task_executors;
 pub mod task_statuses;
 pub mod task_types;
 
+pub use handlers::details;
 pub use handlers::index;

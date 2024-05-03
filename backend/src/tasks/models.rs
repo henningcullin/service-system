@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::{machines::models::ShortMachine, users::models::ShortUser};
@@ -21,4 +21,13 @@ pub struct Task {
     pub created: DateTime<Utc>,
     pub edited: DateTime<Utc>,
     pub due_at: Option<DateTime<Utc>>,
+}
+
+// Details
+
+#[derive(Deserialize)]
+pub struct QueryTask {
+    pub task_id: Option<Uuid>,
+    pub creator_id: Option<Uuid>,
+    pub executor_id: Option<Uuid>,
 }
