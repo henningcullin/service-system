@@ -2,18 +2,25 @@ use std::sync::Arc;
 
 use axum::{
     extract::{Query, State},
+    http::StatusCode,
     Extension, Json,
 };
-use sqlx::query_as;
+use sqlx::{query, query_as, Postgres, QueryBuilder};
 
 use crate::{
+    field_vec,
     machines::facilities::Facility,
+    update_field,
     users::models::User,
-    utils::{check_permission, errors::ApiError},
+    utils::{
+        check_permission,
+        errors::{ApiError, InputInvalidReason},
+        misc::Field,
+    },
     AppState,
 };
 
-use super::models::{NewFacility, QueryFacility};
+use super::models::{NewFacility, QueryFacility, UpdateFacility};
 
 pub async fn details(
     Extension(user): Extension<User>,
@@ -95,4 +102,42 @@ pub async fn create(
     .map_err(ApiError::from)?;
 
     Ok(Json(facility))
+}
+
+pub async fn update(
+    Extension(user): Extension<User>,
+    State(app_state): State<Arc<AppState>>,
+    Json(body): Json<UpdateFacility>,
+) -> Result<StatusCode, ApiError> {
+    check_permission(user.role.facility_edit)?;
+
+    let mut query_builder = QueryBuilder::<Postgres>::new("UPDATE facilites SET");
+    let mut separated_list = query_builder.separated(",");
+
+    let fields = field_vec![
+        name => body.name,
+        address => body.address
+    ];
+
+    if fields.len() < 1 {
+        return Err(ApiError::InputInvalid(InputInvalidReason::NoFieldsToUpdate));
+    }
+
+    for (field, value) in fields {
+        update_field!(separated_list, field, value);
+    }
+
+    query_builder.push(" WHERE id = ");
+    query_builder.push_bind(body.id);
+
+    let result = query_builder
+        .build()
+        .execute(&app_state.db)
+        .await
+        .map_err(ApiError::from)?;
+
+    match result.rows_affected() {
+        1 => Ok(StatusCode::OK),
+        _ => Ok(StatusCode::NOT_FOUND),
+    }
 }

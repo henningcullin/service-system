@@ -13,7 +13,7 @@ use crate::{
     users::models::User,
     utils::{
         check_permission,
-        errors::{ApiError, ForbiddenReason},
+        errors::{ApiError, ForbiddenReason, InputInvalidReason},
         misc::Field,
     },
     AppState,
@@ -182,6 +182,10 @@ pub async fn update(
         facility_edit => body.facility_edit,
         facility_delete => body.facility_delete
     ];
+
+    if fields.len() < 1 {
+        return Err(ApiError::InputInvalid(InputInvalidReason::NoFieldsToUpdate));
+    }
 
     for (field, value) in fields {
         update_field!(separated_list, field, value);

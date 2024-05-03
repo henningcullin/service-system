@@ -36,6 +36,7 @@ pub enum ForbiddenReason {
 #[derive(Debug)]
 pub enum InputInvalidReason {
     NoPasswordSupplied,
+    NoFieldsToUpdate,
 }
 
 #[derive(Debug)]
@@ -81,6 +82,7 @@ impl IntoResponse for ApiError {
             Self::InputInvalid(reason) => {
                 let message = match reason {
                     InputInvalidReason::NoPasswordSupplied => "No password supplied",
+                    InputInvalidReason::NoFieldsToUpdate => "No fields to update provided",
                 };
                 (StatusCode::BAD_REQUEST, message)
             }

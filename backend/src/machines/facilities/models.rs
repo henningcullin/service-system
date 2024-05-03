@@ -23,3 +23,12 @@ pub struct NewFacility {
     pub name: String,
     pub address: Option<String>,
 }
+
+// Update
+
+#[derive(Deserialize)]
+pub struct UpdateFacility {
+    pub id: Uuid,
+    pub name: Option<String>,
+    pub address: Option<String>,
+}
