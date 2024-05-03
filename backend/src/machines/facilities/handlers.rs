@@ -141,3 +141,21 @@ pub async fn update(
         _ => Ok(StatusCode::NOT_FOUND),
     }
 }
+
+pub async fn delete(
+    Extension(user): Extension<User>,
+    State(app_state): State<Arc<AppState>>,
+    Query(params): Query<QueryFacility>,
+) -> Result<StatusCode, ApiError> {
+    check_permission(user.role.facility_delete)?;
+
+    let result = query!(r#"DELETE FROM roles WHERE id = $1"#, params.id)
+        .execute(&app_state.db)
+        .await
+        .map_err(ApiError::from)?;
+
+    match result.rows_affected() {
+        1 => Ok(StatusCode::OK),
+        _ => Ok(StatusCode::NOT_FOUND),
+    }
+}
