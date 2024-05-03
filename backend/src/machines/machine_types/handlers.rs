@@ -125,3 +125,21 @@ pub async fn update(
         _ => Ok(StatusCode::NOT_FOUND),
     }
 }
+
+pub async fn delete(
+    Extension(user): Extension<User>,
+    State(app_state): State<Arc<AppState>>,
+    Query(params): Query<QueryMachineType>,
+) -> Result<StatusCode, ApiError> {
+    check_permission(user.role.machine_delete)?;
+
+    let result = query!(r#"DELETE FROM machine_types WHERE id = $1"#, params.id)
+        .execute(&app_state.db)
+        .await
+        .map_err(ApiError::from)?;
+
+    match result.rows_affected() {
+        1 => Ok(StatusCode::OK),
+        _ => Ok(StatusCode::NOT_FOUND),
+    }
+}
