@@ -31,3 +31,17 @@ pub struct QueryTask {
     pub creator_id: Option<Uuid>,
     pub executor_id: Option<Uuid>,
 }
+
+// Create
+
+#[derive(Deserialize)]
+pub struct NewTask {
+    pub title: String,
+    pub description: String,
+    pub task_type: Uuid,
+    pub status: Uuid,
+    pub archived: Option<bool>,
+    pub executors: Option<Vec<Uuid>>,
+    pub machine: Option<Uuid>,
+    pub due_at: Option<DateTime<Utc>>,
+}
