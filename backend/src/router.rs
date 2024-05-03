@@ -38,15 +38,15 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         // TaskTypes
         .route("/task_type", get(task_types::details))
         .route("/task_types", get(task_types::index))
-        .route("/task_type", get(task_types::create))
-        .route("/task_type", get(task_types::update))
-        .route("/task_type", get(task_types::delete))
+        .route("/task_type", post(task_types::create))
+        .route("/task_type", put(task_types::update))
+        .route("/task_type", delete(task_types::delete))
         // TaskStatuses
         .route("/task_status", get(task_statuses::details))
         .route("/task_statuss", get(task_statuses::index))
-        .route("/task_status", get(task_statuses::create))
-        .route("/task_status", get(task_statuses::update))
-        .route("/task_status", get(task_statuses::delete))
+        .route("/task_status", post(task_statuses::create))
+        .route("/task_status", put(task_statuses::update))
+        .route("/task_status", delete(task_statuses::delete))
         // Facilities
         .route("/facility", get(facilities::details))
         .route("/facilities", get(facilities::index))
