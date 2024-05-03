@@ -1,8 +1,11 @@
+use serde::Serialize;
+use sqlx::prelude::Type;
 use uuid::Uuid;
 
+#[derive(Type, Debug, Serialize)]
 pub struct TaskDocument {
-    pub task_id: Uuid,
-    pub uri: String,
+    pub task_id: Option<Uuid>,
+    pub uri: Option<String>,
     pub name: Option<String>,
     pub description: Option<String>,
 }

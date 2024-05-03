@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use sqlx::prelude::{FromRow, Type};
 use uuid::Uuid;
 use validator::Validate;
 
@@ -20,6 +21,17 @@ pub struct User {
     pub occupation: Option<String>,
     pub image: Option<String>,
     pub facility: Option<Facility>,
+}
+
+// Short variant
+
+#[derive(Type, FromRow, Serialize, Debug)]
+pub struct ShortUser {
+    pub id: Option<Uuid>,
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
+    pub email: Option<String>,
+    pub image: Option<String>,
 }
 
 // Details

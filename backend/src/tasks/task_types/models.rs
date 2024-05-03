@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::prelude::Type;
 use uuid::Uuid;
 
-#[derive(Serialize, Type)]
+#[derive(Serialize, Type, Debug)]
 pub struct TaskType {
     pub id: Uuid,
     pub name: String,
