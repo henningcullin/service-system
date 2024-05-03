@@ -12,7 +12,7 @@ pub struct TokenClaims {
 
 // Temporary jwt token that is used to enable pwl login
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct LoginToken {
     pub sub: String,
     pub iat: usize,

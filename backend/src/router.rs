@@ -38,7 +38,8 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
     let api = Router::new()
         .nest("/auth", auth)
         .route("/login", post(auth::login_initiate))
-        .route("/login/password", post(auth::login_password));
+        .route("/login/password", post(auth::login_password))
+        .route("/login/otp", post(auth::login_otp));
 
     let app = Router::new()
         .nest("/api", api)

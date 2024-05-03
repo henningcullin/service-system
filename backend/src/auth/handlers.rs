@@ -7,8 +7,11 @@ use axum::{
     response::{AppendHeaders, IntoResponse},
     Json,
 };
-use axum_extra::extract::cookie::{Cookie, SameSite};
-use jsonwebtoken::{encode, EncodingKey, Header};
+use axum_extra::extract::{
+    cookie::{Cookie, SameSite},
+    CookieJar,
+};
+use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use rand_core::{OsRng, RngCore};
 use sqlx::query;
 use validator::Validate;
@@ -20,7 +23,7 @@ use crate::{
     AppState,
 };
 
-use super::models::{LoginEmail, LoginKind, LoginPasswordUser};
+use super::models::{LoginEmail, LoginKind, LoginOTPUser, LoginPasswordUser};
 
 pub async fn login_initiate(
     State(app_state): State<Arc<AppState>>,
@@ -252,4 +255,70 @@ pub async fn login_password(
         AppendHeaders([(header::SET_COOKIE, cookie)]),
         StatusCode::OK,
     ))
+}
+
+pub async fn login_otp(
+    State(app_state): State<Arc<AppState>>,
+    cookie_jar: CookieJar,
+    Json(body): Json<LoginOTPUser>,
+) -> Result<impl IntoResponse, ApiError> {
+    let token = cookie_jar
+        .get("auth_token")
+        .map(|cookie| cookie.value().to_string());
+
+    let token = token.ok_or_else(|| ApiError::Unauthorized)?;
+
+    let claims = decode::<LoginToken>(
+        &token,
+        &DecodingKey::from_secret(app_state.env.jwt_pwl_secret.as_ref()),
+        &Validation::default(),
+    )
+    .map_err(ApiError::from)?
+    .claims;
+
+    let codes_match = match PasswordHash::new(&claims.hash) {
+        Ok(stored_hash) => Argon2::default()
+            .verify_password(body.code.as_bytes(), &stored_hash)
+            .map_or(false, |_| true),
+        Err(_) => false,
+    };
+
+    if !codes_match {
+        return Err(ApiError::Forbidden(ForbiddenReason::IncorrectCode));
+    }
+
+    let now = chrono::Utc::now();
+    let iat = now.timestamp() as usize;
+    let exp = (now + chrono::Duration::minutes(app_state.env.jwt_expires_in)).timestamp() as usize;
+    let claims = TokenClaims {
+        sub: claims.sub,
+        iat,
+        exp,
+    };
+
+    let token = encode(
+        &Header::default(),
+        &claims,
+        &EncodingKey::from_secret(app_state.env.jwt_secret.as_ref()),
+    )
+    .map_err(ApiError::from)?;
+
+    let token_cookie = Cookie::build(("token", token.to_owned()))
+        .path("/")
+        .max_age(time::Duration::minutes(app_state.env.jwt_expires_in))
+        .same_site(SameSite::Lax)
+        .http_only(true)
+        .to_string();
+
+    let auth_token_cookie = Cookie::build(("auth_token", ""))
+        .path("/")
+        .max_age(time::Duration::hours(-1))
+        .same_site(SameSite::Lax)
+        .http_only(true)
+        .to_string();
+
+    Ok(AppendHeaders([
+        (header::SET_COOKIE, token_cookie),
+        (header::SET_COOKIE, auth_token_cookie),
+    ]))
 }

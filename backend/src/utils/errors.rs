@@ -29,8 +29,8 @@ pub enum ApiError {
 pub enum ForbiddenReason {
     MissingPermission,
     AccountDeactivated,
-    InvalidResource,
     IncorrectPassword,
+    IncorrectCode,
 }
 
 #[derive(Debug)]
@@ -106,8 +106,8 @@ impl IntoResponse for ApiError {
                 let message = match reason {
                     ForbiddenReason::MissingPermission => "You lack permission to do this action",
                     ForbiddenReason::AccountDeactivated => "Your account has been deactivated",
-                    ForbiddenReason::InvalidResource => "Invalid resource requested",
                     ForbiddenReason::IncorrectPassword => "Incorrect password",
+                    ForbiddenReason::IncorrectCode => "Incorrect code",
                 };
                 (StatusCode::FORBIDDEN, message)
             }
