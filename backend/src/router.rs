@@ -43,7 +43,7 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/task_type", delete(task_types::delete))
         // TaskStatuses
         .route("/task_status", get(task_statuses::details))
-        .route("/task_statuss", get(task_statuses::index))
+        .route("/task_statuses", get(task_statuses::index))
         .route("/task_status", post(task_statuses::create))
         .route("/task_status", put(task_statuses::update))
         .route("/task_status", delete(task_statuses::delete))
