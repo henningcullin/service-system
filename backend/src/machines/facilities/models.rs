@@ -15,3 +15,11 @@ pub struct Facility {
 pub struct QueryFacility {
     pub id: Uuid,
 }
+
+// Create
+
+#[derive(Deserialize)]
+pub struct NewFacility {
+    pub name: String,
+    pub address: Option<String>,
+}

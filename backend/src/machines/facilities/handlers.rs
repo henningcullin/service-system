@@ -13,7 +13,7 @@ use crate::{
     AppState,
 };
 
-use super::models::QueryFacility;
+use super::models::{NewFacility, QueryFacility};
 
 pub async fn details(
     Extension(user): Extension<User>,
@@ -61,4 +61,38 @@ pub async fn index(
     .map_err(ApiError::from)?;
 
     Ok(Json(facilities))
+}
+
+pub async fn create(
+    Extension(user): Extension<User>,
+    State(app_state): State<Arc<AppState>>,
+    Json(body): Json<NewFacility>,
+) -> Result<Json<Facility>, ApiError> {
+    check_permission(user.role.facility_create)?;
+
+    let facility = query_as!(
+        Facility,
+        r#"
+        INSERT INTO
+            facilities
+        (
+            name,
+            address
+        )
+        VALUES
+        (
+            $1,
+            $2
+        )
+        RETURNING
+            *
+        "#,
+        body.name,
+        body.address
+    )
+    .fetch_one(&app_state.db)
+    .await
+    .map_err(ApiError::from)?;
+
+    Ok(Json(facility))
 }
