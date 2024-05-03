@@ -1,9 +1,8 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use sqlx::prelude::Type;
 use uuid::Uuid;
 
-use super::{facilities::Facility, machine_types::MachineType};
+use super::{facilities::Facility, machine_statuses::MachineStatus, machine_types::MachineType};
 
 #[derive(Serialize)]
 pub struct Machine {
@@ -16,12 +15,6 @@ pub struct Machine {
     pub edited: DateTime<Utc>,
     pub facility: Option<Facility>,
     pub image: Option<String>,
-}
-
-#[derive(Serialize, Type)]
-pub struct MachineStatus {
-    pub id: Uuid,
-    pub name: String,
 }
 
 // Details

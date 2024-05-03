@@ -13,8 +13,9 @@ use crate::{
 
 use super::{
     facilities::Facility,
+    machine_statuses::MachineStatus,
     machine_types::MachineType,
-    models::{Machine, MachineStatus, QueryMachine},
+    models::{Machine, QueryMachine},
 };
 
 pub async fn details(
