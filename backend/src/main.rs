@@ -2,6 +2,7 @@ mod auth;
 mod config;
 mod machines;
 mod router;
+mod tasks;
 mod users;
 mod utils;
 
