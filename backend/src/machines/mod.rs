@@ -1,5 +1,6 @@
 pub mod facilities;
 pub mod handlers;
+pub mod machine_types;
 pub mod models;
 
 pub use handlers::details;
