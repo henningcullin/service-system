@@ -13,6 +13,24 @@ CREATE TABLE users (
     facility UUID REFERENCES facilities(id)
 );
 
+CREATE OR REPLACE FUNCTION is_password_required(role_id UUID, user_password VARCHAR)
+RETURNS BOOLEAN AS $$
+DECLARE
+    role_has_password BOOLEAN;
+BEGIN
+    SELECT INTO role_has_password has_password FROM roles WHERE id = role_id;
+    
+    RETURN (NOT role_has_password OR user_password IS NOT NULL);
+END;
+$$ LANGUAGE plpgsql;
+
+ALTER TABLE users
+DROP CONSTRAINT is_password_required_constraint;
+
+ALTER TABLE users
+ADD CONSTRAINT is_password_required_constraint
+CHECK (is_password_required(role, password));
+
 CREATE INDEX idx_email ON users(email);
 
 INSERT INTO users (first_name, last_name, email, phone, role, occupation)
