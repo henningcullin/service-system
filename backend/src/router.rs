@@ -1,6 +1,6 @@
 use crate::{
     auth::{self, auth},
-    machines::{self, facilities, machine_types},
+    machines::{self, facilities, machine_statuses, machine_types},
     users::{self, roles},
     AppState,
 };
@@ -48,6 +48,12 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/machine_type", post(machine_types::create))
         .route("/machine_type", put(machine_types::update))
         .route("/machine_type", delete(machine_types::delete))
+        // MachineStauses
+        .route("/machine_status", get(machine_statuses::details))
+        .route("/machine_statuses", get(machine_statuses::index))
+        .route("/machine_status", post(machine_statuses::create))
+        .route("/machine_status", put(machine_statuses::update))
+        .route("/machine_status", delete(machine_statuses::delete))
         .layer(middleware::from_fn_with_state(app_state.clone(), auth));
 
     let api = Router::new()
