@@ -74,7 +74,7 @@ pub async fn create(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<NewFacility>,
-) -> Result<Json<Facility>, ApiError> {
+) -> Result<(StatusCode, Json<Facility>), ApiError> {
     check_permission(user.role.facility_create)?;
 
     let facility = query_as!(
@@ -101,7 +101,7 @@ pub async fn create(
     .await
     .map_err(ApiError::from)?;
 
-    Ok(Json(facility))
+    Ok((StatusCode::CREATED, Json(facility)))
 }
 
 pub async fn update(

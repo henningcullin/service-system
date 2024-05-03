@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use axum::{
     extract::{Query, State},
+    http::StatusCode,
     Extension, Json,
 };
 use sqlx::query_as;
@@ -12,7 +13,10 @@ use crate::{
     AppState,
 };
 
-use super::{models::QueryMachineType, MachineType};
+use super::{
+    models::{NewMachineType, QueryMachineType},
+    MachineType,
+};
 
 pub async fn details(
     Extension(user): Extension<User>,
@@ -60,4 +64,35 @@ pub async fn index(
     .map_err(ApiError::from)?;
 
     Ok(Json(machine_types))
+}
+
+pub async fn create(
+    Extension(user): Extension<User>,
+    State(app_state): State<Arc<AppState>>,
+    Json(body): Json<NewMachineType>,
+) -> Result<(StatusCode, Json<MachineType>), ApiError> {
+    check_permission(user.role.machine_create)?;
+
+    let machine_type = query_as!(
+        MachineType,
+        r#"
+        INSERT INTO
+            machine_types
+        (
+            name
+        )
+        VALUES
+        (
+            $1
+        )
+        RETURNING
+            *
+        "#,
+        body.name
+    )
+    .fetch_one(&app_state.db)
+    .await
+    .map_err(ApiError::from)?;
+
+    Ok((StatusCode::CREATED, Json(machine_type)))
 }
