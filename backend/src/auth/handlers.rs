@@ -70,7 +70,7 @@ pub async fn login_initiate(
         WHERE
             u.email = $1
         "#,
-        body.email
+        body.email.to_lowercase()
     )
     .fetch_one(&app_state.db)
     .await
