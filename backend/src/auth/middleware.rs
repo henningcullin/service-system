@@ -51,7 +51,7 @@ pub async fn auth(
         &DecodingKey::from_secret(app_state.env.jwt_secret.as_ref()),
         &Validation::default(),
     )
-    .map_err(ApiError::from)?
+    .map_err(|_| ApiError::Unauthorized)?
     .claims;
 
     let user_id = Uuid::parse_str(&claims.sub).map_err(ApiError::from)?;
