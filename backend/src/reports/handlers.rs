@@ -1,16 +1,21 @@
 use std::sync::Arc;
 
 use axum::{extract::State, http::StatusCode, Extension, Json};
-use sqlx::{query_as, query_scalar};
+use sqlx::{query_as, query_scalar, Postgres, QueryBuilder};
 
 use crate::{
+    field_vec, update_field,
     users::models::{ShortUser, User},
-    utils::{check_permission, errors::ApiError},
+    utils::{
+        check_permission,
+        db::{Field, IntoField},
+        errors::{ApiError, InputInvalidReason},
+    },
     AppState,
 };
 
 use super::{
-    models::{NewReport, Report},
+    models::{NewReport, Report, UpdateReport},
     report_documents::ReportDocument,
     report_statuses::ReportStatus,
     report_types::ReportType,
@@ -187,4 +192,45 @@ pub async fn create(
     tx.commit().await.map_err(ApiError::from)?;
 
     Ok((StatusCode::CREATED, Json(report)))
+}
+
+pub async fn update(
+    Extension(user): Extension<User>,
+    State(app_state): State<Arc<AppState>>,
+    Json(body): Json<UpdateReport>,
+) -> Result<StatusCode, ApiError> {
+    check_permission(user.role.report_edit)?;
+
+    let mut query_builder = QueryBuilder::<Postgres>::new("UPDATE reports SET");
+    let mut separated_list = query_builder.separated(",");
+
+    let fields = field_vec!(
+        title => body.title,
+        description => body.description,
+        report_type => body.report_type,
+        status => body.status,
+        archived => body.archived
+    );
+
+    if fields.len() < 1 {
+        return Err(ApiError::InputInvalid(InputInvalidReason::NoFieldsToUpdate));
+    }
+
+    for (field, value) in fields {
+        update_field!(separated_list, field, value);
+    }
+
+    query_builder.push(" WHERE id = ");
+    query_builder.push_bind(body.id);
+
+    let result = query_builder
+        .build()
+        .execute(&app_state.db)
+        .await
+        .map_err(ApiError::from)?;
+
+    match result.rows_affected() {
+        1 => Ok(StatusCode::OK),
+        _ => Ok(StatusCode::NOT_FOUND),
+    }
 }

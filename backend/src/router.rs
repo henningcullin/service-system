@@ -38,6 +38,7 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         // Reports
         .route("/reports", get(reports::index))
         .route("/report", post(reports::create))
+        .route("/report", put(reports::update))
         // ReportTypes
         .route("/report_type", get(report_types::details))
         .route("/report_types", get(report_types::index))

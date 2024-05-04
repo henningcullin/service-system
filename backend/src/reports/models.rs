@@ -32,3 +32,15 @@ pub struct NewReport {
     pub status: Uuid,
     pub archived: Option<bool>,
 }
+
+// Update
+
+#[derive(Deserialize)]
+pub struct UpdateReport {
+    pub id: Uuid,
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub report_type: Option<Uuid>,
+    pub status: Option<Uuid>,
+    pub archived: Option<bool>,
+}
