@@ -39,6 +39,7 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/tasks", get(tasks::index))
         .route("/task", post(tasks::create))
         .route("/task", put(tasks::update))
+        .route("/task", delete(tasks::delete))
         // TaskTypes
         .route("/task_type", get(task_types::details))
         .route("/task_types", get(task_types::index))

@@ -22,7 +22,7 @@ use crate::{
 };
 
 use super::{
-    models::{NewTask, QueryTask, UpdateTask},
+    models::{DeleteTask, NewTask, QueryTask, UpdateTask},
     task_documents::TaskDocument,
     task_statuses::TaskStatus,
     task_types::TaskType,
@@ -438,6 +438,32 @@ pub async fn update(
         .map_err(ApiError::from)?;
 
     println!("{result:?}");
+
+    match result.rows_affected() {
+        1 => Ok(StatusCode::OK),
+        _ => Ok(StatusCode::NOT_FOUND),
+    }
+}
+
+pub async fn delete(
+    Extension(user): Extension<User>,
+    State(app_state): State<Arc<AppState>>,
+    Query(params): Query<DeleteTask>,
+) -> Result<StatusCode, ApiError> {
+    check_permission(user.role.task_delete)?;
+
+    let result = query!(
+        r#"
+        DELETE FROM
+            tasks t
+        WHERE
+            t.id = $1
+        "#,
+        params.id
+    )
+    .execute(&app_state.db)
+    .await
+    .map_err(ApiError::from)?;
 
     match result.rows_affected() {
         1 => Ok(StatusCode::OK),

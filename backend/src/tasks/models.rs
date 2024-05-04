@@ -63,3 +63,9 @@ pub struct UpdateTask {
     #[serde(default)]
     pub due_at: Nullable<DateTime<Utc>>,
 }
+
+// Delete
+#[derive(Deserialize)]
+pub struct DeleteTask {
+    pub id: Uuid,
+}

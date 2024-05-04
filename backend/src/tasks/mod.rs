@@ -7,6 +7,7 @@ pub mod task_statuses;
 pub mod task_types;
 
 pub use handlers::create;
+pub use handlers::delete;
 pub use handlers::details;
 pub use handlers::index;
 pub use handlers::update;
