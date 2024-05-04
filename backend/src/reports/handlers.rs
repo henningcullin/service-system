@@ -1,7 +1,11 @@
 use std::sync::Arc;
 
-use axum::{extract::State, http::StatusCode, Extension, Json};
-use sqlx::{query_as, query_scalar, Postgres, QueryBuilder};
+use axum::{
+    extract::{Query, State},
+    http::StatusCode,
+    Extension, Json,
+};
+use sqlx::{query, query_as, query_scalar, Postgres, QueryBuilder};
 
 use crate::{
     field_vec,
@@ -17,7 +21,7 @@ use crate::{
 };
 
 use super::{
-    models::{NewReport, Report, UpdateReport},
+    models::{DeleteReport, NewReport, Report, UpdateReport},
     report_documents::ReportDocument,
     report_statuses::ReportStatus,
     report_types::ReportType,
@@ -250,6 +254,32 @@ pub async fn update(
         .execute(&app_state.db)
         .await
         .map_err(ApiError::from)?;
+
+    match result.rows_affected() {
+        1 => Ok(StatusCode::OK),
+        _ => Ok(StatusCode::NOT_FOUND),
+    }
+}
+
+pub async fn delete(
+    Extension(user): Extension<User>,
+    State(app_state): State<Arc<AppState>>,
+    Query(params): Query<DeleteReport>,
+) -> Result<StatusCode, ApiError> {
+    check_permission(user.role.report_delete)?;
+
+    let result = query!(
+        r#"
+        DELETE FROM
+            reports r
+        WHERE
+            r.id = $1
+        "#,
+        params.id
+    )
+    .execute(&app_state.db)
+    .await
+    .map_err(ApiError::from)?;
 
     match result.rows_affected() {
         1 => Ok(StatusCode::OK),

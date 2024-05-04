@@ -47,3 +47,10 @@ pub struct UpdateReport {
     #[serde(default)]
     pub archived: Option<bool>,
 }
+
+// Delete
+
+#[derive(Deserialize)]
+pub struct DeleteReport {
+    pub id: Uuid,
+}
