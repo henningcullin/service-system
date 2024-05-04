@@ -1,6 +1,21 @@
 use serde::de::{self, Visitor};
 use serde::{Deserialize, Deserializer};
 
+///
+/// Nullable type for when a field should be nullable
+///
+/// # Usage:
+///
+/// ```rust,no_run
+/// use serde::Deserialize;
+///
+/// #[derive(Deserialize)]
+/// struct CreateUser {
+///     email: String,
+///     #[serde(default)]
+///     password: Nullable<String>,
+/// }
+///
 pub enum Nullable<T> {
     Absent,
     Null,

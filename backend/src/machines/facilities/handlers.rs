@@ -111,7 +111,7 @@ pub async fn update(
 ) -> Result<StatusCode, ApiError> {
     check_permission(user.role.facility_edit)?;
 
-    let mut query_builder = QueryBuilder::<Postgres>::new("UPDATE facilites SET");
+    let mut query_builder = QueryBuilder::<Postgres>::new("UPDATE facilities SET");
     let mut separated_list = query_builder.separated(",");
 
     let fields = field_vec![

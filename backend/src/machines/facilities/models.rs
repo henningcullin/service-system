@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::prelude::Type;
 use uuid::Uuid;
 
+use crate::utils::db::Nullable;
+
 #[derive(Serialize, Type, Clone)]
 pub struct Facility {
     pub id: Option<Uuid>,
@@ -30,5 +32,6 @@ pub struct NewFacility {
 pub struct UpdateFacility {
     pub id: Uuid,
     pub name: Option<String>,
-    pub address: Option<String>,
+    #[serde(default)]
+    pub address: Nullable<String>,
 }
