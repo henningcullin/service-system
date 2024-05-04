@@ -149,7 +149,7 @@ pub async fn delete(
 ) -> Result<StatusCode, ApiError> {
     check_permission(user.role.facility_delete)?;
 
-    let result = query!(r#"DELETE FROM roles WHERE id = $1"#, params.id)
+    let result = query!(r#"DELETE FROM facilities WHERE id = $1"#, params.id)
         .execute(&app_state.db)
         .await
         .map_err(ApiError::from)?;
