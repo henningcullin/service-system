@@ -1,7 +1,7 @@
 use crate::{
     auth::{self, auth},
     machines::{self, facilities, machine_statuses, machine_types},
-    reports::{report_statuses, report_types},
+    reports::{self, report_statuses, report_types},
     tasks::{self, task_statuses, task_types},
     users::{self, roles},
     AppState,
@@ -36,6 +36,8 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/role", put(roles::update))
         .route("/role", delete(roles::delete))
         // Reports
+        .route("/reports", get(reports::index))
+        .route("/report", post(reports::create))
         // ReportTypes
         .route("/report_type", get(report_types::details))
         .route("/report_types", get(report_types::index))
