@@ -5,7 +5,7 @@ use axum::{
     http::StatusCode,
     Extension, Json,
 };
-use sqlx::{query, Execute, Postgres, QueryBuilder};
+use sqlx::{query, Postgres, QueryBuilder};
 
 use crate::{
     field_vec,
@@ -407,8 +407,6 @@ pub async fn update(
 ) -> Result<StatusCode, ApiError> {
     check_permission(user.role.task_edit)?;
 
-    let thing = body.clone();
-
     let mut query_builder = QueryBuilder::<Postgres>::new("UPDATE tasks SET");
     let mut separated_list = query_builder.separated(",");
 
@@ -422,8 +420,6 @@ pub async fn update(
         due_at => body.due_at
     );
 
-    println!("{fields:?}");
-
     if fields.len() < 1 {
         return Err(ApiError::InputInvalid(InputInvalidReason::NoFieldsToUpdate));
     }
@@ -434,14 +430,6 @@ pub async fn update(
 
     query_builder.push(" WHERE id = ");
     query_builder.push_bind(body.id);
-
-    let sql = query_builder.build().sql();
-
-    println!("{thing:?}");
-
-    println!("{sql}");
-
-    return Ok(StatusCode::OK);
 
     let result = query_builder
         .build()

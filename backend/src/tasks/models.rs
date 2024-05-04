@@ -50,7 +50,7 @@ pub struct NewTask {
 
 // Update
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize)]
 pub struct UpdateTask {
     pub id: Uuid,
     pub title: Option<String>,
