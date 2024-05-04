@@ -40,3 +40,25 @@ CREATE TABLE task_documents (
     description TEXT,
     PRIMARY KEY (task_id, uri)
 );
+
+CREATE OR REPLACE FUNCTION delete_task_executors() RETURNS TRIGGER AS $$
+BEGIN
+  DELETE FROM task_executors WHERE task_id = OLD.id;
+  RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_task_executors
+BEFORE DELETE ON tasks
+FOR EACH ROW EXECUTE PROCEDURE delete_task_executors();
+
+CREATE OR REPLACE FUNCTION delete_task_documents() RETURNS TRIGGER AS $$
+BEGIN
+  DELETE FROM task_documents WHERE task_id = OLD.id;
+  RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_task_documents
+BEFORE DELETE ON tasks
+FOR EACH ROW EXECUTE PROCEDURE delete_task_documents();
