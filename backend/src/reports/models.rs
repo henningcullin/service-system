@@ -45,7 +45,9 @@ pub struct UpdateReport {
     pub report_type: Option<Uuid>,
     pub status: Option<Uuid>,
     #[serde(default)]
-    pub archived: Option<bool>,
+    pub archived: Nullable<bool>,
+    #[serde(default)]
+    pub machine: Nullable<Uuid>,
 }
 
 // Delete

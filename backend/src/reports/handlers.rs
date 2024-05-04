@@ -235,7 +235,8 @@ pub async fn update(
         description => body.description,
         report_type => body.report_type,
         status => body.status,
-        archived => body.archived
+        archived => body.archived,
+        machine => body.machine
     );
 
     if fields.len() < 1 {
