@@ -1,7 +1,7 @@
 use serde::de::{self, Visitor};
 use serde::{Deserialize, Deserializer};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Nullable<T> {
     Absent,
     Null,

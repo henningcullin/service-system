@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 use super::Nullable;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Debug)]
 pub enum Field {
     Str(Option<String>),
     Int(Option<i32>),
