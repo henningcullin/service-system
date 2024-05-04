@@ -5,21 +5,24 @@ use axum::{
     http::StatusCode,
     Extension, Json,
 };
-use sqlx::query;
+use sqlx::{query, Postgres, QueryBuilder};
 
 use crate::{
+    field_vec,
     machines::models::ShortMachine,
     tasks::models::Task,
+    update_field,
     users::models::{ShortUser, User},
     utils::{
         check_permission,
-        errors::{ApiError, ForbiddenReason},
+        errors::{ApiError, ForbiddenReason, InputInvalidReason},
+        misc::Field,
     },
     AppState,
 };
 
 use super::{
-    models::{NewTask, QueryTask},
+    models::{NewTask, QueryTask, UpdateTask},
     task_documents::TaskDocument,
     task_statuses::TaskStatus,
     task_types::TaskType,
@@ -395,4 +398,47 @@ pub async fn create(
     tx.commit().await.map_err(ApiError::from)?;
 
     Ok((StatusCode::CREATED, Json(task)))
+}
+
+pub async fn update(
+    Extension(user): Extension<User>,
+    State(app_state): State<Arc<AppState>>,
+    Json(body): Json<UpdateTask>,
+) -> Result<StatusCode, ApiError> {
+    check_permission(user.role.task_edit)?;
+
+    let mut query_builder = QueryBuilder::<Postgres>::new("UPDATE tasks SET");
+    let mut separated_list = query_builder.separated(",");
+
+    let fields = field_vec!(
+        title => body.title,
+        description => body.description,
+        task_type => body.task_type,
+        status => body.status,
+        archived => body.archived,
+        machine => body.machine,
+        due_at => body.due_at
+    );
+
+    if fields.len() < 1 {
+        return Err(ApiError::InputInvalid(InputInvalidReason::NoFieldsToUpdate));
+    }
+
+    for (field, value) in fields {
+        update_field!(separated_list, field, value);
+    }
+
+    query_builder.push(" WHERE id = ");
+    query_builder.push_bind(body.id);
+
+    let result = query_builder
+        .build()
+        .execute(&app_state.db)
+        .await
+        .map_err(ApiError::from)?;
+
+    match result.rows_affected() {
+        1 => Ok(StatusCode::OK),
+        _ => Ok(StatusCode::NOT_FOUND),
+    }
 }

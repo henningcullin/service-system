@@ -33,6 +33,8 @@ macro_rules! insert_fields {
                 Field::Str(ref value) => value.is_some(),
                 Field::Int(ref value) => value.is_some(),
                 Field::Bool(ref value) => value.is_some(),
+                Field::Uuid(ref value) => value.is_some(),
+                Field::DateTime(ref value) => value.is_some(),
             })
             .collect();
 

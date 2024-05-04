@@ -45,3 +45,17 @@ pub struct NewTask {
     pub machine: Option<Uuid>,
     pub due_at: Option<DateTime<Utc>>,
 }
+
+// Update
+
+#[derive(Deserialize)]
+pub struct UpdateTask {
+    pub id: Uuid,
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub task_type: Option<Uuid>,
+    pub status: Option<Uuid>,
+    pub archived: Option<Uuid>,
+    pub machine: Option<Uuid>,
+    pub due_at: Option<DateTime<Utc>>,
+}
