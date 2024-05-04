@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::prelude::Type;
 use uuid::Uuid;
 
-#[derive(Serialize, Type)]
+#[derive(Serialize, Type, Deserialize)]
 pub struct MachineType {
     pub id: Uuid,
     pub name: String,

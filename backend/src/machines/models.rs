@@ -12,6 +12,8 @@ pub struct Machine {
     pub make: Option<String>,
     pub machine_type: MachineType,
     pub status: MachineStatus,
+    /*     pub tasks: Option<Vec<ShortTask>>,
+    pub reports: Option<Vec<ShortReport>>, */
     pub created: DateTime<Utc>,
     pub edited: DateTime<Utc>,
     pub facility: Option<Facility>,
@@ -19,7 +21,6 @@ pub struct Machine {
 }
 
 // Short variant
-
 #[derive(Type, FromRow, Serialize, Debug)]
 pub struct ShortMachine {
     pub id: Option<Uuid>,
@@ -32,4 +33,14 @@ pub struct ShortMachine {
 #[derive(Deserialize)]
 pub struct QueryMachine {
     pub id: Uuid,
+}
+
+// Create
+#[derive(Deserialize)]
+pub struct NewMachine {
+    pub name: String,
+    pub make: Option<String>,
+    pub machine_type: Uuid,
+    pub status: Uuid,
+    pub facility: Option<Uuid>,
 }
