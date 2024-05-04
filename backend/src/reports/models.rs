@@ -23,6 +23,14 @@ pub struct Report {
     pub edited: DateTime<Utc>,
 }
 
+// Details
+
+#[derive(Deserialize)]
+pub struct QueryReport {
+    pub report_id: Option<Uuid>,
+    pub creator_id: Option<Uuid>,
+}
+
 // Create
 
 #[derive(Deserialize)]

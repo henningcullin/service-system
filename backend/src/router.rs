@@ -36,6 +36,7 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/role", put(roles::update))
         .route("/role", delete(roles::delete))
         // Reports
+        .route("/report", get(reports::details))
         .route("/reports", get(reports::index))
         .route("/report", post(reports::create))
         .route("/report", put(reports::update))
