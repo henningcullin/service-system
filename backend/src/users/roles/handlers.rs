@@ -13,8 +13,8 @@ use crate::{
     users::models::User,
     utils::{
         check_permission,
+        db::{Field, IntoField},
         errors::{ApiError, ForbiddenReason, InputInvalidReason},
-        misc::Field,
     },
     AppState,
 };
@@ -108,7 +108,7 @@ pub async fn create(
         facility_delete => body.facility_delete
     ];
 
-    insert_fields!(query_builder, fields);
+    insert_fields!(query_builder, &fields);
 
     query_builder.push(" RETURNING *");
 

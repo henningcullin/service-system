@@ -2,7 +2,9 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::{machines::models::ShortMachine, users::models::ShortUser};
+use crate::{
+    machines::models::ShortMachine, users::models::ShortUser, utils::db::nullable::Nullable,
+};
 
 use super::{task_documents::TaskDocument, task_statuses::TaskStatus, task_types::TaskType};
 
@@ -48,7 +50,7 @@ pub struct NewTask {
 
 // Update
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct UpdateTask {
     pub id: Uuid,
     pub title: Option<String>,
@@ -56,6 +58,8 @@ pub struct UpdateTask {
     pub task_type: Option<Uuid>,
     pub status: Option<Uuid>,
     pub archived: Option<Uuid>,
-    pub machine: Option<Uuid>,
-    pub due_at: Option<DateTime<Utc>>,
+    #[serde(default)]
+    pub machine: Nullable<Uuid>,
+    #[serde(default)]
+    pub due_at: Nullable<DateTime<Utc>>,
 }

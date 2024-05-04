@@ -14,8 +14,8 @@ use crate::{
     users::models::User,
     utils::{
         check_permission,
+        db::{Field, IntoField},
         errors::{ApiError, InputInvalidReason},
-        misc::Field,
     },
     AppState,
 };

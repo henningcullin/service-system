@@ -2,22 +2,32 @@
 macro_rules! update_field {
     ($query_builder:expr, $field:expr, $value:expr) => {
         match $value {
-            Field::Str(Some(val)) => {
+            Field::Str(val) => {
                 $query_builder
                     .push(format!(" {} = ", $field))
                     .push_bind_unseparated(val);
             }
-            Field::Int(Some(val)) => {
+            Field::Int(val) => {
                 $query_builder
                     .push(format!(" {} = ", $field))
                     .push_bind_unseparated(val);
             }
-            Field::Bool(Some(val)) => {
+            Field::Bool(val) => {
                 $query_builder
                     .push(format!(" {} = ", $field))
                     .push_bind_unseparated(val);
             }
-            _ => {}
+            Field::Uuid(val) => {
+                $query_builder
+                    .push(format!(" {} = ", $field))
+                    .push_bind_unseparated(val);
+            }
+            Field::DateTime(val) => {
+                $query_builder
+                    .push(format!(" {} = ", $field))
+                    .push_bind_unseparated(val);
+            }
+            Field::Ignore => unreachable!(),
         }
     };
 }
@@ -27,18 +37,7 @@ macro_rules! insert_fields {
     ($query_builder:expr, $fields:expr) => {
         let mut field_list = $query_builder.separated(", ");
 
-        let fields: Vec<_> = $fields
-            .into_iter()
-            .filter(|(_, field)| match field {
-                Field::Str(ref value) => value.is_some(),
-                Field::Int(ref value) => value.is_some(),
-                Field::Bool(ref value) => value.is_some(),
-                Field::Uuid(ref value) => value.is_some(),
-                Field::DateTime(ref value) => value.is_some(),
-            })
-            .collect();
-
-        for (field, _) in &fields {
+        for (field, _) in $fields {
             field_list.push(field);
         }
 
@@ -46,18 +45,24 @@ macro_rules! insert_fields {
 
         let mut value_list = $query_builder.separated(", ");
 
-        for (_, value) in fields {
+        for (_, value) in $fields {
             match value {
-                Field::Str(Some(val)) => {
+                Field::Str(val) => {
                     value_list.push_bind(val);
                 }
-                Field::Int(Some(val)) => {
+                Field::Int(val) => {
                     value_list.push_bind(val);
                 }
-                Field::Bool(Some(val)) => {
+                Field::Bool(val) => {
                     value_list.push_bind(val);
                 }
-                _ => {}
+                Field::Uuid(val) => {
+                    value_list.push_bind(val);
+                }
+                Field::DateTime(val) => {
+                    value_list.push_bind(val);
+                }
+                Field::Ignore => unreachable!(),
             }
         }
 
@@ -71,15 +76,20 @@ macro_rules! field_vec {
 
         macro_rules! to_field {
             ($value:expr) => {{
-                Field::from($value)
+                $value.into_field()
             }};
         }
 
-        vec![
-            $(
-                (stringify!($name), to_field!($values)),
-            )*
-        ]
+        let mut vec = Vec::new();
+
+        $(
+            let field = to_field!($values);
+            if field != Field::Ignore {
+                vec.push((stringify!($name), field));
+            }
+        )*
+
+        vec
     }};
 }
 
