@@ -437,8 +437,6 @@ pub async fn update(
         .await
         .map_err(ApiError::from)?;
 
-    println!("{result:?}");
-
     match result.rows_affected() {
         1 => Ok(StatusCode::OK),
         _ => Ok(StatusCode::NOT_FOUND),
