@@ -4,7 +4,9 @@ use axum::{extract::State, http::StatusCode, Extension, Json};
 use sqlx::{query_as, query_scalar, Postgres, QueryBuilder};
 
 use crate::{
-    field_vec, update_field,
+    field_vec,
+    machines::models::ShortMachine,
+    update_field,
     users::models::{ShortUser, User},
     utils::{
         check_permission,
@@ -51,6 +53,12 @@ pub async fn index(
                 u.image
             ) AS "creator!: ShortUser",
             (
+                m.id,
+                m.name,
+                m.make,
+                m.image
+            ) AS "machine?: ShortMachine",
+            (
                 SELECT array_agg(
                     (
                         rd.uri,
@@ -77,6 +85,10 @@ pub async fn index(
             users u
         ON
             r.creator = u.id
+        LEFT JOIN
+            machines m
+        ON
+            r.machine = m.id
         "#
     )
     .fetch_all(&app_state.db)
@@ -154,6 +166,12 @@ pub async fn create(
                 u.image
             ) AS "creator!: ShortUser",
             (
+                m.id,
+                m.name,
+                m.make,
+                m.image
+            ) AS "machine?: ShortMachine",
+            (
                 SELECT array_agg(
                     (
                         rd.uri,
@@ -180,6 +198,10 @@ pub async fn create(
             users u
         ON
             r.creator = u.id
+        LEFT JOIN
+            machines m
+        ON
+            r.machine = m.id
         WHERE
             r.id = $1
         "#,

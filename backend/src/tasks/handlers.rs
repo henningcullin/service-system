@@ -382,7 +382,7 @@ pub async fn create(
             users u
         ON
             t.creator = u.id
-        INNER JOIN
+        LEFT JOIN
             machines m
         ON
             t.machine = m.id

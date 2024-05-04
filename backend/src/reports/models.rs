@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::users::models::ShortUser;
+use crate::{machines::models::ShortMachine, users::models::ShortUser, utils::db::Nullable};
 
 use super::{
     report_documents::ReportDocument, report_statuses::ReportStatus, report_types::ReportType,
@@ -17,6 +17,7 @@ pub struct Report {
     pub status: ReportStatus,
     pub archived: bool,
     pub creator: ShortUser,
+    pub machine: Option<ShortMachine>,
     pub documents: Option<Vec<ReportDocument>>,
     pub created: DateTime<Utc>,
     pub edited: DateTime<Utc>,
@@ -31,6 +32,7 @@ pub struct NewReport {
     pub report_type: Uuid,
     pub status: Uuid,
     pub archived: Option<bool>,
+    pub machine: Option<Uuid>,
 }
 
 // Update
@@ -42,5 +44,6 @@ pub struct UpdateReport {
     pub description: Option<String>,
     pub report_type: Option<Uuid>,
     pub status: Option<Uuid>,
+    #[serde(default)]
     pub archived: Option<bool>,
 }
