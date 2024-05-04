@@ -16,6 +16,7 @@ CREATE TABLE reports (
     status UUID NOT NULL REFERENCES report_statuses(id),
     archived BOOLEAN NOT NULL DEFAULT FALSE,
     creator UUID NOT NULL REFERENCES users(id),
+    machine UUID REFERENCES machines(id),
     created TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     edited TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -32,3 +33,14 @@ CREATE TABLE report_documents (
     description TEXT,
     PRIMARY KEY (report_id, uri)
 );
+
+CREATE OR REPLACE FUNCTION delete_report_documents() RETURNS TRIGGER AS $$
+BEGIN
+  DELETE FROM report_documents WHERE report_id = OLD.id;
+  RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_report_documents
+BEFORE DELETE ON reports
+FOR EACH ROW EXECUTE PROCEDURE delete_report_documents();
