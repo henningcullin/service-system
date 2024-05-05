@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::prelude::{FromRow, Type};
 use uuid::Uuid;
 
+use crate::utils::db::Nullable;
+
 use super::{facilities::Facility, machine_statuses::MachineStatus, machine_types::MachineType};
 
 #[derive(Serialize)]
@@ -43,4 +45,22 @@ pub struct NewMachine {
     pub machine_type: Uuid,
     pub status: Uuid,
     pub facility: Option<Uuid>,
+}
+
+#[derive(Deserialize)]
+pub struct UpdateMachine {
+    pub id: Uuid,
+    pub name: Option<String>,
+    #[serde(default)]
+    pub make: Nullable<String>,
+    pub machine_type: Option<Uuid>,
+    pub status: Option<Uuid>,
+    #[serde(default)]
+    pub facility: Nullable<Uuid>,
+}
+
+// Delete
+#[derive(Deserialize)]
+pub struct DeleteMachine {
+    pub id: Uuid,
 }

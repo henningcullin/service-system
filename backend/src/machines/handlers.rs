@@ -5,11 +5,16 @@ use axum::{
     http::StatusCode,
     Extension, Json,
 };
-use sqlx::query_as;
+use sqlx::{query, query_as, Postgres, QueryBuilder};
 
 use crate::{
+    field_vec, update_field,
     users::models::User,
-    utils::{check_permission, errors::ApiError},
+    utils::{
+        check_permission,
+        db::{Field, IntoField},
+        errors::{ApiError, InputInvalidReason},
+    },
     AppState,
 };
 
@@ -17,7 +22,7 @@ use super::{
     facilities::Facility,
     machine_statuses::MachineStatus,
     machine_types::MachineType,
-    models::{Machine, NewMachine, QueryMachine},
+    models::{DeleteMachine, Machine, NewMachine, QueryMachine, UpdateMachine},
 };
 
 pub async fn details(
@@ -207,4 +212,63 @@ pub async fn create(
     .map_err(ApiError::from)?;
 
     Ok((StatusCode::CREATED, Json(machine)))
+}
+
+pub async fn update(
+    Extension(user): Extension<User>,
+    State(app_state): State<Arc<AppState>>,
+    Json(body): Json<UpdateMachine>,
+) -> Result<StatusCode, ApiError> {
+    check_permission(user.role.machine_edit)?;
+
+    let mut query_builder = QueryBuilder::<Postgres>::new("UPDATE machines SET");
+    let mut separated_list = query_builder.separated(",");
+
+    let fields = field_vec![
+        name => body.name,
+        make => body.make,
+        machine_type => body.machine_type,
+        status => body.status,
+        facility => body.facility
+    ];
+
+    if fields.len() < 1 {
+        return Err(ApiError::InputInvalid(InputInvalidReason::NoFieldsToUpdate));
+    }
+
+    for (field, value) in fields {
+        update_field!(separated_list, field, value);
+    }
+
+    query_builder.push(" WHERE id = ");
+    query_builder.push_bind(body.id);
+
+    let result = query_builder
+        .build()
+        .execute(&app_state.db)
+        .await
+        .map_err(ApiError::from)?;
+
+    match result.rows_affected() {
+        1 => Ok(StatusCode::NO_CONTENT),
+        _ => Ok(StatusCode::NOT_FOUND),
+    }
+}
+
+pub async fn delete(
+    Extension(user): Extension<User>,
+    State(app_state): State<Arc<AppState>>,
+    Query(params): Query<DeleteMachine>,
+) -> Result<StatusCode, ApiError> {
+    check_permission(user.role.machine_delete)?;
+
+    let result = query!(r#"DELETE FROM machines WHERE id = $1"#, params.id)
+        .execute(&app_state.db)
+        .await
+        .map_err(ApiError::from)?;
+
+    match result.rows_affected() {
+        1 => Ok(StatusCode::OK),
+        _ => Ok(StatusCode::NOT_FOUND),
+    }
 }

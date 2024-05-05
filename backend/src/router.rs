@@ -82,6 +82,8 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/machine", get(machines::details))
         .route("/machines", get(machines::index))
         .route("/machine", post(machines::create))
+        .route("/machine", put(machines::update))
+        .route("/machine", delete(machines::delete))
         // MachineTypes
         .route("/machine_type", get(machine_types::details))
         .route("/machine_types", get(machine_types::index))
