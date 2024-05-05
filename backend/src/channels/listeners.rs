@@ -8,11 +8,18 @@ use sqlx::postgres::PgListener;
 use std::{convert::Infallible, sync::Arc};
 use tokio_stream::{wrappers::ReceiverStream, StreamExt};
 
-use crate::{utils::errors::ApiError, AppState}; // import your AppState
+use crate::{
+    users::models::User,
+    utils::{check_permission, errors::ApiError},
+    AppState,
+}; // import your AppState
 
 pub async fn task_listen(
+    Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
 ) -> Result<Sse<impl Stream<Item = Result<Event, Infallible>>>, ApiError> {
+    check_permission(user.role.task_view)?;
+
     let mut listener = PgListener::connect_with(&app_state.db)
         .await
         .map_err(ApiError::from)?;
@@ -45,8 +52,11 @@ pub async fn task_listen(
 }
 
 pub async fn report_listen(
+    Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
 ) -> Result<Sse<impl Stream<Item = Result<Event, Infallible>>>, ApiError> {
+    check_permission(user.role.report_view)?;
+
     let mut listener = PgListener::connect_with(&app_state.db)
         .await
         .map_err(ApiError::from)?;
