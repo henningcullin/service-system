@@ -7,20 +7,23 @@ use axum::{
     Extension, Json,
 };
 use rand_core::OsRng;
-use sqlx::{query_as, query_scalar};
+use sqlx::{query_as, query_scalar, Postgres, QueryBuilder};
 use validator::Validate;
 
 use crate::{
+    field_vec,
     machines::facilities::Facility,
+    update_field, user_from_id,
     utils::{
         check_permission,
+        db::{Field, IntoField},
         errors::{ApiError, ConflictReason, ForbiddenReason, InputInvalidReason},
     },
     AppState,
 };
 
 use super::{
-    models::{NewUser, QueryUser, User},
+    models::{NewUser, QueryUser, UpdateUser, User},
     roles::models::Role,
 };
 
@@ -241,7 +244,6 @@ pub async fn create(
                 role,
                 active,
                 occupation,
-                image,
                 facility
             )
             VALUES
@@ -254,8 +256,7 @@ pub async fn create(
                 $6,
                 $7,
                 $8,
-                $9,
-                $10
+                $9
             )
             RETURNING *
         )
@@ -319,7 +320,6 @@ pub async fn create(
         body.role,
         body.active.unwrap_or(true),
         body.occupation,
-        body.image,
         body.facility,
     )
     .fetch_one(&app_state.db)
@@ -327,4 +327,88 @@ pub async fn create(
     .map_err(ApiError::from)?;
 
     Ok((StatusCode::CREATED, Json(user)))
+}
+
+pub async fn update(
+    Extension(user): Extension<User>,
+    State(app_state): State<Arc<AppState>>,
+    Json(body): Json<UpdateUser>,
+) -> Result<StatusCode, ApiError> {
+    let permissions_ok = user.role.user_edit || body.id == user.id;
+
+    if !permissions_ok {
+        return Err(ApiError::Forbidden(ForbiddenReason::MissingPermission));
+    }
+
+    if body.email.is_some() {
+        body.validate().map_err(ApiError::from)?;
+    }
+
+    let target_user = user_from_id!(body.id)
+        .fetch_one(&app_state.db)
+        .await
+        .map_err(ApiError::from)?;
+
+    if target_user.role.level <= user.role.level && target_user.id != user.id {
+        return Err(ApiError::Forbidden(ForbiddenReason::MissingPermission));
+    }
+
+    if let Some(role_id) = body.role {
+        let role = query_as!(
+            Role,
+            r#"
+            SELECT
+                *
+            FROM
+                roles r
+            WHERE
+                r.id = $1 
+            "#,
+            role_id
+        )
+        .fetch_one(&app_state.db)
+        .await
+        .map_err(ApiError::from)?;
+
+        if role.level <= user.role.level {
+            return Err(ApiError::Forbidden(ForbiddenReason::MissingPermission));
+        }
+    }
+
+    let mut query_builder = QueryBuilder::<Postgres>::new("UPDATE users SET");
+    let mut separated_list = query_builder.separated(",");
+
+    let fields = field_vec![
+        first_name => body.first_name,
+        last_name => body.last_name,
+        email => body.email,
+        password => body.password,
+        phone => body.phone,
+        role => body.role,
+        active => body.active,
+        occupation => body.occupation,
+        facility => body.facility
+    ];
+
+    if fields.len() < 1 {
+        return Err(ApiError::InputInvalid(InputInvalidReason::NoFieldsToUpdate));
+    }
+
+    for (field, value) in fields {
+        update_field!(separated_list, field, value);
+    }
+
+    query_builder.push(" WHERE id = ");
+    query_builder.push_bind(body.id);
+
+    let result = query_builder
+        .build()
+        .execute(&app_state.db)
+        .await
+        .map_err(ApiError::from)?;
+
+    match result.rows_affected() {
+        1 => Ok(StatusCode::NO_CONTENT),
+        _ => Ok(StatusCode::NOT_FOUND),
+    }
 }

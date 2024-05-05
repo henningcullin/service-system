@@ -4,7 +4,7 @@ use sqlx::prelude::{FromRow, Type};
 use uuid::Uuid;
 use validator::Validate;
 
-use crate::machines::facilities::Facility;
+use crate::{machines::facilities::Facility, utils::db::Nullable};
 
 use super::roles::models::Role;
 
@@ -54,6 +54,26 @@ pub struct NewUser {
     pub role: Uuid,
     pub active: Option<bool>,
     pub occupation: Option<String>,
-    pub image: Option<String>,
     pub facility: Option<Uuid>,
+}
+
+// Update
+
+#[derive(Validate, Deserialize)]
+pub struct UpdateUser {
+    pub id: Uuid,
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
+    #[validate(email)]
+    pub email: Option<String>,
+    #[serde(default)]
+    pub password: Nullable<String>,
+    #[serde(default)]
+    pub phone: Nullable<String>,
+    pub role: Option<Uuid>,
+    pub active: Option<bool>,
+    #[serde(default)]
+    pub occupation: Nullable<String>,
+    #[serde(default)]
+    pub facility: Nullable<Uuid>,
 }
