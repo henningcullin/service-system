@@ -25,9 +25,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 ALTER TABLE users
-DROP CONSTRAINT is_password_required_constraint;
-
-ALTER TABLE users
 ADD CONSTRAINT is_password_required_constraint
 CHECK (is_password_required(role, password));
 
