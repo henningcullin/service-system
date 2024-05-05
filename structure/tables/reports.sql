@@ -44,3 +44,31 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trigger_report_documents
 BEFORE DELETE ON reports
 FOR EACH ROW EXECUTE PROCEDURE delete_report_documents();
+
+CREATE OR REPLACE FUNCTION notify_report_change() RETURNS TRIGGER AS $$
+DECLARE
+  data json;
+  report_id UUID;
+  operation_type text;
+BEGIN
+  IF (TG_OP = 'DELETE') THEN
+    report_id := OLD.id;
+    operation_type := 'DELETE';
+  ELSIF (TG_OP = 'INSERT') THEN
+    report_id := NEW.id;
+    operation_type := 'INSERT';
+  ELSIF (TG_OP = 'UPDATE') THEN
+    report_id := NEW.id;
+    operation_type := 'UPDATE';
+  END IF;
+  
+  data := json_build_object('id', report_id::text, 'kind', operation_type);
+  PERFORM pg_notify('report_changed', data::text);
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER report_changed
+AFTER INSERT OR UPDATE OR DELETE ON reports
+FOR EACH ROW EXECUTE PROCEDURE notify_report_change();
