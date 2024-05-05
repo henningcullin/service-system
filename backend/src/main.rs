@@ -48,7 +48,7 @@ async fn main() {
     let (_file_guard, _terminal_guard) = utils::tracing::init(&config.log_path);
 
     let pool = PgPoolOptions::new()
-        .max_connections(5)
+        .max_connections(10)
         .acquire_timeout(Duration::from_secs(3))
         .connect(&config.database_url)
         .await
