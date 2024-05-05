@@ -2,7 +2,7 @@ use crate::{
     auth::{self, auth},
     machines::{self, facilities, machine_statuses, machine_types},
     reports::{self, report_statuses, report_types},
-    tasks::{self, task_statuses, task_types},
+    tasks::{self, task_executors, task_statuses, task_types},
     users::{self, roles},
     AppState,
 };
@@ -72,6 +72,9 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/task_status", post(task_statuses::create))
         .route("/task_status", put(task_statuses::update))
         .route("/task_status", delete(task_statuses::delete))
+        // TaskExecutors
+        .route("/task_executor", post(task_executors::create))
+        .route("/task_executor", delete(task_executors::delete))
         // Facilities
         .route("/facility", get(facilities::details))
         .route("/facilities", get(facilities::index))
