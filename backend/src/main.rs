@@ -1,4 +1,5 @@
 mod auth;
+mod channels;
 mod config;
 mod machines;
 mod reports;

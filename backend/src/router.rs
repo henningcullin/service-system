@@ -1,5 +1,6 @@
 use crate::{
     auth::{self, auth},
+    channels,
     machines::{self, facilities, machine_statuses, machine_types},
     reports::{self, report_statuses, report_types},
     tasks::{self, task_executors, task_statuses, task_types},
@@ -21,7 +22,10 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         app_state.env.frontend_url.to_owned() + "\\index.html",
     ));
 
+    let listeners = Router::new().route("/tasks", get(channels::task_listen));
+
     let auth = Router::new()
+        .nest("/listen", listeners)
         // Auth
         .route("/logout", get(auth::logout))
         .route("/me", get(auth::me))

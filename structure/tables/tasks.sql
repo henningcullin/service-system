@@ -62,3 +62,34 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trigger_task_documents
 BEFORE DELETE ON tasks
 FOR EACH ROW EXECUTE PROCEDURE delete_task_documents();
+
+
+-- NOTIFICATIONS ON TASK CHANGES
+
+CREATE OR REPLACE FUNCTION notify_task_change() RETURNS TRIGGER AS $$
+DECLARE
+  data json;
+  task_id UUID;
+  operation_type text;
+BEGIN
+  IF (TG_OP = 'DELETE') THEN
+    task_id := OLD.id;
+    operation_type := 'DELETE';
+  ELSIF (TG_OP = 'INSERT') THEN
+    task_id := NEW.id;
+    operation_type := 'INSERT';
+  ELSIF (TG_OP = 'UPDATE') THEN
+    task_id := NEW.id;
+    operation_type := 'UPDATE';
+  END IF;
+  
+  data := json_build_object('id', task_id::text, 'kind', operation_type);
+  PERFORM pg_notify('task_changed', data::text);
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER task_changed
+AFTER INSERT OR UPDATE OR DELETE ON tasks
+FOR EACH ROW EXECUTE PROCEDURE notify_task_change();
