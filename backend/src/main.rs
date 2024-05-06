@@ -15,7 +15,6 @@ use axum::http::{
 use config::Config;
 use dotenv::dotenv;
 use router::create_router;
-use serde::Serialize;
 use sqlx::postgres::{PgPool, PgPoolOptions};
 use std::{sync::Arc, time::Duration};
 use tower_http::cors::CorsLayer;
@@ -25,18 +24,6 @@ use tracing::info;
 pub struct AppState {
     db: PgPool,
     env: Config,
-}
-
-#[derive(Debug, Serialize)]
-pub enum ResponseType {
-    Fail,
-    Success,
-}
-
-#[derive(Debug, Serialize)]
-pub struct ResponseData {
-    pub status: ResponseType,
-    pub message: String,
 }
 
 #[tokio::main(flavor = "multi_thread", worker_threads = 6)]
