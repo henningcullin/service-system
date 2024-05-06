@@ -3,20 +3,16 @@
 
     async function logout() {
         try {
-            const response = await fetch('/api/auth/user/logout');
-            const data = await response.json();
-    
-            if (response.status !== 200) return alert('Could not logout');
+            const response = await fetch("/api/auth/logout");
 
-            alert(data.message);
+            if (response.status !== 200) return alert("Could not logout");
 
             getLoggedIn();
         } catch (error) {
-            console.error('Logout error: ', error);
-            alert('Could not logout');
+            console.error("Logout error: ", error);
+            alert("Could not logout");
         }
     }
-
 </script>
 
 <button class="ui large red button" on:click={logout}>Logout</button>

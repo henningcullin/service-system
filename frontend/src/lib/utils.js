@@ -7,7 +7,7 @@ import { navigate } from 'svelte-navigator';
  */
 export async function getLoggedIn() {
 	try {
-		const response = await fetch('/api/auth/user/me');
+		const response = await fetch('/api/auth/me');
 		const data = await response.json();
 
 		if (response.status !== 200) {
@@ -18,8 +18,10 @@ export async function getLoggedIn() {
 		data.last_login = new Date(data.last_login);
 
 		account.set(data);
+		return true;
 	} catch (error) {
 		console.log('Could not get logged in status', error);
+		return false;
 	}
 }
 
