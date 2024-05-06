@@ -41,8 +41,7 @@ pub async fn details(
         params.id
     )
     .fetch_one(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     Ok(Json(role))
 }
@@ -63,8 +62,7 @@ pub async fn index(
         "#
     )
     .fetch_all(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     Ok(Json(roles))
 }
@@ -115,8 +113,7 @@ pub async fn create(
     let role = query_builder
         .build_query_as::<Role>()
         .fetch_one(&app_state.db)
-        .await
-        .map_err(ApiError::from)?;
+        .await?;
 
     Ok((StatusCode::CREATED, Json(role)))
 }
@@ -141,8 +138,7 @@ pub async fn update(
         body.id
     )
     .fetch_one(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     if target_role.level <= user.role.level {
         return Err(ApiError::Forbidden(ForbiddenReason::MissingPermission));
@@ -194,11 +190,7 @@ pub async fn update(
     query_builder.push(" WHERE id = ");
     query_builder.push_bind(body.id);
 
-    let result = query_builder
-        .build()
-        .execute(&app_state.db)
-        .await
-        .map_err(ApiError::from)?;
+    let result = query_builder.build().execute(&app_state.db).await?;
 
     match result.rows_affected() {
         1 => Ok(StatusCode::NO_CONTENT),
@@ -226,8 +218,7 @@ pub async fn delete(
         params.id
     )
     .fetch_one(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     if target_role.level <= user.role.level {
         return Err(ApiError::Forbidden(ForbiddenReason::MissingPermission));
@@ -235,8 +226,7 @@ pub async fn delete(
 
     let result = query!(r#"DELETE FROM roles WHERE id = $1"#, params.id)
         .execute(&app_state.db)
-        .await
-        .map_err(ApiError::from)?;
+        .await?;
 
     match result.rows_affected() {
         1 => Ok(StatusCode::NO_CONTENT),

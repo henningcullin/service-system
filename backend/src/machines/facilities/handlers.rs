@@ -42,8 +42,7 @@ pub async fn details(
         params.id
     )
     .fetch_one(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     Ok(Json(facility))
 }
@@ -64,8 +63,7 @@ pub async fn index(
         "#
     )
     .fetch_all(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     Ok(Json(facilities))
 }
@@ -98,8 +96,7 @@ pub async fn create(
         body.address
     )
     .fetch_one(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     Ok((StatusCode::CREATED, Json(facility)))
 }
@@ -130,11 +127,7 @@ pub async fn update(
     query_builder.push(" WHERE id = ");
     query_builder.push_bind(body.id);
 
-    let result = query_builder
-        .build()
-        .execute(&app_state.db)
-        .await
-        .map_err(ApiError::from)?;
+    let result = query_builder.build().execute(&app_state.db).await?;
 
     match result.rows_affected() {
         1 => Ok(StatusCode::NO_CONTENT),
@@ -151,8 +144,7 @@ pub async fn delete(
 
     let result = query!(r#"DELETE FROM facilities WHERE id = $1"#, params.id)
         .execute(&app_state.db)
-        .await
-        .map_err(ApiError::from)?;
+        .await?;
 
     match result.rows_affected() {
         1 => Ok(StatusCode::NO_CONTENT),

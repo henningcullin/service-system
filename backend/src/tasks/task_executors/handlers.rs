@@ -36,8 +36,7 @@ pub async fn create(
         body.user_id
     )
     .execute(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     match result.rows_affected() {
         1 => Ok(StatusCode::CREATED),
@@ -65,8 +64,7 @@ pub async fn delete(
         body.user_id
     )
     .execute(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     match result.rows_affected() {
         1 => Ok(StatusCode::NO_CONTENT),

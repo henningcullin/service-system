@@ -139,8 +139,7 @@ pub async fn details(
         params.executor_id
     )
     .fetch_all(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     Ok(Json(tasks))
 }
@@ -229,8 +228,7 @@ pub async fn index(
         "#
     )
     .fetch_all(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     Ok(Json(tasks))
 }
@@ -242,7 +240,7 @@ pub async fn create(
 ) -> Result<(StatusCode, Json<Task>), ApiError> {
     check_permission(user.role.task_create)?;
 
-    let mut tx = app_state.db.begin().await.map_err(ApiError::from)?;
+    let mut tx = app_state.db.begin().await?;
 
     let task_id = sqlx::query_scalar!(
         r#"
@@ -282,8 +280,7 @@ pub async fn create(
         body.due_at
     )
     .fetch_one(&mut *tx)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     if let Some(executors) = body.executors {
         query!(
@@ -300,8 +297,7 @@ pub async fn create(
             &executors
         )
         .execute(&mut *tx)
-        .await
-        .map_err(ApiError::from)?;
+        .await?;
     }
 
     let task = sqlx::query_as!(
@@ -392,10 +388,9 @@ pub async fn create(
         task_id
     )
     .fetch_one(&mut *tx)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
-    tx.commit().await.map_err(ApiError::from)?;
+    tx.commit().await?;
 
     Ok((StatusCode::CREATED, Json(task)))
 }
@@ -431,11 +426,7 @@ pub async fn update(
     query_builder.push(" WHERE id = ");
     query_builder.push_bind(body.id);
 
-    let result = query_builder
-        .build()
-        .execute(&app_state.db)
-        .await
-        .map_err(ApiError::from)?;
+    let result = query_builder.build().execute(&app_state.db).await?;
 
     match result.rows_affected() {
         1 => Ok(StatusCode::NO_CONTENT),
@@ -460,8 +451,7 @@ pub async fn delete(
         params.id
     )
     .execute(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     match result.rows_affected() {
         1 => Ok(StatusCode::NO_CONTENT),

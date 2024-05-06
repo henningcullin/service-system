@@ -38,8 +38,7 @@ pub async fn details(
         params.id
     )
     .fetch_one(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     Ok(Json(machine_type))
 }
@@ -60,8 +59,7 @@ pub async fn index(
         "#
     )
     .fetch_all(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     Ok(Json(machine_types))
 }
@@ -91,8 +89,7 @@ pub async fn create(
         body.name
     )
     .fetch_one(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     Ok((StatusCode::CREATED, Json(machine_type)))
 }
@@ -117,8 +114,7 @@ pub async fn update(
         body.id
     )
     .execute(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     match result.rows_affected() {
         1 => Ok(StatusCode::NO_CONTENT),
@@ -135,8 +131,7 @@ pub async fn delete(
 
     let result = query!(r#"DELETE FROM machine_types WHERE id = $1"#, params.id)
         .execute(&app_state.db)
-        .await
-        .map_err(ApiError::from)?;
+        .await?;
 
     match result.rows_affected() {
         1 => Ok(StatusCode::NO_CONTENT),

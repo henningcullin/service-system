@@ -20,14 +20,9 @@ pub async fn task_listen(
 ) -> Result<Sse<impl Stream<Item = Result<Event, Infallible>>>, ApiError> {
     check_permission(user.role.task_view)?;
 
-    let mut listener = PgListener::connect_with(&app_state.db)
-        .await
-        .map_err(ApiError::from)?;
+    let mut listener = PgListener::connect_with(&app_state.db).await?;
 
-    listener
-        .listen("task_changed")
-        .await
-        .map_err(ApiError::from)?;
+    listener.listen("task_changed").await?;
 
     let (tx, rx) = tokio::sync::mpsc::channel(100);
     tokio::spawn(async move {
@@ -57,14 +52,9 @@ pub async fn report_listen(
 ) -> Result<Sse<impl Stream<Item = Result<Event, Infallible>>>, ApiError> {
     check_permission(user.role.report_view)?;
 
-    let mut listener = PgListener::connect_with(&app_state.db)
-        .await
-        .map_err(ApiError::from)?;
+    let mut listener = PgListener::connect_with(&app_state.db).await?;
 
-    listener
-        .listen("report_changed")
-        .await
-        .map_err(ApiError::from)?;
+    listener.listen("report_changed").await?;
 
     let (tx, rx) = tokio::sync::mpsc::channel(100);
     tokio::spawn(async move {

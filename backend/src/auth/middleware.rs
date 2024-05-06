@@ -50,16 +50,12 @@ pub async fn auth(
         &token,
         &DecodingKey::from_secret(app_state.env.jwt_secret.as_ref()),
         &Validation::default(),
-    )
-    .map_err(|_| ApiError::Unauthorized)?
+    )?
     .claims;
 
-    let user_id = Uuid::parse_str(&claims.sub).map_err(ApiError::from)?;
+    let user_id = Uuid::parse_str(&claims.sub)?;
 
-    let user: User = user_from_id!(user_id)
-        .fetch_one(&app_state.db)
-        .await
-        .map_err(ApiError::from)?;
+    let user: User = user_from_id!(user_id).fetch_one(&app_state.db).await?;
 
     if !user.active {
         Err(ApiError::Forbidden(ForbiddenReason::AccountDeactivated))?

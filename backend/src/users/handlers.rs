@@ -94,8 +94,7 @@ pub async fn details(
         params.id
     )
     .fetch_one(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     Ok(Json(user))
 }
@@ -163,8 +162,7 @@ pub async fn index(
         "#
     )
     .fetch_all(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     Ok(Json(users))
 }
@@ -176,14 +174,13 @@ pub async fn create(
 ) -> Result<(StatusCode, Json<User>), ApiError> {
     check_permission(user.role.user_create)?;
 
-    body.validate().map_err(ApiError::from)?;
+    body.validate()?;
 
     let email = body.email.to_lowercase();
 
     let user_exists = query_scalar!("SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)", email)
         .fetch_one(&app_state.db)
-        .await
-        .map_err(ApiError::from)?;
+        .await?;
 
     if let Some(exists) = user_exists {
         if exists {
@@ -204,8 +201,7 @@ pub async fn create(
         body.role
     )
     .fetch_one(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     if role.level <= user.role.level {
         return Err(ApiError::Forbidden(ForbiddenReason::MissingPermission));
@@ -223,8 +219,7 @@ pub async fn create(
                 let salt = SaltString::generate(&mut OsRng);
                 let hashed_password = Argon2::default()
                     .hash_password(password.as_bytes(), &salt)
-                    .map(|hash| hash.to_string())
-                    .map_err(ApiError::from)?;
+                    .map(|hash| hash.to_string())?;
                 Some(hashed_password)
             }
         },
@@ -323,8 +318,7 @@ pub async fn create(
         body.facility,
     )
     .fetch_one(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     Ok((StatusCode::CREATED, Json(user)))
 }
@@ -341,13 +335,10 @@ pub async fn update(
     }
 
     if body.email.is_some() {
-        body.validate().map_err(ApiError::from)?;
+        body.validate()?;
     }
 
-    let target_user = user_from_id!(body.id)
-        .fetch_one(&app_state.db)
-        .await
-        .map_err(ApiError::from)?;
+    let target_user = user_from_id!(body.id).fetch_one(&app_state.db).await?;
 
     if target_user.role.level <= user.role.level && target_user.id != user.id {
         return Err(ApiError::Forbidden(ForbiddenReason::MissingPermission));
@@ -367,8 +358,7 @@ pub async fn update(
             role_id
         )
         .fetch_one(&app_state.db)
-        .await
-        .map_err(ApiError::from)?;
+        .await?;
 
         if role.level <= user.role.level {
             return Err(ApiError::Forbidden(ForbiddenReason::MissingPermission));
@@ -401,11 +391,7 @@ pub async fn update(
     query_builder.push(" WHERE id = ");
     query_builder.push_bind(body.id);
 
-    let result = query_builder
-        .build()
-        .execute(&app_state.db)
-        .await
-        .map_err(ApiError::from)?;
+    let result = query_builder.build().execute(&app_state.db).await?;
 
     match result.rows_affected() {
         1 => Ok(StatusCode::NO_CONTENT),

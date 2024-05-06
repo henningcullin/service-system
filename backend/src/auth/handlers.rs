@@ -47,7 +47,7 @@ pub async fn login_initiate(
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<LoginEmail>,
 ) -> Result<impl IntoResponse, ApiError> {
-    body.validate().map_err(ApiError::from)?;
+    body.validate()?;
 
     let user = query!(
         r#"
@@ -94,8 +94,7 @@ pub async fn login_initiate(
         body.email.to_lowercase()
     )
     .fetch_one(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     if !user.active {
         Err(ApiError::Forbidden(ForbiddenReason::AccountDeactivated))?
@@ -128,7 +127,6 @@ pub async fn login_initiate(
     let salt = SaltString::generate(&mut OsRng);
     let hash = Argon2::default()
         .hash_password(code.as_bytes(), &salt)
-        .map_err(ApiError::from)
         .map(|hash| hash.to_string())?;
 
     println!("Code: {code}"); // REPLACE WITH "EMAIL TO" IMPLEMENTATION
@@ -148,8 +146,7 @@ pub async fn login_initiate(
         &Header::default(),
         &claims,
         &EncodingKey::from_secret(app_state.env.jwt_pwl_secret.as_ref()),
-    )
-    .map_err(ApiError::from)?;
+    )?;
 
     let cookie = Cookie::build(("auth_token", token.to_owned()))
         .path("/")
@@ -168,7 +165,7 @@ pub async fn login_password(
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<LoginPasswordUser>,
 ) -> Result<impl IntoResponse, ApiError> {
-    body.validate().map_err(ApiError::from)?;
+    body.validate()?;
 
     let user = query!(
         r#"
@@ -215,8 +212,7 @@ pub async fn login_password(
         body.email.to_lowercase()
     )
     .fetch_one(&app_state.db)
-    .await
-    .map_err(ApiError::from)?;
+    .await?;
 
     if !user.role.has_password {
         return Err(ApiError::Forbidden(ForbiddenReason::MissingPermission));
@@ -259,8 +255,7 @@ pub async fn login_password(
         &Header::default(),
         &claims,
         &EncodingKey::from_secret(app_state.env.jwt_secret.as_ref()),
-    )
-    .map_err(ApiError::from)?;
+    )?;
 
     let cookie = Cookie::build(("token", token.to_owned()))
         .path("/")
@@ -290,8 +285,7 @@ pub async fn login_otp(
         &token,
         &DecodingKey::from_secret(app_state.env.jwt_pwl_secret.as_ref()),
         &Validation::default(),
-    )
-    .map_err(ApiError::from)?
+    )?
     .claims;
 
     let codes_match = match PasswordHash::new(&claims.hash) {
@@ -305,12 +299,9 @@ pub async fn login_otp(
         return Err(ApiError::Forbidden(ForbiddenReason::IncorrectCode));
     }
 
-    let user_id = Uuid::parse_str(&claims.sub).map_err(ApiError::from)?;
+    let user_id = Uuid::parse_str(&claims.sub)?;
 
-    let user = user_from_id!(user_id)
-        .fetch_one(&app_state.db)
-        .await
-        .map_err(ApiError::from)?;
+    let user = user_from_id!(user_id).fetch_one(&app_state.db).await?;
 
     if user.role.has_password {
         return Err(ApiError::Forbidden(ForbiddenReason::MissingPermission));
@@ -333,8 +324,7 @@ pub async fn login_otp(
         &Header::default(),
         &claims,
         &EncodingKey::from_secret(app_state.env.jwt_secret.as_ref()),
-    )
-    .map_err(ApiError::from)?;
+    )?;
 
     let token_cookie = Cookie::build(("token", token.to_owned()))
         .path("/")
