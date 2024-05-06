@@ -18,8 +18,10 @@ export async function getLoggedIn() {
 		data.last_login = new Date(data.last_login);
 
 		account.set(data);
+		return true;
 	} catch (error) {
 		console.log('Could not get logged in status', error);
+		return false;
 	}
 }
 
