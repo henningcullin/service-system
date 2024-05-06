@@ -7,7 +7,7 @@ import { navigate } from 'svelte-navigator';
  */
 export async function getLoggedIn() {
 	try {
-		const response = await fetch('/api/auth/user/me');
+		const response = await fetch('/api/auth/me');
 		const data = await response.json();
 
 		if (response.status !== 200) {
