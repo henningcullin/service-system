@@ -15,7 +15,7 @@ use axum::http::{
 use config::Config;
 use dotenv::dotenv;
 use router::create_router;
-use sqlx::postgres::{PgListener, PgPool, PgPoolOptions};
+use sqlx::postgres::{PgPool, PgPoolOptions};
 use std::{sync::Arc, time::Duration};
 use tokio::sync::{broadcast::Sender, Mutex};
 use tower_http::cors::CorsLayer;
@@ -49,39 +49,7 @@ async fn main() {
         .await
         .expect("Can't connect to Database");
 
-    let (task_sender, _) = tokio::sync::broadcast::channel(100);
-    let (report_sender, _) = tokio::sync::broadcast::channel(100);
-
-    let mut task_listener = PgListener::connect_with(&pool)
-        .await
-        .expect("Can't connect to Database");
-    task_listener
-        .listen("task_changed")
-        .await
-        .expect("Can't listen on task_changed channel");
-
-    let mut report_listener = PgListener::connect_with(&pool)
-        .await
-        .expect("Can't connect to Database");
-    report_listener
-        .listen("report_changed")
-        .await
-        .expect("Can't listen on report_changed channel");
-
-    let cloned_task_sender = task_sender.clone();
-    let cloned_report_sender = report_sender.clone();
-
-    tokio::spawn(async move {
-        while let Ok(notification) = task_listener.recv().await {
-            let _ = cloned_task_sender.send(notification.payload().to_string());
-        }
-    });
-
-    tokio::spawn(async move {
-        while let Ok(notification) = report_listener.recv().await {
-            let _ = cloned_report_sender.send(notification.payload().to_string());
-        }
-    });
+    let (task_sender, report_sender) = channels::init_channels(&pool).await;
 
     let state = AppState {
         db: pool.clone(),
