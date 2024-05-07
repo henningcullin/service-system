@@ -22,12 +22,12 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         app_state.env.frontend_url.to_owned() + "\\index.html",
     ));
 
-    let listeners = Router::new()
+    let channels = Router::new()
         .route("/tasks", get(channels::task_listen))
         .route("/reports", get(channels::report_listen));
 
     let auth = Router::new()
-        .nest("/listen", listeners)
+        .nest("/channel", channels)
         // Auth
         .route("/logout", get(auth::logout))
         .route("/me", get(auth::me))
