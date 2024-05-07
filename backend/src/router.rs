@@ -13,7 +13,11 @@ use axum::{
     Router,
 };
 use std::sync::Arc;
-use tower_http::services::{ServeDir, ServeFile};
+use tower_http::{
+    services::{ServeDir, ServeFile},
+    trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer},
+};
+use tracing::Level;
 
 pub fn create_router(app_state: Arc<AppState>) -> Router {
     let file_serve = get_service(ServeDir::new(&app_state.env.frontend_url));
@@ -118,7 +122,13 @@ pub fn create_router(app_state: Arc<AppState>) -> Router {
         .route("/assets/*path", get(file_serve))
         .route("/", index_serve.to_owned())
         .route("/*path", index_serve)
-        .with_state(app_state);
+        .with_state(app_state)
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
+                .on_response(DefaultOnRequest::new().level(Level::INFO))
+                .on_response(DefaultOnResponse::new().level(Level::INFO)),
+        );
 
     app
 }
