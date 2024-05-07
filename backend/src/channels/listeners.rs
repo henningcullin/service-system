@@ -4,9 +4,8 @@ use axum::{
     Extension,
 };
 use futures_util::stream::{self, Stream};
-use sqlx::postgres::PgListener;
 use std::{convert::Infallible, sync::Arc};
-use tokio_stream::{wrappers::ReceiverStream, StreamExt};
+use tokio_stream::{wrappers::BroadcastStream, StreamExt};
 
 use crate::{
     users::models::User,
@@ -20,26 +19,17 @@ pub async fn task_listen(
 ) -> Result<Sse<impl Stream<Item = Result<Event, Infallible>>>, ApiError> {
     check_permission(user.role.task_view)?;
 
-    let mut listener = PgListener::connect_with(&app_state.db).await?;
+    let reciever = app_state.channels.tasks.lock().await.subscribe();
 
-    listener.listen("task_changed").await?;
-
-    let (tx, rx) = tokio::sync::mpsc::channel(100);
-    tokio::spawn(async move {
-        while let Ok(notification) = listener.recv().await {
-            let _ = tx.send(notification.payload().to_string()).await;
-        }
-    });
-
-    let stream = ReceiverStream::new(rx);
+    let stream = BroadcastStream::new(reciever);
 
     let sse_stream = stream::unfold(stream, |mut stream| async {
         match stream.next().await {
-            Some(data) => {
+            Some(Ok(data)) => {
                 let event = Event::default().data(data);
                 Some((Ok(event), stream))
             }
-            None => None,
+            _ => None,
         }
     });
 
@@ -52,26 +42,17 @@ pub async fn report_listen(
 ) -> Result<Sse<impl Stream<Item = Result<Event, Infallible>>>, ApiError> {
     check_permission(user.role.report_view)?;
 
-    let mut listener = PgListener::connect_with(&app_state.db).await?;
+    let reciever = app_state.channels.reports.lock().await.subscribe();
 
-    listener.listen("report_changed").await?;
-
-    let (tx, rx) = tokio::sync::mpsc::channel(100);
-    tokio::spawn(async move {
-        while let Ok(notification) = listener.recv().await {
-            let _ = tx.send(notification.payload().to_string()).await;
-        }
-    });
-
-    let stream = ReceiverStream::new(rx);
+    let stream = BroadcastStream::new(reciever);
 
     let sse_stream = stream::unfold(stream, |mut stream| async {
         match stream.next().await {
-            Some(data) => {
+            Some(Ok(data)) => {
                 let event = Event::default().data(data);
                 Some((Ok(event), stream))
             }
-            None => None,
+            _ => None,
         }
     });
 
