@@ -4,12 +4,14 @@
   import Header from "./lib/Header.svelte";
 
   import Mainmenu from "./routes/Mainmenu.svelte";
+  import Login from "./routes/Login.svelte";
 </script>
 
 <Router primary={false}>
   <Header></Header>
   <main>
     <Route path="/" component={Mainmenu} />
+    <Route path="/login" component={Login}/>
   </main>
 </Router>
 
