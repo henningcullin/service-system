@@ -1,9 +1,12 @@
 mod auth;
+mod channels;
 mod config;
-mod machine;
+mod machines;
+mod reports;
 mod router;
-mod task;
-mod user;
+mod tasks;
+mod users;
+mod utils;
 
 use axum::http::{
     header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
@@ -12,27 +15,23 @@ use axum::http::{
 use config::Config;
 use dotenv::dotenv;
 use router::create_router;
-use serde::Serialize;
-use sqlx::{mysql::MySqlPoolOptions, MySql, Pool};
+use sqlx::postgres::{PgPool, PgPoolOptions};
 use std::{sync::Arc, time::Duration};
+use tokio::sync::{broadcast::Sender, Mutex};
 use tower_http::cors::CorsLayer;
+use tracing::info;
+
+#[derive(Clone)]
+pub struct Channels {
+    tasks: Arc<Mutex<Sender<String>>>,
+    reports: Arc<Mutex<Sender<String>>>,
+}
 
 #[derive(Clone)]
 pub struct AppState {
-    db: Pool<MySql>,
+    db: PgPool,
     env: Config,
-}
-
-#[derive(Debug, Serialize)]
-pub enum ResponseType {
-    Fail,
-    Success,
-}
-
-#[derive(Debug, Serialize)]
-pub struct ResponseData {
-    pub status: ResponseType,
-    pub message: String,
+    channels: Channels,
 }
 
 #[tokio::main(flavor = "multi_thread", worker_threads = 6)]
@@ -41,16 +40,24 @@ async fn main() {
 
     let config = Config::init();
 
-    let pool = MySqlPoolOptions::new()
-        .max_connections(7)
+    let (_file_guard, _terminal_guard) = utils::tracing::init(&config.log_path);
+
+    let pool = PgPoolOptions::new()
+        .max_connections(10)
         .acquire_timeout(Duration::from_secs(3))
         .connect(&config.database_url)
         .await
         .expect("Can't connect to Database");
 
+    let (task_sender, report_sender) = channels::init_channels(&pool).await;
+
     let state = AppState {
         db: pool.clone(),
         env: config.clone(),
+        channels: Channels {
+            tasks: Arc::new(Mutex::new(task_sender)),
+            reports: Arc::new(Mutex::new(report_sender)),
+        },
     };
 
     let cors = CorsLayer::new()
@@ -64,6 +71,9 @@ async fn main() {
     let listener = tokio::net::TcpListener::bind("0.0.0.0:80")
         .await
         .expect("Can't start listener");
+
+    info!("Listening on 0.0.0.0:80");
+
     axum::serve(listener, app)
         .await
         .expect("Can't start server");

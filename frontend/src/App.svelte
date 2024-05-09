@@ -1,59 +1,36 @@
 <script>
-// @ts-nocheck
+  import { Router, Route } from "svelte-navigator";
 
-  import { Router, Route} from 'svelte-navigator';
+  import Header from "./lib/Header.svelte";
 
-  import Header from './Header.svelte';
-  import Footer from './Footer.svelte';
-  import Sidebar from './Sidebar.svelte';
-
-  import { account } from '$lib/stores';
-  import { getLoggedIn } from '$lib/utils';
-
-  import Home from './routes/Home.svelte';
-  import NotFound from './routes/notFound.svelte';
-
-  import Machine from './routes/machines/machine.svelte';
-  import Machines from './routes/machines/machines.svelte';
-
-  import User from './routes/users/user.svelte';
-  import Users from './routes/users/users.svelte';
-  
-  import Task from './routes/tasks/task.svelte';
-  import Tasks from './routes/tasks/tasks.svelte';
-
-  import Login from './routes/Login.svelte'
-  import Account from './routes/Account.svelte';
-
-  if (Object.keys($account).length == 0) {
-    getLoggedIn();
-  }
-  
+  import Mainmenu from "./routes/Mainmenu.svelte";
+  import Login from "./routes/Login.svelte";
 </script>
 
 <Router primary={false}>
-
-  <Sidebar/>
-
-  <Header/>
-  <main class="ui segment">
-    <Route path='/' component={Home} />
-
-    <Route path='/machines/' component={Machines} />
-    <Route path='/machine/' component={Machine}/>
-    
-    <Route path='/users/' component={Users} />
-    <Route path='/user/' component={User} />
-
-    <Route path='/tasks/' component={Tasks} />
-    <Route path='/task/' component={Task} />
-    
-
-    <Route path='/login/*' component={Login} />
-    <Route path='/account/*' component={Account} />
-    <Route path='*' component={NotFound} />
+  <Header></Header>
+  <main>
+    <Route path="/" component={Mainmenu} />
+    <Route path="/login" component={Login}/>
   </main>
-
-  <Footer/>
-  
 </Router>
+
+<style>
+  main {
+    position: relative;
+    background: #fff;
+    box-shadow: 0 1px 2px 0 rgba(34, 36, 38, 0.15);
+    padding: 1em 1em;
+    border-radius: 0.28571429rem;
+    border: 1px solid rgba(34, 36, 38, 0.15);
+    min-height: 95dvh;
+  }
+
+  main:first-child {
+    margin-top: 0;
+  }
+
+  main:last-child {
+    margin-bottom: 0;
+  }
+</style>
