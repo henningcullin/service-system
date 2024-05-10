@@ -1,14 +1,16 @@
 <script>
   import { Router, Route } from "svelte-navigator";
 
-  import Header from "./lib/components/Header.svelte";
+  import Header from "$lib/components/Header.svelte";
+  import Sidebar from "$lib/components/Sidebar.svelte";
 
-  import Mainmenu from "./routes/Mainmenu.svelte";
-  import Login from "./routes/Login.svelte";
+  import Mainmenu from "$routes/Mainmenu.svelte";
+  import Login from "$routes/Login.svelte";
 </script>
 
 <Router primary={false}>
   <Header></Header>
+  <Sidebar></Sidebar>
   <main>
     <Route path="/" component={Mainmenu} />
     <Route path="/login" component={Login} />
