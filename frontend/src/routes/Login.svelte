@@ -1,75 +1,143 @@
 <script>
-    import { getloggedIn, postJSON } from "$lib/utils";
-    import { navigate } from "svelte-navigator";
+	import { navigate } from "svelte-navigator";
+	import { getLoggedIn } from "$lib/utils";
 
-    let type = "email";
-    let email = "";
-    let password = "";
-    let code = "";
+	let email = "";
+	let type = "EMAIL";
+	let password = "";
+	let code = "";
 
-    function submitForm() {
-        switch (type) {
-            case "email":
-                return loginEmail();
-            case "password":
-                return loginPassword();
-            case "otp":
-                return loginOtp();
-        }
-    }
+	async function submitEmailForm() {
+		password = "";
+		code = "";
 
-    async function loginEmail() {
-        try {
-            const response = await postJSON("/api/login", { email });
-            const data = await response.json();
+		if (email.length <= 0) return;
 
-            switch (data) {
-                case "PASSWORD":
-                    return (type = "password");
-                case "OTP":
-                    return (type = "otp");
-            }
-        } catch (error) {}
-    }
+		const response = await fetch("/api/login", {
+			headers: {
+				"Content-Type": "application/json",
+			},
+			method: "POST",
+			body: JSON.stringify({ email }),
+		});
 
-    async function loginPassword() {
-        try {
-            const response = await postJSON("/api/login/password", {
-                password,
-            });
-            if (response.status === 200) {
-                await getloggedIn();
-                navigate("/");
-            }
-        } catch (error) {}
-    }
+		const data = await response.json();
 
-    async function loginOtp() {
-        try {
-            const response = await postJSON("/api/login/otp", { code });
-            if (response.status === 200) {
-                await getloggedIn();
-                navigate("/");
-            }
-        } catch (error) {}
-    }
+		if (response.status != 200) return;
+
+		type = data;
+	}
+
+	async function submitLoginForm() {
+		/**
+		 *
+		 * @param {string} endpoint
+		 * @param {object} value
+		 */
+		async function loginFetch(endpoint, value) {
+			return fetch(endpoint, {
+				headers: {
+					"Content-Type": "application/json",
+				},
+				method: "POST",
+				body: JSON.stringify(value),
+			});
+		}
+
+		const response =
+			type === "PASSWORD"
+				? await loginFetch("/api/login/password", {
+						email,
+						password,
+					})
+				: type === "OTP"
+					? await loginFetch("/api/login/otp", { code })
+					: console.error("Unknown login type");
+
+		console.log(response);
+
+		if (!response) return;
+
+		if (response.status != 200) {
+			const data = await response.json();
+			return alert(data);
+		}
+
+		getLoggedIn();
+
+		navigate("/");
+	}
 </script>
 
-<form on:submit|preventDefault={submitForm}>
-    <input bind:value={email} type="email" name="email" placeholder="Email" />
-    <input
-        bind:value={password}
-        type="password"
-        name="password"
-        placeholder="Password"
-        class={type === "password" ? "" : "hidden"}
-    />
-    <input
-        bind:value={code}
-        type="text"
-        name="code"
-        placeholder="Code"
-        class={type === "otp" ? "" : "hidden"}
-    />
-    <input type="submit" />
-</form>
+<div class="ui middle aligned center aligned grid">
+	<div class="column">
+		<h2 class="ui huge centered header">Log in</h2>
+
+		<form
+			class="ui large form {type === 'EMAIL' ? '' : 'hidden'}"
+			on:submit|preventDefault={submitEmailForm}
+		>
+			<div class="ui stacked">
+				<div class="field">
+					<input
+						type="email"
+						placeholder="email"
+						bind:value={email}
+					/>
+				</div>
+				<input
+					class="ui fluid large olive submit button"
+					type="submit"
+					value="Send"
+				/>
+			</div>
+		</form>
+
+		<form
+			class="ui large form {type !== 'EMAIL' ? '' : 'hidden'}"
+			on:submit|preventDefault={submitLoginForm}
+		>
+			<div class="ui stacked">
+				<div class="field">
+					<input
+						class="ui input"
+						type="email"
+						readonly
+						bind:value={email}
+					/>
+				</div>
+				<div class="field">
+					<input
+						type="text"
+						placeholder="code"
+						class={type === "OTP" ? "" : "hidden"}
+						bind:value={code}
+					/>
+				</div>
+				<div class="field">
+					<input
+						type="password"
+						placeholder="password"
+						class={type === "PASSWORD" ? "" : "hidden"}
+						bind:value={password}
+					/>
+				</div>
+				<input
+					class="ui fluid large olive submit button"
+					type="submit"
+					value="Login"
+				/>
+			</div>
+		</form>
+	</div>
+</div>
+
+<style>
+	.ui.middle.aligned.center.aligned.grid {
+		min-height: 90dvh;
+	}
+
+	.column {
+		max-width: 55em;
+	}
+</style>

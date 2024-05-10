@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite'
-import { svelte } from '@sveltejs/vite-plugin-svelte'
+import { defineConfig } from 'vite';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { viteStaticCopy } from 'vite-plugin-static-copy'
 import path from 'path';
 
@@ -14,11 +14,11 @@ export default defineConfig({
           dest: 'assets/themes',
         }
       ]
-  })],
+    })
+  ],
   resolve: {
     alias: {
       $lib: path.resolve('src/lib'),
-      $routes: path.resolve('src/routes')
     },
   },
 })
