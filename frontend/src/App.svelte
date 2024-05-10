@@ -26,9 +26,7 @@
     position: relative;
     background: #fff;
     padding: 1em 1em;
-    border: 1px solid rgba(34, 36, 38, 0.15);
     min-height: 95dvh;
-    transition: margin-left 0.4s;
   }
 
   main:first-child {

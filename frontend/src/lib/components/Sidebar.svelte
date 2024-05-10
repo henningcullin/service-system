@@ -4,19 +4,17 @@
     $: isSidebarOpen = $showSidebar;
 </script>
 
-<sidebar class={isSidebarOpen ? "open" : ""}>
-    <button></button>
-</sidebar>
+<sidebar class={isSidebarOpen ? "open" : ""} id="sidebar"> </sidebar>
 
 <style>
     sidebar {
         min-height: 100dvh;
-        width: 10em;
-        background-color: red;
+        width: 12em;
         position: fixed;
         left: 0;
         top: 0;
+        background-color: white;
         transform: translateX(-100%);
-        transition: transform 0.4s ease-out;
+        transition: transform 0.3s ease-in-out;
     }
 </style>

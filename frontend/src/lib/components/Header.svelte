@@ -18,6 +18,7 @@
         top: 0;
         height: 5dvh;
         display: flex;
-        transition: margin-left 0.4s;
+        background-color: #fefefe;
+        border-bottom: 1px solid #aaa;
     }
 </style>

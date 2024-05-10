@@ -6,17 +6,15 @@
 
 /* SIDEBAR */
 
-sidebar.open {
+#sidebar.open {
   transform: translateX(0);
 }
 
 main,
 header {
-  transition: margin-left 0.4s ease-out;
+  transition: margin-left 0.3s ease-in-out;
 }
 
-main.push,
-header.push {
-  margin-left: 10em;
-  opacity: 0.5;
+.push {
+  margin-left: 12em;
 }
