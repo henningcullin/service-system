@@ -2,7 +2,7 @@
 </script>
 
 <header>
-    <button class="red"> Open Sidebar </button>
+    <button> Open Sidebar </button>
 </header>
 
 <style>

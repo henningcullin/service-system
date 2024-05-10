@@ -1,7 +1,7 @@
 <script>
   import { Router, Route } from "svelte-navigator";
 
-  import Header from "./lib/Header.svelte";
+  import Header from "./lib/components/Header.svelte";
 
   import Mainmenu from "./routes/Mainmenu.svelte";
   import Login from "./routes/Login.svelte";
@@ -11,7 +11,7 @@
   <Header></Header>
   <main>
     <Route path="/" component={Mainmenu} />
-    <Route path="/login" component={Login}/>
+    <Route path="/login" component={Login} />
   </main>
 </Router>
 
