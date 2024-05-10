@@ -1,4 +1,6 @@
 <script>
+  import { showSidebar } from "$lib/stores";
+
   import { Router, Route } from "svelte-navigator";
 
   import Header from "$lib/components/Header.svelte";
@@ -6,12 +8,14 @@
 
   import Mainmenu from "$routes/Mainmenu.svelte";
   import Login from "$routes/Login.svelte";
+
+  $: isSidebarOpen = $showSidebar;
 </script>
 
 <Router primary={false}>
   <Header></Header>
   <Sidebar></Sidebar>
-  <main>
+  <main class={isSidebarOpen ? "push" : ""}>
     <Route path="/" component={Mainmenu} />
     <Route path="/login" component={Login} />
   </main>
@@ -21,11 +25,10 @@
   main {
     position: relative;
     background: #fff;
-    box-shadow: 0 1px 2px 0 rgba(34, 36, 38, 0.15);
     padding: 1em 1em;
-    border-radius: 0.28571429rem;
     border: 1px solid rgba(34, 36, 38, 0.15);
     min-height: 95dvh;
+    transition: margin-left 0.4s;
   }
 
   main:first-child {
