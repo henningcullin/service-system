@@ -10,7 +10,7 @@
   import { account } from "$lib/stores";
   import { getLoggedIn } from "$lib/utils";
 
-  import Home from "./routes/Home.svelte";
+  import Mainmenu from "./routes/Mainmenu.svelte";
   import NotFound from "./routes/notFound.svelte";
 
   import Machine from "./routes/machines/machine.svelte";
@@ -35,7 +35,7 @@
 
   <Header />
   <main class="ui segment">
-    <Route path="/" component={Home} />
+    <Route path="/" component={Mainmenu} />
 
     <Route path="/machines/" component={Machines} />
     <Route path="/machine/" component={Machine} />

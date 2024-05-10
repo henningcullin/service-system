@@ -1,4 +1,4 @@
-import { account, tasks, machines, users} from './stores';
+import { account, tasks, reports, machines, users} from './stores';
 import { navigate } from 'svelte-navigator';
 
 /**
@@ -68,29 +68,19 @@ export async function getTasks() {
 	try {
 		const response = await fetch('/api/auth/tasks');
 		const data = await response.json();
-
-		const map = new Map();
-
-		for (const task of data) {
-			const {id, title, description, task_type, status, archived, created, edited, creator, executor, machine} = task;
-			map.set(id, {
-				id,
-				title,
-				description: description ? description : '',
-				task_type,
-				status,
-				archived: Boolean(archived),
-				created: new Date(created),
-				edited: new Date(edited),
-				creator,
-				executor: executor ? executor : '',
-				machine: machine ? machine : '',
-			});
-		}
-
-		tasks.set(map);
+		tasks.set(data);
 	} catch (error) {
 		console.error('Could not get tasks', error);
+	}
+};
+
+export async function getReports() {
+	try {
+		const response = await fetch('/api/auth/reports');
+		const data = await response.json();
+		reports.set(data);
+	} catch (error) {
+		console.error('Could not get reports', error);
 	}
 };
 
