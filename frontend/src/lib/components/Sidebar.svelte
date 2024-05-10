@@ -4,7 +4,9 @@
     $: isSidebarOpen = $showSidebar;
 </script>
 
-<sidebar class={isSidebarOpen ? "open" : ""} id="sidebar"> </sidebar>
+<sidebar class={isSidebarOpen ? "open" : ""} id="sidebar">
+    <i class="bars icon"></i>
+</sidebar>
 
 <style>
     sidebar {
