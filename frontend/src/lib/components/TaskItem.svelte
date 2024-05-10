@@ -8,6 +8,8 @@
 <Item>
     <div class="image">
         <img src="https://fomantic-ui.com/images/wireframe/image.png" alt="" />
+        <Divider ui />
+        <img src="https://fomantic-ui.com/images/wireframe/image.png" alt="" />
     </div>
     <div class="content">
         <Link to="/task?id={task.id}" class="header">{task.title}</Link>
