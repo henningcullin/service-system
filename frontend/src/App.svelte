@@ -1,5 +1,5 @@
 <script>
-  import { showSidebar } from "$lib/stores";
+  import { showSidebar, account } from "$lib/stores";
 
   import { Router, Route } from "svelte-navigator";
 
