@@ -1,5 +1,8 @@
 import { writable } from 'svelte/store';
 
+export const machine_types = writable([]);
+export const machine_statuses = writable([]);
+
 export const machines = writable([]);
 export const machine = writable({});
 
