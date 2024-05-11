@@ -8,11 +8,11 @@
 
 <style>
     sidebar {
-        border: 1px solid green;
         position: absolute;
         top: 0;
         width: 14em;
         height: 100%;
         transition: left 0.3s;
+        background-color: var(--secondary);
     }
 </style>

@@ -9,7 +9,7 @@
 </script>
 
 <Sidebar />
-<pusher class={IsSidebarOpen ? 'push' : ''}>
+<pusher class={IsSidebarOpen ? 'push dim' : ''}>
     <Header />
     <main>
         <Router primary={false}>
@@ -22,7 +22,10 @@
     pusher {
         width: 100%;
         min-height: 100dvh;
-        transition: margin-left 0.3s;
+        transition:
+            margin-left 0.3s,
+            opacity 0.3s;
         display: block;
+        background-color: var(--main);
     }
 </style>

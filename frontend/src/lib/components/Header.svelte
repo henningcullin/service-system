@@ -13,7 +13,10 @@
 <style>
     header {
         width: 100%;
+        position: fixed;
+        top: 0;
         height: 5dvh;
-        border: 1px solid red;
+        background-color: var(--primary);
+        box-shadow: 0 0 3px 0 var(--line);
     }
 </style>
