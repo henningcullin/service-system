@@ -1,4 +1,4 @@
-import { account, tasks, reports, machines, users} from './stores';
+import { account, tasks, reports, machines, users } from './stores';
 import { navigate } from 'svelte-navigator';
 
 /**
@@ -6,23 +6,23 @@ import { navigate } from 'svelte-navigator';
  * @returns {Promise<void>}
  */
 export async function getLoggedIn() {
-	try {
-		const response = await fetch('/api/auth/me');
-		const data = await response.json();
+    try {
+        const response = await fetch('/api/auth/me');
+        const data = await response.json();
 
-		if (response.status !== 200) {
-			account.set({});
-			return navigate('/login');
-		}
+        if (response.status !== 200) {
+            account.set({});
+            return navigate('/login');
+        }
 
-		data.last_login = new Date(data.last_login);
+        data.last_login = new Date(data.last_login);
 
-		account.set(data);
-		return true;
-	} catch (error) {
-		console.log('Could not get logged in status', error);
-		return false;
-	}
+        account.set(data);
+        return true;
+    } catch (error) {
+        console.log('Could not get logged in status', error);
+        return false;
+    }
 }
 
 /**
@@ -33,13 +33,13 @@ export async function getLoggedIn() {
  * @returns {Promise<any>}
  */
 export async function sendJson(url, method, body) {
-	return fetch(url, {
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		method: method,
-		body: JSON.stringify(body),
-	});
+    return fetch(url, {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        method: method,
+        body: JSON.stringify(body),
+    });
 }
 
 /**
@@ -48,7 +48,7 @@ export async function sendJson(url, method, body) {
  * @returns {Promise<any>}
  */
 export async function sendDelete(url) {
-	return fetch(url, { method: 'DELETE' });
+    return fetch(url, { method: 'DELETE' });
 }
 
 /**
@@ -57,90 +57,50 @@ export async function sendDelete(url) {
  * @returns {Element | null}
  */
 export function ƒ(selector) {
-	return document.querySelector(selector);
+    return document.querySelector(selector);
 }
 
-/**
- * Loads the tasks from the server into the store
- * @returns {void}
- */
+async function fetchAll(url) {
+    const response = await fetch(url);
+    return response.json();
+}
+
 export async function getTasks() {
-	try {
-		const response = await fetch('/api/auth/tasks');
-		const data = await response.json();
-		tasks.set(data);
-	} catch (error) {
-		console.error('Could not get tasks', error);
-	}
-};
+    try {
+        const data = await fetchAll('/api/auth/tasks');
+        tasks.set(data);
+    } catch (error) {
+        console.error('Could not get tasks', error);
+    }
+}
 
 export async function getReports() {
-	try {
-		const response = await fetch('/api/auth/reports');
-		const data = await response.json();
-		reports.set(data);
-	} catch (error) {
-		console.error('Could not get reports', error);
-	}
-};
+    try {
+        const data = await fetchAll('/api/auth/reports');
+        reports.set(data);
+    } catch (error) {
+        console.error('Could not get reports', error);
+    }
+}
 
-/**
- * Loads the machines from the server into the store
- * @returns {void}
- */
 export async function getMachines() {
-	try {
-		const response = await fetch('/api/auth/machines');
-		const data = await response.json();
-
-		const map = new Map();
-
-		for (const machine of data) {
-			const {id, name, make, machine_type, status, created, edited} = machine;
-			map.set(id, {
-				id,
-				name,
-				make: make ? make : '',
-				machine_type: machine_type ? machine_type : '',
-				status,
-				created: new Date(created),
-				edited: new Date(edited),
-			});
-		}
-
-		machines.set(map);
-	} catch (error) {
-		console.error('Could not get machines', error);
-	}
-};
+    try {
+        const data = await fetchAll('/api/auth/machines');
+        machines.set(data);
+    } catch (error) {
+        console.error('Could not get machines', error);
+    }
+}
 
 /**
  * Loads the users from the server into the store
  * @returns {void}
  */
 export async function getUsers() {
-	try {
-		const response = await fetch('/api/auth/users');
-		const data = await response.json();
-
-		const map = new Map();
-
-		for (const user of data) {
-			const {id, first_name, last_name, email, phone, role, active, last_login} = user;
-			map.set(id, {
-				id,
-				first_name,
-				last_name,
-				email,
-				phone: phone ? phone : '',
-				role,
-				active,
-				last_login: new Date(last_login),
-			});
-		}
-
-		users.set(map);
-	} catch (error) {
-		console.error('Could not fetch products', error);
-	}
-};
+    try {
+        const data = await indexFetch('/api/auth/users');
+        users.set(data);
+    } catch (error) {
+        console.error('Could not fetch products', error);
+    }
+}
