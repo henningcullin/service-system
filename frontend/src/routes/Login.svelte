@@ -1,12 +1,21 @@
 <script>
     import { getLoggedIn, sendJSON } from '$utils';
+    import { onMount } from 'svelte';
     import { navigate } from 'svelte-navigator';
+
+    let emailInput;
+    let passwordInput;
+    let otpInput;
 
     let processing = false;
     let type = 'email';
     let email = '';
     let password = '';
     let otp = '';
+
+    onMount(() => {
+        emailInput.focus();
+    });
 
     async function submitForm() {
         if (processing) return;
@@ -32,6 +41,10 @@
             const data = await response.json();
             if (response.status === 200) {
                 type = data.toLowerCase();
+                setTimeout(() => {
+                    if (type === 'password') passwordInput.focus();
+                    else otpInput.focus();
+                }, 1);
             }
         } catch (error) {
             console.error(error);
@@ -73,14 +86,22 @@
             bind:value={email}
             readonly={type !== 'email'}
             disabled={type !== 'email'}
+            bind:this={emailInput}
         />
         <input
             type="password"
             placeholder="Password"
             bind:value={password}
             class={type !== 'password' ? 'hidden' : ''}
+            bind:this={passwordInput}
         />
-        <input type="text" placeholder="One Time Password" bind:value={otp} class={type !== 'otp' ? 'hidden' : ''} />
+        <input
+            type="text"
+            placeholder="One Time Password"
+            bind:value={otp}
+            class={type !== 'otp' ? 'hidden' : ''}
+            bind:this={otpInput}
+        />
         <button class="teal {processing ? 'disabled' : ''}">{type === 'email' ? 'Send' : 'Login'}</button>
     </form>
 </segment>
