@@ -8,18 +8,21 @@
     let password = '';
     let otp = '';
 
-    function submitForm() {
+    async function submitForm() {
         if (processing) return;
         processing = true;
+        await submit(type);
+        processing = false;
+    }
+
+    async function submit(type) {
         switch (type) {
             case 'email':
-                return submitEmail();
+                return await submitEmail();
             case 'password':
-                return submitPassword();
+                return await submitPassword();
             case 'otp':
-                return submitOtp();
-            default:
-                processing = false;
+                return await submitOtp();
         }
     }
 
@@ -30,10 +33,7 @@
             if (response.status === 200) {
                 type = data.toLowerCase();
             }
-        } catch (error) {
-        } finally {
-            processing = false;
-        }
+        } catch (error) {}
     }
 
     async function submitPassword() {
@@ -41,10 +41,7 @@
             const response = await sendJSON('/api/login/password', 'POST', { email, password });
             if (response.status === 200) {
             }
-        } catch (error) {
-        } finally {
-            processing = false;
-        }
+        } catch (error) {}
     }
 
     async function submitOtp() {
@@ -52,15 +49,12 @@
             const response = await sendJSON('/api/login/otp', 'POST', { code: otp });
             if (response.status === 200) {
             }
-        } catch (error) {
-        } finally {
-            processing = false;
-        }
+        } catch (error) {}
     }
 </script>
 
 <segment>
-    <form>
+    <form on:submit|preventDefault={submitForm}>
         <input
             type="email"
             placeholder="Email"
@@ -76,9 +70,7 @@
             class={type !== 'password' ? 'hidden' : ''}
         />
         <input type="text" placeholder="One Time Password" bind:value={otp} class={type !== 'otp' ? 'hidden' : ''} />
-        <button class="teal {processing ? 'disabled' : ''}" on:click|preventDefault={submitForm}
-            >{type === 'email' ? 'Send' : 'Login'}</button
-        >
+        <button class="teal {processing ? 'disabled' : ''}">{type === 'email' ? 'Send' : 'Login'}</button>
     </form>
 </segment>
 
