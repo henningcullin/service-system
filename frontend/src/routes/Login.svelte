@@ -1,5 +1,5 @@
 <script>
-    import { sendJSON } from '$lib/utils';
+    import { getLoggedIn, sendJSON } from '$utils';
     import { navigate } from 'svelte-navigator';
 
     let processing = false;
@@ -33,23 +33,34 @@
             if (response.status === 200) {
                 type = data.toLowerCase();
             }
-        } catch (error) {}
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     async function submitPassword() {
         try {
             const response = await sendJSON('/api/login/password', 'POST', { email, password });
+            console.log(response);
             if (response.status === 200) {
+                const loggedIn = await getLoggedIn();
+                if (loggedIn) return navigate('/');
             }
-        } catch (error) {}
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     async function submitOtp() {
         try {
             const response = await sendJSON('/api/login/otp', 'POST', { code: otp });
             if (response.status === 200) {
+                const loggedIn = await getLoggedIn();
+                if (loggedIn) return navigate('/');
             }
-        } catch (error) {}
+        } catch (error) {
+            console.error(error);
+        }
     }
 </script>
 
