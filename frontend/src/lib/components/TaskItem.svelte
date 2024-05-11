@@ -39,7 +39,7 @@
                     </div>
                 </div>
             </List>
-            {#if task.machine}
+            {#if task.machine.id}
                 <Divider ui />
                 <b>Machine</b>
                 <List ui divided>
