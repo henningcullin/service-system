@@ -5,6 +5,8 @@
 
     import { SidebarOpen } from '$lib/stores';
     import Login from '$routes/Login.svelte';
+    import Mainmenu from '$routes/Mainmenu.svelte';
+    import NotFound from '$routes/NotFound.svelte';
 
     $: IsSidebarOpen = $SidebarOpen;
 
@@ -13,15 +15,17 @@
     }
 </script>
 
-<Sidebar />
-<pusher class={IsSidebarOpen ? 'push dim' : ''} on:click={closeSidebar}>
-    <Header />
-    <main>
-        <Router primary={false}>
+<Router primary={false}>
+    <Sidebar />
+    <pusher class={IsSidebarOpen ? 'push dim' : ''} on:click={closeSidebar}>
+        <Header />
+        <main>
+            <Route path="/" component={Mainmenu} />
             <Route path="/login/" component={Login} />
-        </Router>
-    </main>
-</pusher>
+            <Route path="*" component={NotFound} />
+        </main>
+    </pusher>
+</Router>
 
 <style>
     pusher {
