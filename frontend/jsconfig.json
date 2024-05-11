@@ -5,8 +5,8 @@
         "module": "ESNext",
         "baseUrl": ".",
         "paths": {
-            "$lib/*": ["src/lib/*"],
             "$components/*": ["src/lib/components/*"],
+            "$lib/*": ["src/lib/*"],
             "$routes/*": ["src/routes/*"]
         },
         /**
