@@ -4,6 +4,7 @@
     import { Router, Route } from 'svelte-navigator';
 
     import { SidebarOpen } from '$lib/stores';
+    import Login from '$routes/Login.svelte';
 
     $: IsSidebarOpen = $SidebarOpen;
 
@@ -17,7 +18,7 @@
     <Header />
     <main>
         <Router primary={false}>
-            <Route></Route>
+            <Route path="/login/" component={Login} />
         </Router>
     </main>
 </pusher>
@@ -31,5 +32,11 @@
             opacity 0.3s;
         display: block;
         background-color: var(--main);
+    }
+
+    main {
+        min-height: 100dvh;
+        margin-top: 5dvh;
+        padding: 1em;
     }
 </style>
