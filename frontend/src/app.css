@@ -42,12 +42,7 @@
   }
 }
 
-/* COLOR CLASSES */
-
-.teal {
-  background-color: var(--teal);
-  color:#fff;
-}
+/* FORCE BOXES TO MAX SIZE */
 
 body {
   margin: 0;
@@ -66,6 +61,18 @@ body {
   position: relative;
 }
 
+/* HELPER CLASSES */
+
+.hidden {
+  display: none;
+}
+
+/* COLOR CLASSES */
+
+.teal {
+  background-color: var(--teal);
+  color:#fff;
+}
 
 /* LINKS */
 
