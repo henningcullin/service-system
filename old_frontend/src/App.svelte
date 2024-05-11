@@ -13,8 +13,8 @@
     import Mainmenu from './routes/Mainmenu.svelte';
     import NotFound from './routes/notFound.svelte';
 
-    import Machine from './routes/machines/machine.svelte';
-    import Machines from './routes/machines/machines.svelte';
+    import Machine from './routes/machines/Machine.svelte';
+    import Machines from './routes/machines/Machines.svelte';
 
     import User from './routes/users/user.svelte';
     import Users from './routes/users/users.svelte';

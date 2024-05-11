@@ -1,4 +1,4 @@
-import { account, tasks, reports, machines, users } from './stores';
+import { account, tasks, reports, machines, users, machineStatuses, machineTypes } from './stores';
 import { navigate } from 'svelte-navigator';
 
 /**
@@ -65,6 +65,8 @@ async function fetchAll(url) {
     return response.json();
 }
 
+// _______________________________________ TASKS
+
 export async function getTasks() {
     try {
         const data = await fetchAll('/api/auth/tasks');
@@ -73,6 +75,8 @@ export async function getTasks() {
         console.error('Could not get tasks', error);
     }
 }
+
+// ______________________________________ REPORTS
 
 export async function getReports() {
     try {
@@ -83,6 +87,8 @@ export async function getReports() {
     }
 }
 
+// _________________________________________ MACHINES
+
 export async function getMachines() {
     try {
         const data = await fetchAll('/api/auth/machines');
@@ -92,10 +98,26 @@ export async function getMachines() {
     }
 }
 
-/**
- * Loads the users from the server into the store
- * @returns {void}
- */
+export async function getMachineStatuses() {
+    try {
+        const data = await fetchAll('/api/auth/machine_statuses');
+        machineStatuses.set(data);
+    } catch (error) {
+        console.error('Could not get machinestatuses', error);
+    }
+}
+
+export async function getMachineTypes() {
+    try {
+        const data = await fetchAll('/api/auth/machine_types');
+        machineTypes.set(data);
+    } catch (error) {
+        console.error('Could not get machinetypes', error);
+    }
+}
+
+// ____________________________________________ USERS
+
 export async function getUsers() {
     try {
         const data = await indexFetch('/api/auth/users');

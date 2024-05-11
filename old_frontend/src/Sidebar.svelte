@@ -44,7 +44,7 @@
             Machines
         </Title>
         <Content>
-            <Link to="" class="item">
+            <Link to="/machine/?new=true" class="item">
                 <Icon plus></Icon>
                 Create Machine
             </Link>
