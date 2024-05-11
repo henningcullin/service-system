@@ -35,7 +35,7 @@
     }
 
     main {
-        min-height: 100dvh;
+        min-height: 95dvh;
         margin-top: 5dvh;
         padding: 1em;
     }
