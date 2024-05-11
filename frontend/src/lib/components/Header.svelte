@@ -7,7 +7,7 @@
 </script>
 
 <header>
-    <button on:click={toggleSidebar}> Open Sidebar </button>
+    <button on:click|stopPropagation={toggleSidebar}> Open Sidebar </button>
 </header>
 
 <style>

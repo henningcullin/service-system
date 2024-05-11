@@ -6,10 +6,14 @@
     import { SidebarOpen } from '$lib/stores';
 
     $: IsSidebarOpen = $SidebarOpen;
+
+    function closeSidebar() {
+        if (IsSidebarOpen) SidebarOpen.update((state) => !state);
+    }
 </script>
 
 <Sidebar />
-<pusher class={IsSidebarOpen ? 'push dim' : ''}>
+<pusher class={IsSidebarOpen ? 'push dim' : ''} on:click={closeSidebar}>
     <Header />
     <main>
         <Router primary={false}>
