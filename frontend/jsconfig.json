@@ -3,6 +3,11 @@
     "moduleResolution": "bundler",
     "target": "ESNext",
     "module": "ESNext",
+    "baseUrl": ".",
+    "paths": {
+        "$lib/*": ["src/lib/*"],
+        "$routes/*": ["src/routes/*"]
+    },
     /**
      * svelte-preprocess cannot figure out whether you have
      * a value or a type, so tell TypeScript to enforce using
