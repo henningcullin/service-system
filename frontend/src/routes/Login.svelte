@@ -2,12 +2,15 @@
     import { sendJSON } from '$lib/utils';
     import { navigate } from 'svelte-navigator';
 
+    let processing = false;
     let type = 'email';
     let email = '';
     let password = '';
     let otp = '';
 
     function submitForm() {
+        if (processing) return;
+        processing = true;
         switch (type) {
             case 'email':
                 return submitEmail();
@@ -15,6 +18,8 @@
                 return submitPassword();
             case 'otp':
                 return submitOtp();
+            default:
+                processing = false;
         }
     }
 
@@ -25,7 +30,10 @@
             if (response.status === 200) {
                 type = data.toLowerCase();
             }
-        } catch (error) {}
+        } catch (error) {
+        } finally {
+            processing = false;
+        }
     }
 
     async function submitPassword() {
@@ -33,7 +41,10 @@
             const response = await sendJSON('/api/login/password', 'POST', { email, password });
             if (response.status === 200) {
             }
-        } catch (error) {}
+        } catch (error) {
+        } finally {
+            processing = false;
+        }
     }
 
     async function submitOtp() {
@@ -41,12 +52,15 @@
             const response = await sendJSON('/api/login/otp', 'POST', { code: otp });
             if (response.status === 200) {
             }
-        } catch (error) {}
+        } catch (error) {
+        } finally {
+            processing = false;
+        }
     }
 </script>
 
 <segment>
-    <form on:submit|preventDefault={submitForm}>
+    <form>
         <input
             type="email"
             placeholder="Email"
@@ -62,7 +76,9 @@
             class={type !== 'password' ? 'hidden' : ''}
         />
         <input type="text" placeholder="One Time Password" bind:value={otp} class={type !== 'otp' ? 'hidden' : ''} />
-        <button type="submit" class="teal">{type === 'email' ? 'Send' : 'Login'}</button>
+        <button class="teal {processing ? 'disabled' : ''}" on:click|preventDefault={submitForm}
+            >{type === 'email' ? 'Send' : 'Login'}</button
+        >
     </form>
 </segment>
 
