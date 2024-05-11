@@ -1,55 +1,55 @@
 <script>
-  // @ts-nocheck
+    // @ts-nocheck
 
-  import { Router, Route } from "svelte-navigator";
+    import { Router, Route } from 'svelte-navigator';
 
-  import Header from "./Header.svelte";
-  import Footer from "./Footer.svelte";
-  import Sidebar from "./Sidebar.svelte";
+    import Header from './Header.svelte';
+    import Footer from './Footer.svelte';
+    import Sidebar from './Sidebar.svelte';
 
-  import { account } from "$lib/stores";
-  import { getLoggedIn } from "$lib/utils";
+    import { account } from '$lib/stores';
+    import { getLoggedIn } from '$lib/utils';
 
-  import Mainmenu from "./routes/Mainmenu.svelte";
-  import NotFound from "./routes/notFound.svelte";
+    import Mainmenu from './routes/Mainmenu.svelte';
+    import NotFound from './routes/notFound.svelte';
 
-  import Machine from "./routes/machines/machine.svelte";
-  import Machines from "./routes/machines/machines.svelte";
+    import Machine from './routes/machines/machine.svelte';
+    import Machines from './routes/machines/machines.svelte';
 
-  import User from "./routes/users/user.svelte";
-  import Users from "./routes/users/users.svelte";
+    import User from './routes/users/user.svelte';
+    import Users from './routes/users/users.svelte';
 
-  /*   import Task from './routes/tasks/task.svelte';
+    /*   import Task from './routes/tasks/task.svelte';
   import Tasks from './routes/tasks/tasks.svelte'; */
 
-  import Login from "./routes/Login.svelte";
-  import Account from "./routes/Account.svelte";
+    import Login from './routes/Login.svelte';
+    import Account from './routes/Account.svelte';
 
-  if (Object.keys($account).length == 0) {
-    getLoggedIn();
-  }
+    if (Object.keys($account).length == 0) {
+        getLoggedIn();
+    }
 </script>
 
 <Router primary={false}>
-  <Sidebar />
+    <Sidebar />
 
-  <Header />
-  <main class="ui segment">
-    <Route path="/" component={Mainmenu} />
+    <Header />
+    <main class="ui segment">
+        <Route path="/" component={Mainmenu} />
 
-    <Route path="/machines/" component={Machines} />
-    <Route path="/machine/" component={Machine} />
+        <Route path="/machines/" component={Machines} />
+        <Route path="/machine/" component={Machine} />
 
-    <Route path="/users/" component={Users} />
-    <Route path="/user/" component={User} />
+        <Route path="/users/" component={Users} />
+        <Route path="/user/" component={User} />
 
-    <!--     <Route path='/tasks/' component={Tasks} />
+        <!--     <Route path='/tasks/' component={Tasks} />
     <Route path='/task/' component={Task} /> -->
 
-    <Route path="/login/*" component={Login} />
-    <Route path="/account/*" component={Account} />
-    <Route path="*" component={NotFound} />
-  </main>
+        <Route path="/login/*" component={Login} />
+        <Route path="/account/*" component={Account} />
+        <Route path="*" component={NotFound} />
+    </main>
 
-  <Footer />
+    <Footer />
 </Router>

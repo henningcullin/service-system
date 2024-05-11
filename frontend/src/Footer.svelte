@@ -1,3 +1,1 @@
-<footer class="ui vertical footer">
-
-</footer>
+<footer class="ui vertical footer"></footer>

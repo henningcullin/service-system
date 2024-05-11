@@ -1,9 +1,9 @@
 <script>
-    import { Grid, Items, Divider } from "svelte-fomantic-ui";
-    import TaskItem from "$lib/components/TaskItem.svelte";
+    import { Grid, Items, Divider } from 'svelte-fomantic-ui';
+    import TaskItem from '$lib/components/TaskItem.svelte';
 
-    import { tasks, reports } from "$lib/stores";
-    import { getReports, getTasks } from "$lib/utils";
+    import { tasks, reports } from '$lib/stores';
+    import { getReports, getTasks } from '$lib/utils';
 
     getReports();
     getTasks();

@@ -1,6 +1,6 @@
 <script>
-    import { Item, Divider, List } from "svelte-fomantic-ui";
-    import { Link } from "svelte-navigator";
+    import { Item, Divider, List } from 'svelte-fomantic-ui';
+    import { Link } from 'svelte-navigator';
 
     export let task;
 </script>
@@ -14,12 +14,10 @@
     <div class="content">
         <Link to="/task?id={task.id}" class="header">{task.title}</Link>
         <div class="meta">
-            <b>Type:</b><Link to="/task/type?id={task.task_type.id}"
-                >{task.task_type.name}</Link
-            >
-            <b>Status: </b><Link to="/task/status?id={task.status.id}"
-                >{task.status.name}</Link
-            >
+            <b>Type:</b><Link to="/task/type?id={task.task_type.id}">{task.task_type.name}</Link>
+            <b>Status: </b><Link to="/task/status?id={task.status.id}">
+                {task.status.name}
+            </Link>
             {#if task.due_at}
                 <b>Due at: </b>{task.due_at}
             {/if}
@@ -30,19 +28,13 @@
             <b>Creator</b>
             <List ui divided>
                 <div class="item">
-                    <img
-                        class="ui avatar image"
-                        src="https://fomantic-ui.com/images/avatar2/small/rachel.png"
-                        alt=""
-                    />
+                    <img class="ui avatar image" src="https://fomantic-ui.com/images/avatar2/small/rachel.png" alt="" />
                     <div class="content">
                         <Link to="/user?id={task.creator.id}" class="header"
                             >{`${task.creator.first_name} ${task.creator.last_name}`}</Link
                         >
                         <div class="description">
-                            <a href="mailto:{task.creator.email}"
-                                >{task.creator.email}</a
-                            >
+                            <a href="mailto:{task.creator.email}">{task.creator.email}</a>
                         </div>
                     </div>
                 </div>
@@ -58,9 +50,7 @@
                             alt=""
                         />
                         <div class="content">
-                            <Link
-                                to="/machine?id={task.machine.id}"
-                                class="header"
+                            <Link to="/machine?id={task.machine.id}" class="header"
                                 >{`${task.machine.make} ${task.machine.name}`}</Link
                             >
                         </div>
@@ -83,9 +73,7 @@
                                     >{`${executor.first_name} ${executor.last_name}`}</Link
                                 >
                                 <div class="description">
-                                    <a href="mailto:{executor.email}"
-                                        >{executor.email}</a
-                                    >
+                                    <a href="mailto:{executor.email}">{executor.email}</a>
                                 </div>
                             </div>
                         </div>

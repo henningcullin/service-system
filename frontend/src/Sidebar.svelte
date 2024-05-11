@@ -1,15 +1,6 @@
 <script>
-    import { Link } from "svelte-navigator";
-    import {
-        Sidebar,
-        Header,
-        Accordion,
-        Title,
-        Content,
-        Icon,
-        Menu,
-        Divider,
-    } from "svelte-fomantic-ui";
+    import { Link } from 'svelte-navigator';
+    import { Sidebar, Header, Accordion, Title, Content, Icon, Menu, Divider } from 'svelte-fomantic-ui';
 </script>
 
 <Sidebar ui vertical menu left id="sidebar">
