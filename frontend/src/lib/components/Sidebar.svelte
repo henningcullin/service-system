@@ -1,10 +1,14 @@
 <script>
     import { SidebarOpen } from '$lib/stores';
+    import { Link } from 'svelte-navigator';
 
     $: IsSidebarOpen = $SidebarOpen;
 </script>
 
-<sidebar class={IsSidebarOpen ? 'open' : ''}> </sidebar>
+<sidebar class={IsSidebarOpen ? 'open' : ''}>
+    <Link to="/">Mainmenu</Link>
+    <Link to="/login">Login</Link>
+</sidebar>
 
 <style>
     sidebar {
