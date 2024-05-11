@@ -97,6 +97,11 @@ input {
     font-size: 0.85em;
 }
 
+input::placeholder {
+    color: var(--text);
+    opacity: 0.85;
+}
+
 /* TEXT */
 
 h1 {
