@@ -1,4 +1,5 @@
 <script>
+    import { account } from '$stores';
     import { getLoggedIn, sendJSON } from '$utils';
     import { onMount } from 'svelte';
     import { navigate } from 'svelte-navigator';
@@ -14,6 +15,7 @@
     let otp = '';
 
     onMount(() => {
+        if ($account.id) return navigate('/');
         emailInput.focus();
     });
 
@@ -76,34 +78,32 @@
     }
 </script>
 
-<segment>
-    <form on:submit|preventDefault={submitForm}>
-        <input
-            type="email"
-            placeholder="Email"
-            required
-            bind:value={email}
-            readonly={type !== 'email'}
-            disabled={type !== 'email'}
-            bind:this={emailInput}
-        />
-        <input
-            type="password"
-            placeholder="Password"
-            bind:value={password}
-            class={type !== 'password' ? 'hidden' : ''}
-            bind:this={passwordInput}
-        />
-        <input
-            type="text"
-            placeholder="One Time Password"
-            bind:value={otp}
-            class={type !== 'otp' ? 'hidden' : ''}
-            bind:this={otpInput}
-        />
-        <button class="olive {processing ? 'disabled' : ''}">{type === 'email' ? 'Send' : 'Login'}</button>
-    </form>
-</segment>
+<form on:submit|preventDefault={submitForm}>
+    <input
+        type="email"
+        placeholder="Email"
+        required
+        bind:value={email}
+        readonly={type !== 'email'}
+        disabled={type !== 'email'}
+        bind:this={emailInput}
+    />
+    <input
+        type="password"
+        placeholder="Password"
+        bind:value={password}
+        class={type !== 'password' ? 'hidden' : ''}
+        bind:this={passwordInput}
+    />
+    <input
+        type="text"
+        placeholder="One Time Password"
+        bind:value={otp}
+        class={type !== 'otp' ? 'hidden' : ''}
+        bind:this={otpInput}
+    />
+    <button class="olive {processing ? 'disabled' : ''}">{type === 'email' ? 'Send' : 'Login'}</button>
+</form>
 
 <style>
     form {
