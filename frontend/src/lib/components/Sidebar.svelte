@@ -8,6 +8,7 @@
 <sidebar class={IsSidebarOpen ? 'open' : ''}>
     <Link to="/">Mainmenu</Link>
     <Link to="/login">Login</Link>
+    <Link to="/machines">Machines</Link>
 </sidebar>
 
 <style>
