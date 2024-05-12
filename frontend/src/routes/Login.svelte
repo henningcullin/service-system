@@ -54,7 +54,6 @@
     async function submitPassword() {
         try {
             const response = await sendJSON('/api/login/password', 'POST', { email, password });
-            console.log(response);
             if (response.status === 200) {
                 const loggedIn = await getLoggedIn();
                 if (loggedIn) return navigate('/');
