@@ -15,8 +15,13 @@
     let otp = '';
 
     onMount(() => {
-        if ($account.id) return navigate('/');
         emailInput.focus();
+    });
+
+    account.subscribe((user) => {
+        if (user?.id) {
+            navigate('/');
+        }
     });
 
     async function submitForm() {
@@ -57,8 +62,7 @@
         try {
             const response = await sendJSON('/api/login/password', 'POST', { email, password });
             if (response.status === 200) {
-                const loggedIn = await getLoggedIn();
-                if (loggedIn) return navigate('/');
+                getLoggedIn();
             }
         } catch (error) {
             console.error(error);
@@ -69,8 +73,7 @@
         try {
             const response = await sendJSON('/api/login/otp', 'POST', { code: otp });
             if (response.status === 200) {
-                const loggedIn = await getLoggedIn();
-                if (loggedIn) return navigate('/');
+                getLoggedIn();
             }
         } catch (error) {
             console.error(error);
