@@ -102,7 +102,7 @@
             class={type !== 'otp' ? 'hidden' : ''}
             bind:this={otpInput}
         />
-        <button class="teal {processing ? 'disabled' : ''}">{type === 'email' ? 'Send' : 'Login'}</button>
+        <button class="olive {processing ? 'disabled' : ''}">{type === 'email' ? 'Send' : 'Login'}</button>
     </form>
 </segment>
 
