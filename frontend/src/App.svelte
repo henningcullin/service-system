@@ -11,7 +11,9 @@
     import Mainmenu from '$routes/Mainmenu.svelte';
     import NotFound from '$routes/NotFound.svelte';
     import Account from '$routes/Account.svelte';
+
     import Machines from '$routes/machines/Machines.svelte';
+    import Machine from '$routes/machines/Machine.svelte';
 
     $: IsSidebarOpen = $SidebarOpen;
 
@@ -37,6 +39,7 @@
             <Route path="/account/" component={Account} />
 
             <Route path="/machines/*" component={Machines} />
+            <Route path="/machine/:id" component={Machine} />
 
             <Route path="*" component={NotFound} />
         </main>
