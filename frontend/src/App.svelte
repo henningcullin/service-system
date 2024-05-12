@@ -1,15 +1,17 @@
 <script>
-    import Header from '$components/Header.svelte';
-    import Sidebar from '$components/Sidebar.svelte';
+    import { onMount } from 'svelte';
     import { Router, Route, navigate } from 'svelte-navigator';
 
     import { SidebarOpen, account } from '$lib/stores';
+    import { getLoggedIn } from '$utils';
+    import Header from '$components/Header.svelte';
+    import Sidebar from '$components/Sidebar.svelte';
+
     import Login from '$routes/Login.svelte';
     import Mainmenu from '$routes/Mainmenu.svelte';
     import NotFound from '$routes/NotFound.svelte';
     import Account from '$routes/Account.svelte';
-    import { getLoggedIn } from '$utils';
-    import { onMount } from 'svelte';
+    import Machines from '$routes/machines/Machines.svelte';
 
     $: IsSidebarOpen = $SidebarOpen;
 
@@ -33,6 +35,9 @@
             <Route path="/" component={Mainmenu} />
             <Route path="/login/" component={Login} />
             <Route path="/account/" component={Account} />
+
+            <Route path="/machines/*" component={Machines} />
+
             <Route path="*" component={NotFound} />
         </main>
     </pusher>
