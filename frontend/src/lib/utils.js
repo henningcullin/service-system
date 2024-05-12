@@ -1,4 +1,4 @@
-import { account } from '$stores';
+import { account, machines } from '$stores';
 
 export async function sendJSON(url, method, body) {
     return fetch(url, {
@@ -20,5 +20,19 @@ export async function getLoggedIn() {
         } else return false;
     } catch (error) {
         return false;
+    }
+}
+
+async function fetchArray(url) {
+    const response = await fetch(url);
+    return response.json();
+}
+
+export async function getMachines() {
+    try {
+        const data = await fetchArray('/api/auth/machines');
+        machines.set(data);
+    } catch (error) {
+        console.error(error);
     }
 }
