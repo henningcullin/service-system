@@ -15,6 +15,8 @@
     /* COLOR VARS */
 
     --teal: #00b5ad;
+    --olive: #a7bd0d;
+    --red: #db2828;
 
     color: var(--text);
     background-color: var(--main);
@@ -73,6 +75,16 @@ body {
 .teal {
     background-color: var(--teal);
     color: #fff;
+}
+
+.olive {
+    background-color: var(--olive);
+    color: #fff;
+}
+
+.red {
+    background-color: var(--red);
+    color: #151515;
 }
 
 /* LINKS */
