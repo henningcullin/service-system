@@ -1,6 +1,6 @@
 <script>
     import { facilities, machine, machineStatuses, machineTypes } from '$stores';
-    import { getFacilities, getMachine, getMachineStatuses, getMachineTypes, sendJSON } from '$utils';
+    import { getFacilities, getMachine, getMachineStatuses, getMachineTypes, sendDelete, sendJSON } from '$utils';
     import { onMount } from 'svelte';
     import { navigate, useLocation } from 'svelte-navigator';
 
@@ -69,7 +69,18 @@
     }
 
     async function deleteMachine() {
-        navigate('?view=true');
+        try {
+            const accepted = confirm('Are you sure you want to delete this?');
+            if (!accepted) return;
+            const response = await sendDelete(`/api/auth/machine?id=${id}`);
+            if (response.status !== 204) return alert('Failed to delete machine');
+            machine.set({});
+            clearFields();
+            navigate('?view=true');
+            updateUrl();
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     function cancel() {
@@ -77,12 +88,11 @@
         if (id) loadFields();
     }
 
-    function setCurrent() {
-        if (!$machine.id) return;
+    function updateUrl() {
         const url = new URL(window.location.href);
         const pathArray = url.pathname.split('/');
         if (pathArray.length > 2) pathArray.pop();
-        pathArray.push($machine.id);
+        if ($machine.id) pathArray.push($machine.id);
         url.pathname = pathArray.join('/');
         const newUrl = url.href;
         navigate(newUrl);
@@ -120,7 +130,7 @@
             if (response.status !== 201) return alert('Failed to create the machine');
             const data = await response.json();
             machine.set(data);
-            setCurrent();
+            updateUrl();
             loadFields();
         } catch (error) {
             console.error(error);
