@@ -1,6 +1,8 @@
 <script>
     import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
     import * as Avatar from '$lib/components/ui/avatar/index.js';
+    import { Switch } from '$lib/components/ui/switch/index.js';
+    import { Label } from '$lib/components/ui/label/index.js';
     import { Button } from '$lib/components/ui/button/index.js';
     import { account } from '$stores';
     import { navigate } from 'svelte-navigator';
@@ -34,6 +36,13 @@
                 <p class="text-xs leading-none text-muted-foreground">{$account.email}</p>
             </div>
         </DropdownMenu.Label>
+        <DropdownMenu.Separator />
+        <div
+            class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled]:pointer-events-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[disabled]:opacity-50"
+        >
+            <Switch id="toggle-color-mode" style="margin-right: 1em;" />
+            <Label for="toggle-color-mode">Dark theme</Label>
+        </div>
         <DropdownMenu.Separator />
         <DropdownMenu.Group>
             <DropdownMenu.Item>Profile</DropdownMenu.Item>
