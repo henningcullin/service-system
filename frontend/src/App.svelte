@@ -39,7 +39,7 @@
             <Route path="/account/" component={Account} />
 
             <Route path="/machines/*" component={Machines} />
-            <Route path="/machine/:id" component={Machine} />
+            <Route path="/machine/*id" component={Machine} />
 
             <Route path="*" component={NotFound} />
         </main>

@@ -4,7 +4,8 @@
 
     export let id;
 
-    getMachine(id);
+    if (id) getMachine(id);
+
     getMachineTypes();
     getMachineStatuses();
     getFacilities();

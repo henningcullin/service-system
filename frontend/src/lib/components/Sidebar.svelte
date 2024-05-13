@@ -10,7 +10,7 @@
     <Link to="/login">Login</Link>
     <divider />
     <item>
-        <Link to="/machine?new=true">Create Machine</Link>
+        <Link to="/machine/?new=true">Create Machine</Link>
         <Link to="/machines">Machines</Link>
     </item>
 </sidebar>
