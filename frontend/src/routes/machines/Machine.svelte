@@ -28,12 +28,12 @@
         id = segments.length > 2 ? segments.at(-1) : null;
     }
 
-    onMount(() => {
+    onMount(async () => {
         if (id) getMachine(id);
     });
 
     $: isCreating = params?.get('new') === 'true';
-    $: isEditing = params?.get('edit') === 'true' /*  && id */;
+    $: isEditing = params?.get('edit') === 'true' && id;
     $: isViewing = !(isCreating || isEditing);
 
     async function newMachine() {
@@ -52,7 +52,7 @@
 <tab>
     <div class="action container">
         <button on:click={newMachine}>New</button>
-        <button on:click={editMachine}>Edit</button>
+        <button on:click={editMachine} disabled={isEditing || !id}>Edit</button>
         <button on:click={deleteMachine}>Delete</button>
     </div>
 
