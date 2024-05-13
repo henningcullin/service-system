@@ -115,7 +115,8 @@ input::placeholder {
     color: var(--text);
 }
 
-input:disabled {
+input:disabled,
+select:disabled {
     opacity: 50%;
 }
 
