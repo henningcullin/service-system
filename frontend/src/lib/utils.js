@@ -24,51 +24,35 @@ export async function getLoggedIn() {
 }
 
 async function fetchJson(url) {
-    const response = await fetch(url);
-    return response.json();
+    try {
+        const response = await fetch(url);
+        return response.json();
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 export async function getMachines() {
-    try {
-        const data = await fetchJson('/api/auth/machines');
-        machines.set(data);
-    } catch (error) {
-        console.error(error);
-    }
+    const data = await fetchJson('/api/auth/machines');
+    machines.set(data ?? []);
 }
 
 export async function getMachine(id) {
-    try {
-        const data = await fetchJson(`/api/auth/machine?id=${id}`);
-        machine.set(data);
-    } catch (error) {
-        console.error(error);
-    }
+    const data = await fetchJson(`/api/auth/machine?id=${id}`);
+    machine.set(data ?? {});
 }
 
 export async function getMachineTypes() {
-    try {
-        const data = await fetchJson('/api/auth/machine_types');
-        machineTypes.set(data);
-    } catch (error) {
-        console.error(error);
-    }
+    const data = await fetchJson('/api/auth/machine_types');
+    machineTypes.set(data ?? []);
 }
 
 export async function getMachineStatuses() {
-    try {
-        const data = await fetchJson('/api/auth/machine_statuses');
-        machineStatuses.set(data);
-    } catch (error) {
-        console.error(error);
-    }
+    const data = await fetchJson('/api/auth/machine_statuses');
+    machineStatuses.set(data ?? []);
 }
 
 export async function getFacilities() {
-    try {
-        const data = await fetchJson('/api/auth/facilities');
-        facilities.set(data);
-    } catch (error) {
-        console.error(error);
-    }
+    const data = await fetchJson('/api/auth/facilities');
+    facilities.set(data ?? []);
 }
