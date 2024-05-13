@@ -8,7 +8,11 @@
 <sidebar class={IsSidebarOpen ? 'open' : ''}>
     <Link to="/">Mainmenu</Link>
     <Link to="/login">Login</Link>
-    <Link to="/machines">Machines</Link>
+    <divider />
+    <item>
+        <Link to="/machine?new=true">Create Machine</Link>
+        <Link to="/machines">Machines</Link>
+    </item>
 </sidebar>
 
 <style>
@@ -19,5 +23,14 @@
         height: 100%;
         transition: left 0.3s;
         background-color: var(--secondary);
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    item {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
     }
 </style>
