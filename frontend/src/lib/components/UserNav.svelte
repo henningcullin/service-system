@@ -6,12 +6,24 @@
     import { Button } from '$lib/components/ui/button/index.js';
     import { account } from '$stores';
     import { navigate } from 'svelte-navigator';
+    import { setMode, mode, localStorageKey, userPrefersMode, systemPrefersMode } from 'mode-watcher';
+    import { onMount } from 'svelte';
 
     let initials = '';
 
     $: {
         initials = $account.first_name.at(0).toUpperCase() + $account.last_name.at(0).toUpperCase();
     }
+
+    onMount(() => {
+        let preference = localStorage.getItem(localStorageKey);
+        preference ?? ($userPrefersMode === 'system' ? $systemPrefersMode : $userPrefersMode);
+        setMode(preference);
+    });
+
+    $: isDark = $mode === 'dark';
+
+    $: setMode(isDark ? 'dark' : 'light');
 
     async function logout() {
         const response = await fetch('/api/auth/logout');
@@ -40,8 +52,8 @@
         <div
             class="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled]:pointer-events-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[disabled]:opacity-50"
         >
-            <Switch id="toggle-color-mode" style="margin-right: 1em;" />
-            <Label for="toggle-color-mode">Dark theme</Label>
+            <Switch id="toggle-color-mode" style="margin-right: 1em;" bind:checked={isDark} />
+            <Label for="toggle-color-mode">Dark mode</Label>
         </div>
         <DropdownMenu.Separator />
         <DropdownMenu.Group>
