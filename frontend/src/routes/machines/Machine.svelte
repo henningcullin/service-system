@@ -1,6 +1,6 @@
 <script>
     import { facilities, machine, machineStatuses, machineTypes } from '$stores';
-    import { getFacilities, getMachine, getMachineStatuses, getMachineTypes } from '$utils';
+    import { getFacilities, getMachine, getMachineStatuses, getMachineTypes, sendJSON } from '$utils';
     import { onMount } from 'svelte';
     import { navigate, useLocation } from 'svelte-navigator';
 
@@ -14,6 +14,8 @@
         make: '',
         machine_type: '',
         status: '',
+        created: '',
+        edited: '',
         facility: '',
     };
 
@@ -29,6 +31,8 @@
         form.make = $machine?.make;
         form.machine_type = $machine?.machine_type?.id;
         form.status = $machine?.status?.id;
+        form.created = new Date($machine?.created).toLocaleString();
+        form.edited = new Date($machine?.edited).toLocaleString();
         form.facility = $machine?.facility?.id;
     }
 
@@ -46,7 +50,7 @@
     onMount(async () => {
         if (id) {
             await getMachine(id);
-            loadFields();
+            if (!isCreating) loadFields();
         }
     });
 
@@ -73,9 +77,57 @@
         if (id) loadFields();
     }
 
-    async function saveMachine() {
-        if (isViewing) return;
+    function setCurrent() {
+        if (!$machine.id) return;
+        const url = new URL(window.location.href);
+        const pathArray = url.pathname.split('/');
+        if (pathArray.length > 2) pathArray.pop();
+        pathArray.push($machine.id);
+        url.pathname = pathArray.join('/');
+        const newUrl = url.href;
+        navigate(newUrl);
     }
+
+    let isSaving = false;
+
+    async function saveMachine() {
+        if (isSaving) return;
+        isSaving = true;
+        switch (true) {
+            case isViewing:
+                return (isSaving = false);
+            case isCreating:
+                await createMachine();
+                break;
+            case isEditing:
+                await updateMachine();
+                break;
+        }
+        isSaving = false;
+    }
+
+    async function createMachine() {
+        try {
+            const { name, make, machine_type, status, facility } = form;
+            const response = await sendJSON('/api/auth/machine', 'POST', {
+                name,
+                make,
+                machine_type,
+                status,
+                facility,
+            });
+            console.log(response);
+            if (response.status !== 201) return alert('Failed to create the machine');
+            const data = await response.json();
+            machine.set(data);
+            setCurrent();
+            loadFields();
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    async function updateMachine() {}
 </script>
 
 <tab>
@@ -83,7 +135,7 @@
         <button on:click={newMachine} disabled={isCreating}>New</button>
         <button on:click={editMachine} disabled={isEditing || !id}>Edit</button>
         <button on:click={deleteMachine} disabled={isCreating || !id}>Delete</button>
-        <button on:click={cancel}>Cancel</button>
+        <button on:click={cancel} disabled={isViewing}>Cancel</button>
     </div>
 
     <form on:submit|preventDefault={saveMachine}>
@@ -119,6 +171,12 @@
                 <option value={facility.id}>{facility.name}</option>
             {/each}
         </select>
+
+        <label for="created">Created at</label>
+        <input type="text" id="created" readonly bind:value={form.created} />
+
+        <label for="edited">Edited at</label>
+        <input type="text" id="edited" readonly bind:value={form.edited} />
 
         <button class="saveButton" type="submit" disabled={isViewing}>Save</button>
     </form>
