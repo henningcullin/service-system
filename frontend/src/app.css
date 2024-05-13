@@ -116,6 +116,11 @@ input::placeholder {
     opacity: 0.85;
 }
 
+input:focus {
+    outline: none;
+    filter: drop-shadow(0 0 0.15em var(--olive));
+}
+
 /* TEXT */
 
 h1 {
