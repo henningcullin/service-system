@@ -2,6 +2,7 @@
     import { facilities, machineStatuses, machineTypes } from '$stores';
     import { getFacilities, getMachine, getMachineStatuses, getMachineTypes } from '$utils';
     import { onMount } from 'svelte';
+    import { navigate, useLocation } from 'svelte-navigator';
 
     const form = {
         id: '',
@@ -16,23 +17,36 @@
     getMachineStatuses();
     getFacilities();
 
-    $: url = new URL(location?.href);
-    $: params = url?.searchParams;
-    $: id = url.pathname.split('/').at(-1);
+    $: location = useLocation();
+
+    $: params = new URLSearchParams($location.search);
+
+    let id;
+
+    $: {
+        const segments = $location.pathname.split('/');
+        id = segments.length > 2 ? segments.at(-1) : null;
+    }
 
     onMount(() => {
         if (id) getMachine(id);
     });
 
     $: isCreating = params?.get('new') === 'true';
-    $: isEditing = params?.get('edit') === 'true' && id;
+    $: isEditing = params?.get('edit') === 'true' /*  && id */;
     $: isViewing = !(isCreating || isEditing);
 
-    async function newMachine() {}
+    async function newMachine() {
+        navigate('?new=true');
+    }
 
-    async function editMachine() {}
+    async function editMachine() {
+        navigate('?edit=true');
+    }
 
-    async function deleteMachine() {}
+    async function deleteMachine() {
+        navigate('?view=true');
+    }
 </script>
 
 <tab>
