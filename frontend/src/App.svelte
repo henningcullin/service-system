@@ -15,6 +15,7 @@
 
     import Machines from '$routes/machines/Machines.svelte';
     import Machine from '$routes/machines/Machine.svelte';
+    import { ModeWatcher } from 'mode-watcher';
 
     $: IsSidebarOpen = $SidebarOpen;
 
@@ -30,6 +31,7 @@
     });
 </script>
 
+<ModeWatcher />
 <Router primary={false}>
     <Sidebar></Sidebar>
     <pusher class={IsSidebarOpen ? 'push dim' : ''} on:click={closeSidebar}>
