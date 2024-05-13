@@ -14,6 +14,7 @@
 
     /* COLOR VARS */
 
+    --white: #f9f9f9;
     --teal: #00b5ad;
     --olive: #a7bd0d;
     --red: #db2828;
@@ -120,9 +121,10 @@ select:disabled {
     opacity: 50%;
 }
 
-input:focus {
+input:focus,
+select:focus {
     outline: none;
-    filter: drop-shadow(0 0 0.15em var(--olive));
+    filter: drop-shadow(0 0 0.15em var(--white));
 }
 
 /* TEXT */
