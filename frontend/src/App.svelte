@@ -1,4 +1,5 @@
 <script>
+    import './app.css';
     import { onMount } from 'svelte';
     import { Router, Route, navigate } from 'svelte-navigator';
 
@@ -30,18 +31,18 @@
 </script>
 
 <Router primary={false}>
-    <Sidebar />
+    <Sidebar></Sidebar>
     <pusher class={IsSidebarOpen ? 'push dim' : ''} on:click={closeSidebar}>
-        <Header />
+        <Header></Header>
         <main>
-            <Route path="/" component={Mainmenu} />
-            <Route path="/login/" component={Login} />
-            <Route path="/account/" component={Account} />
+            <Route path="/" component={Mainmenu}></Route>
+            <Route path="/login/" component={Login}></Route>
+            <Route path="/account/" component={Account}></Route>
 
-            <Route path="/machines/*" component={Machines} />
-            <Route path="/machine/*" component={Machine} />
+            <Route path="/machines/*" component={Machines}></Route>
+            <Route path="/machine/*" component={Machine}></Route>
 
-            <Route path="*" component={NotFound} />
+            <Route path="*" component={NotFound}></Route>
         </main>
     </pusher>
 </Router>
