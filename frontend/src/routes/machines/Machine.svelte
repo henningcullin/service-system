@@ -1,8 +1,12 @@
 <script>
-    import { facilities, machineStatuses, machineTypes } from '$stores';
+    import { facilities, machine, machineStatuses, machineTypes } from '$stores';
     import { getFacilities, getMachine, getMachineStatuses, getMachineTypes } from '$utils';
     import { onMount } from 'svelte';
     import { navigate, useLocation } from 'svelte-navigator';
+
+    getMachineTypes();
+    getMachineStatuses();
+    getFacilities();
 
     const form = {
         id: '',
@@ -13,9 +17,20 @@
         facility: '',
     };
 
-    getMachineTypes();
-    getMachineStatuses();
-    getFacilities();
+    function clearFields() {
+        for (const field in form) {
+            form[field] = '';
+        }
+    }
+
+    function loadFields() {
+        form.id = $machine?.id;
+        form.name = $machine?.name;
+        form.make = $machine?.make;
+        form.machine_type = $machine?.machine_type?.id;
+        form.status = $machine?.status?.id;
+        form.facility = $machine?.facility?.id;
+    }
 
     $: location = useLocation();
 
@@ -29,7 +44,10 @@
     }
 
     onMount(async () => {
-        if (id) getMachine(id);
+        if (id) {
+            await getMachine(id);
+            loadFields();
+        }
     });
 
     $: isCreating = params?.get('new') === 'true';
@@ -38,25 +56,37 @@
 
     async function newMachine() {
         navigate('?new=true');
+        clearFields();
     }
 
     async function editMachine() {
         navigate('?edit=true');
+        if (id) loadFields();
     }
 
     async function deleteMachine() {
         navigate('?view=true');
     }
+
+    function cancel() {
+        navigate('?view=true');
+        if (id) loadFields();
+    }
+
+    async function saveMachine() {
+        if (isViewing) return;
+    }
 </script>
 
 <tab>
     <div class="action container">
-        <button on:click={newMachine}>New</button>
+        <button on:click={newMachine} disabled={isCreating}>New</button>
         <button on:click={editMachine} disabled={isEditing || !id}>Edit</button>
-        <button on:click={deleteMachine}>Delete</button>
+        <button on:click={deleteMachine} disabled={isCreating || !id}>Delete</button>
+        <button on:click={cancel}>Cancel</button>
     </div>
 
-    <form>
+    <form on:submit|preventDefault={saveMachine}>
         <label for="id">ID</label>
         <input type="text" id="id" bind:value={form.id} disabled />
 
@@ -89,9 +119,18 @@
                 <option value={facility.id}>{facility.name}</option>
             {/each}
         </select>
+
+        <button class="saveButton" type="submit" disabled={isViewing}>Save</button>
     </form>
 </tab>
 
 <tab> </tab>
 
 <tab> </tab>
+
+<style>
+    .saveButton {
+        width: 100%;
+        margin-top: 1.5em;
+    }
+</style>
