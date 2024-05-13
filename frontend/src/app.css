@@ -113,7 +113,6 @@ select {
 
 input::placeholder {
     color: var(--text);
-    opacity: 100;
 }
 
 input:disabled {
