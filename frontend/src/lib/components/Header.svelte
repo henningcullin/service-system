@@ -11,7 +11,9 @@
 <header>
     <button on:click|stopPropagation={toggleSidebar}> Open Sidebar </button>
     {#if $account.id}
-        <Link to="/account">{$account.first_name}</Link>
+        <div class="right menu">
+            <Link class="account-box" to="/account">{$account.first_name}</Link>
+        </div>
     {/if}
 </header>
 
@@ -23,5 +25,14 @@
         height: 5dvh;
         background-color: var(--primary);
         box-shadow: 0 0 3px 0 var(--line);
+    }
+
+    .right.menu {
+        position: relative;
+        float: right;
+        height: 100%;
+        display: grid;
+        place-items: center;
+        margin-right: 2em;
     }
 </style>
