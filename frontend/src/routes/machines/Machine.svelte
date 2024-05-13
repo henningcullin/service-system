@@ -10,11 +10,10 @@
     getMachineStatuses();
     getFacilities();
 
-    const url = new URL(location.href).searchParams;
-    const params = url.searchParams;
+    $: params = new URL(location?.href)?.searchParams;
 
-    $: isCreating = new URL(location?.href)?.searchParams?.get('new') === 'true';
-    $: isEditing = new URL(location?.href)?.searchParams?.get('edit') === 'true';
+    $: isCreating = params?.get('new') === 'true';
+    $: isEditing = params?.get('edit') === 'true';
 
     $: isViewing = !(isCreating || isEditing);
 </script>
