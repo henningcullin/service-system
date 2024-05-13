@@ -13,8 +13,8 @@
     const url = new URL(location.href).searchParams;
     const params = url.searchParams;
 
-    $: isCreating = new URL(location?.href)?.searchParams?.get('new');
-    $: isEditing = new URL(location?.href)?.searchParams?.get('edit');
+    $: isCreating = new URL(location?.href)?.searchParams?.get('new') === 'true';
+    $: isEditing = new URL(location?.href)?.searchParams?.get('edit') === 'true';
 
     $: isViewing = !(isCreating || isEditing);
 </script>
