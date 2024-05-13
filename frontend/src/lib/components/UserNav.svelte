@@ -6,20 +6,13 @@
     import { Button } from '$lib/components/ui/button/index.js';
     import { account } from '$stores';
     import { navigate } from 'svelte-navigator';
-    import { setMode, mode, localStorageKey, userPrefersMode, systemPrefersMode } from 'mode-watcher';
-    import { onMount } from 'svelte';
+    import { setMode, mode } from 'mode-watcher';
 
     let initials = '';
 
     $: {
         initials = $account.first_name.at(0).toUpperCase() + $account.last_name.at(0).toUpperCase();
     }
-
-    onMount(() => {
-        let preference = localStorage.getItem(localStorageKey);
-        preference ?? ($userPrefersMode === 'system' ? $systemPrefersMode : $userPrefersMode);
-        setMode(preference);
-    });
 
     $: isDark = $mode === 'dark';
 

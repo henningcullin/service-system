@@ -15,13 +15,17 @@
 
     import Machines from '$routes/machines/Machines.svelte';
     import Machine from '$routes/machines/Machine.svelte';
-    import { ModeWatcher } from 'mode-watcher';
+    import { ModeWatcher, localStorageKey, setMode, systemPrefersMode, userPrefersMode } from 'mode-watcher';
 
     $: IsSidebarOpen = $SidebarOpen;
 
     function closeSidebar() {
         if (IsSidebarOpen) SidebarOpen.update((state) => !state);
     }
+
+    let preference = localStorage.getItem(localStorageKey);
+    preference ?? ($userPrefersMode === 'system' ? $systemPrefersMode : $userPrefersMode);
+    setMode(preference);
 
     onMount(async function () {
         if (!$account.id) {
