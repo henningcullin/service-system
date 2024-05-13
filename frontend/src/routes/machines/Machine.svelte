@@ -1,21 +1,29 @@
 <script>
     import { facilities, machine, machineStatuses, machineTypes } from '$stores';
     import { getFacilities, getMachine, getMachineStatuses, getMachineTypes } from '$utils';
-
-    export let id;
-
-    if (id) getMachine(id);
+    import { onMount } from 'svelte';
 
     getMachineTypes();
     getMachineStatuses();
     getFacilities();
 
-    $: params = new URL(location?.href)?.searchParams;
+    $: url = new URL(location?.href);
+    $: params = url?.searchParams;
+    $: id = url.pathname.split('/').at(-1);
+
+    onMount(() => {
+        if (id) getMachine(id);
+    });
 
     $: isCreating = params?.get('new') === 'true';
-    $: isEditing = params?.get('edit') === 'true';
-
+    $: isEditing = params?.get('edit') === 'true' && id;
     $: isViewing = !(isCreating || isEditing);
+
+    async function newMachine() {}
+
+    async function editMachine() {}
+
+    async function deleteMachine() {}
 </script>
 
 <tab>
