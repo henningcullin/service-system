@@ -12,7 +12,6 @@
     import Login from '$routes/Login.svelte';
     import Mainmenu from '$routes/Mainmenu.svelte';
     import NotFound from '$routes/NotFound.svelte';
-    import Account from '$routes/Account.svelte';
 
     import Machines from '$routes/machines/Machines.svelte';
     import Machine from '$routes/machines/Machine.svelte';
@@ -40,7 +39,6 @@
         <main>
             <Route path="/" component={Mainmenu}></Route>
             <Route path="/login/" component={Login}></Route>
-            <Route path="/account/" component={Account}></Route>
 
             <Route path="/machines/*" component={Machines}></Route>
             <Route path="/machine/*" component={Machine}></Route>

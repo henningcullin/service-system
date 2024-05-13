@@ -3,6 +3,7 @@
     import { SidebarOpen } from '$lib/stores';
     import { Menu } from 'lucide-svelte';
     import { Link } from 'svelte-navigator';
+    import UserNav from './UserNav.svelte';
 
     function toggleSidebar() {
         SidebarOpen.update((state) => !state);
@@ -21,8 +22,10 @@
         </nav>
         <div class="ml-auto flex items-center space-x-4">
             {#if $account.id}
-                <Link class="account-box" to="/account">{$account.first_name}</Link>
+                <UserNav />
             {/if}
         </div>
     </div>
 </div>
+
+<!-- <Link class="account-box" to="/account">{$account.first_name}</Link> -->
