@@ -1,6 +1,7 @@
 <script>
     import { account } from '$lib/stores';
     import { SidebarOpen } from '$lib/stores';
+    import { Menu } from 'lucide-svelte';
     import { Link } from 'svelte-navigator';
 
     function toggleSidebar() {
@@ -8,31 +9,20 @@
     }
 </script>
 
-<header>
-    <button on:click|stopPropagation={toggleSidebar}> Open Sidebar </button>
-    {#if $account.id}
-        <div class="right menu">
-            <Link class="account-box" to="/account">{$account.first_name}</Link>
+<div class="border-b">
+    <div class="flex h-14 items-center px-4">
+        <nav class="flex items-center space-x-4 lg:space-x-6">
+            <button
+                on:click|stopPropagation={toggleSidebar}
+                class="text-sm font-medium transition-colors hover:text-primary"
+            >
+                <Menu />
+            </button>
+        </nav>
+        <div class="ml-auto flex items-center space-x-4">
+            {#if $account.id}
+                <Link class="account-box" to="/account">{$account.first_name}</Link>
+            {/if}
         </div>
-    {/if}
-</header>
-
-<style>
-    header {
-        width: 100%;
-        position: fixed;
-        top: 0;
-        height: 5dvh;
-        background-color: var(--primary);
-        box-shadow: 0 0 3px 0 var(--line);
-    }
-
-    .right.menu {
-        position: relative;
-        float: right;
-        height: 100%;
-        display: grid;
-        place-items: center;
-        margin-right: 2em;
-    }
-</style>
+    </div>
+</div>
