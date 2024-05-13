@@ -1,5 +1,6 @@
 <script>
     import './app.css';
+    import './custom.css';
     import { onMount } from 'svelte';
     import { Router, Route, navigate } from 'svelte-navigator';
 
