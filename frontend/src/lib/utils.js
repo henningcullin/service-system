@@ -10,6 +10,10 @@ export async function sendJSON(url, method, body) {
     });
 }
 
+export async function sendDelete(url) {
+    return fetch(url, { method: 'DELETE' });
+}
+
 export async function getLoggedIn() {
     try {
         const response = await fetch('/api/auth/me');
