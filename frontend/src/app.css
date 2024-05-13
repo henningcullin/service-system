@@ -91,12 +91,12 @@ body {
 
 a {
     font-weight: 500;
-    color: #646cff;
+    color: var(--text);
     text-decoration: inherit;
     box-sizing: border-box;
 }
 a:hover {
-    color: #535bf2;
+    color: var(--teal);
 }
 
 /* FORMS */
