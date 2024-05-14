@@ -65,7 +65,7 @@
 
     main {
         min-height: 95dvh;
-        margin-top: 5dvh;
+        margin-top: 3dvh;
         padding: 1em;
     }
 </style>
