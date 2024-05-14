@@ -4,7 +4,7 @@
     import * as Command from '$lib/components/ui/command/index.js';
     import * as Popover from '$lib/components/ui/popover/index.js';
     import { Button } from '$lib/components/ui/button/index.js';
-    import { Separator } from '$lib/componenets/ui/separator/index.js';
+    import Separator from '$components/ui/separator/separator.svelte';
     import { Badge } from '$lib/components/ui/badge/index.js';
 
     export let filterValues = [];
