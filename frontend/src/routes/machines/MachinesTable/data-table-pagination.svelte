@@ -1,9 +1,14 @@
-<script>
-    import { ChevronRight, ChevronLeft, ChevronsRight, ChevronsLeft } from 'lucide-svelte';
+<script lang="ts">
+    import ChevronRight from 'lucide-svelte/icons/chevron-right';
+    import ChevronLeft from 'lucide-svelte/icons/chevron-left';
+    import ChevronsRight from 'lucide-svelte/icons/chevrons-right';
+    import ChevronsLeft from 'lucide-svelte/icons/chevrons-left';
+    import type { TableViewModel } from 'svelte-headless-table';
+    import type { Task } from './schema.ts';
     import * as Select from '$lib/components/ui/select/index.js';
     import { Button } from '$lib/components/ui/button/index.js';
 
-    export let tableModel;
+    export let tableModel: TableViewModel<Task>;
 
     const { pageRows, pluginStates, rows } = tableModel;
 

@@ -1,20 +1,21 @@
-<script>
-    import { CirclePlus } from 'lucide-svelte';
-    import { Check } from 'lucide-svelte';
+<script lang="ts">
+    import CirclePlus from 'lucide-svelte/icons/circle-plus';
+    import Check from 'lucide-svelte/icons/check';
+    import type { statuses } from './data.ts';
     import * as Command from '$lib/components/ui/command/index.js';
     import * as Popover from '$lib/components/ui/popover/index.js';
     import { Button } from '$lib/components/ui/button/index.js';
-    import Separator from '$components/ui/separator/separator.svelte';
+    import { Separator } from '$lib/components/ui/separator/index.js';
     import { Badge } from '$lib/components/ui/badge/index.js';
 
-    export let filterValues = [];
-    export let title;
-    export let options = [];
-    export let counts = {};
+    export let filterValues: string[] = [];
+    export let title: string;
+    export let options = [] as typeof statuses;
+    export let counts: { [index: string]: number } = {};
 
     let open = false;
 
-    function handleSelect(currentValue) {
+    function handleSelect(currentValue: string) {
         if (Array.isArray(filterValues) && filterValues.includes(currentValue)) {
             filterValues = filterValues.filter((v) => v !== currentValue);
         } else {
@@ -57,7 +58,7 @@
                 <Command.Empty>No results found.</Command.Empty>
                 <Command.Group>
                     {#each options as option}
-                        {@const Icon = option.icon}
+                        {@const Icon = option}
                         <Command.Item
                             value={option.value}
                             onSelect={(currentValue) => {
@@ -70,12 +71,10 @@
                                     option.value,
                                 )
                                     ? 'bg-primary text-primary-foreground'
-                                    : 'opacity-50 [&_svg]:invisible'}
-                                "
+                                    : 'opacity-50 [&_svg]:invisible'}"
                             >
                                 <Check className="h-4 w-4" />
                             </div>
-                            <Icon class="mr-2 h-4 w-4 text-muted-foreground" />
                             <span>
                                 {option.label}
                             </span>

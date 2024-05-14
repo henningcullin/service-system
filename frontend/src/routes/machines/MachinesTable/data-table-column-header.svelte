@@ -1,28 +1,36 @@
-<script>
-    import { ChevronDown, ChevronUp, ChevronsUpDown, EyeOff } from 'lucide-svelte';
+<script lang="ts">
+    import EyeOff from 'lucide-svelte/icons/eye-off';
+    import ChevronDown from 'lucide-svelte/icons/chevron-down';
+    import ChevronUp from 'lucide-svelte/icons/chevron-up';
+    import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
+    import type { TableViewModel } from 'svelte-headless-table';
+    import type { Task } from './schema.ts';
     import { Button } from '$lib/components/ui/button/index.js';
     import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 
-    export let props;
-    /**
-     * @type TableViewModel<Task>
-     */
-    export let tableModel;
-    /**
-     * @type string
-     */
-    export let cellId;
+    export let props: {
+        select: never;
+        sort: {
+            order: 'desc' | 'asc' | undefined;
+            toggle: (_: Event) => void;
+            clear: () => void;
+            disabled: boolean;
+        };
+        filter: never;
+    };
+    export let tableModel: TableViewModel<Task>;
+    export let cellId: string;
 
     const { hiddenColumnIds } = tableModel.pluginStates.hide;
 
-    function handleAscSort(e) {
+    function handleAscSort(e: Event) {
         if (props.sort.order === 'asc') {
             return;
         }
         props.sort.toggle(e);
     }
 
-    function handleDescSort(e) {
+    function handleDescSort(e: Event) {
         if (props.sort.order === 'desc') {
             return;
         }
@@ -34,7 +42,7 @@
     }
 
     function handleHide() {
-        hiddenColumnIds.update((ids) => {
+        hiddenColumnIds.update((ids: string[]) => {
             if (ids.includes(cellId)) {
                 return ids;
             }
@@ -44,7 +52,7 @@
 </script>
 
 {#if !props.sort.disabled}
-    <div class={'flex items-center'}>
+    <div class="flex items-center">
         <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild let:builder>
                 <Button variant="ghost" builders={[builder]} class="-ml-3 h-8 data-[state=open]:bg-accent" size="sm">

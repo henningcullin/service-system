@@ -1,14 +1,16 @@
-<script>
-    import { SlidersHorizontal } from 'lucide-svelte';
+<script lang="ts">
+    import SlidersHorizontal from 'lucide-svelte/icons/sliders-horizontal';
+    import type { TableViewModel } from 'svelte-headless-table';
+    import type { Task } from './schema';
     import { Button } from '$lib/components/ui/button/index.js';
     import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 
-    export let tableModel;
+    export let tableModel: TableViewModel<Task>;
     const { pluginStates, flatColumns } = tableModel;
     const { hiddenColumnIds } = pluginStates.hide;
 
-    function handleHide(id) {
-        hiddenColumnIds.update((ids) => {
+    function handleHide(id: string) {
+        hiddenColumnIds.update((ids: string[]) => {
             if (ids.includes(id)) {
                 return ids.filter((i) => i !== id);
             }

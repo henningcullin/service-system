@@ -1,15 +1,20 @@
-<script>
-    import { X } from 'lucide-svelte';
+<script lang="ts">
+    import type { TableViewModel } from 'svelte-headless-table';
+    import X from 'lucide-svelte/icons/x';
+    import type { Writable } from 'svelte/store';
+    import { priorities, statuses } from './data';
+    import type { Task } from './schema';
     import { DataTableFacetedFilter, DataTableViewOptions } from './index.js';
     import Button from '$lib/components/ui/button/button.svelte';
     import { Input } from '$lib/components/ui/input/index.js';
 
-    export let tableModel;
-    export let data;
-    export let machineTypes;
-    export let machineStatuses;
+    export let tableModel: TableViewModel<Task>;
+    export let data: Task[];
 
-    const counts = data.reduce(
+    const counts = data.reduce<{
+        status: { [index: string]: number };
+        priority: { [index: string]: number };
+    }>(
         (acc, { status, priority }) => {
             acc.status[status] = (acc.status[status] || 0) + 1;
             acc.priority[priority] = (acc.priority[priority] || 0) + 1;
@@ -22,9 +27,20 @@
     );
 
     const { pluginStates } = tableModel;
-    const { filterValue } = pluginStates.filter;
+    const {
+        filterValue,
+    }: {
+        filterValue: Writable<string>;
+    } = pluginStates.filter;
 
-    const { filterValues } = pluginStates.colFilter;
+    const {
+        filterValues,
+    }: {
+        filterValues: Writable<{
+            status: string[];
+            priority: string[];
+        }>;
+    } = pluginStates.colFilter;
 
     $: showReset = Object.values({ ...$filterValues, $filterValue }).some((v) => v.length > 0);
 </script>
@@ -32,7 +48,7 @@
 <div class="flex items-center justify-between">
     <div class="flex flex-1 items-center space-x-2">
         <Input
-            placeholder="Filter machines..."
+            placeholder="Filter tasks..."
             class="h-8 w-[150px] lg:w-[250px]"
             type="search"
             bind:value={$filterValue}
@@ -40,22 +56,22 @@
 
         <DataTableFacetedFilter
             bind:filterValues={$filterValues.status}
-            title="Type"
-            options={machineTypes}
-            counts={counts.type}
+            title="Status"
+            options={statuses}
+            counts={counts.status}
         />
         <DataTableFacetedFilter
             bind:filterValues={$filterValues.priority}
-            title="Status"
-            options={machineStatuses}
-            counts={counts.status}
+            title="Priority"
+            options={priorities}
+            counts={counts.priority}
         />
         {#if showReset}
             <Button
                 on:click={() => {
                     $filterValue = '';
-                    $filterValues.type = [];
                     $filterValues.status = [];
+                    $filterValues.priority = [];
                 }}
                 variant="ghost"
                 class="h-8 px-2 lg:px-3"

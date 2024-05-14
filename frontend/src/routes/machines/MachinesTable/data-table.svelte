@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { get, readable } from 'svelte/store';
     import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
     import {
@@ -9,6 +9,7 @@
         addSortBy,
         addTableFilter,
     } from 'svelte-headless-table/plugins';
+    import type { Task } from './schema';
     import {
         DataTableCheckbox,
         DataTableColumnHeader,
@@ -22,7 +23,7 @@
 
     import * as Table from '$lib/components/ui/table/index.js';
 
-    export let data;
+    export let data: Task[];
 
     const table = createTable(readable(data), {
         select: addSelectedRows(),
