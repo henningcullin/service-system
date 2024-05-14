@@ -266,7 +266,7 @@
     const { headerRows, pageRows, tableAttrs, tableBodyAttrs } = tableModel;
 </script>
 
-<div class="space-y-4">
+<div class="space-y-2">
     <DTToolbar {tableModel} {machines} />
     <div class="rounded-md border">
         <Table.Root {...$tableAttrs}>
@@ -314,7 +314,7 @@
                     {/each}
                 {:else}
                     <Table.Row>
-                        <Table.Cell colspan={columns.length} class="h-18 text-center">No results.</Table.Cell>
+                        <Table.Cell colspan={columns.length} class="h-24 text-center">No results.</Table.Cell>
                     </Table.Row>
                 {/if}
             </Table.Body>
