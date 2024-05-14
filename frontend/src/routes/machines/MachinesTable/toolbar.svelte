@@ -4,7 +4,7 @@
     import type { Writable } from 'svelte/store';
     import { machineTypes, machineStatuses, facilities } from '$stores'; // import from $stores
     import type { Machine } from './schema';
-    import { DataTableFacetedFilter, DataTableViewOptions } from './index.js';
+    import { DTFacetedFilter, DTViewOptions } from './index.js';
     import Button from '$lib/components/ui/button/button.svelte';
     import { Input } from '$lib/components/ui/input/index.js';
 
@@ -58,19 +58,19 @@
             bind:value={$filterValue}
         />
 
-        <DataTableFacetedFilter
+        <DTFacetedFilter
             bind:filterValues={$filterValues.machine_type}
             title="Type"
             options={$machineTypes}
             counts={counts.machine_type}
         />
-        <DataTableFacetedFilter
+        <DTFacetedFilter
             bind:filterValues={$filterValues.status}
             title="Status"
             options={$machineStatuses}
             counts={counts.status}
         />
-        <DataTableFacetedFilter
+        <DTFacetedFilter
             bind:filterValues={$filterValues.facility}
             title="Facilites"
             options={$facilities}
@@ -93,5 +93,5 @@
         {/if}
     </div>
 
-    <DataTableViewOptions {tableModel} />
+    <DTViewOptions {tableModel} />
 </div>

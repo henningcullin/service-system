@@ -11,20 +11,20 @@
         addTableFilter,
     } from 'svelte-headless-table/plugins';
     import {
-        DataTableCheckbox,
-        DataTableColumnHeader,
-        DataTablePagination,
-        DataTableRowActions,
-        DataTableMachineTypeCell,
-        DataTableMachineStatusCell,
-        DataTableFieldCell,
-        DataTableToolbar,
-        DataTableIdCell,
+        DTCheckbox,
+        DTColumnHeader,
+        DTPagination,
+        DTRowActions,
+        DTMachineTypeCell,
+        DTMachineStatusCell,
+        DTFieldCell,
+        DTToolbar,
+        DTIdCell,
+        DTDateCell,
+        DTFacilityCell,
     } from './index.js';
 
     import * as Table from '$lib/components/ui/table/index.js';
-    import DataTableDateCell from './data-table-date-cell.svelte';
-    import DataTableFacilityCell from './data-table-facility-cell.svelte';
 
     const table = createTable(machines, {
         select: addSelectedRows(),
@@ -46,7 +46,7 @@
             id: 'select',
             header: (_, { pluginStates }) => {
                 const { allPageRowsSelected } = pluginStates.select;
-                return createRender(DataTableCheckbox, {
+                return createRender(DTCheckbox, {
                     checked: allPageRowsSelected,
                     'aria-label': 'Select all',
                 });
@@ -54,7 +54,7 @@
             cell: ({ row }, { pluginStates }) => {
                 const { getRowState } = pluginStates.select;
                 const { isSelected } = getRowState(row);
-                return createRender(DataTableCheckbox, {
+                return createRender(DTCheckbox, {
                     checked: isSelected,
                     'aria-label': 'Select row',
                     class: 'translate-y-[2px]',
@@ -72,7 +72,7 @@
             header: 'Machine',
             cell: ({ value, row }) => {
                 if (row.isData()) {
-                    return createRender(DataTableIdCell, {
+                    return createRender(DTIdCell, {
                         value,
                     });
                 }
@@ -90,7 +90,7 @@
             header: 'Name',
             cell: ({ value, row }) => {
                 if (row.isData()) {
-                    return createRender(DataTableFieldCell, {
+                    return createRender(DTFieldCell, {
                         value,
                     });
                 }
@@ -103,7 +103,7 @@
             header: 'Make',
             cell: ({ value, row }) => {
                 if (row.isData()) {
-                    return createRender(DataTableFieldCell, {
+                    return createRender(DTFieldCell, {
                         value,
                     });
                 }
@@ -115,7 +115,7 @@
             id: 'machine_type',
             header: 'Type',
             cell: ({ value }) => {
-                return createRender(DataTableMachineTypeCell, {
+                return createRender(DTMachineTypeCell, {
                     value,
                 });
             },
@@ -140,7 +140,7 @@
             id: 'status',
             header: 'Status',
             cell: ({ value }) => {
-                return createRender(DataTableMachineStatusCell, {
+                return createRender(DTMachineStatusCell, {
                     value,
                 });
             },
@@ -166,7 +166,7 @@
             id: 'facility',
             header: 'Facility',
             cell: ({ value }) => {
-                return createRender(DataTableFacilityCell, {
+                return createRender(DTFacilityCell, {
                     value,
                 });
             },
@@ -193,7 +193,7 @@
             header: 'Created at',
             cell: ({ value, row }) => {
                 if (row.isData()) {
-                    return createRender(DataTableDateCell, {
+                    return createRender(DTDateCell, {
                         value,
                     });
                 }
@@ -222,7 +222,7 @@
             header: 'Edited at',
             cell: ({ value, row }) => {
                 if (row.isData()) {
-                    return createRender(DataTableDateCell, {
+                    return createRender(DTDateCell, {
                         value,
                     });
                 }
@@ -252,7 +252,7 @@
             },
             cell: ({ row }) => {
                 if (row.isData() && row.original) {
-                    return createRender(DataTableRowActions, {
+                    return createRender(DTRowActions, {
                         row: row.original,
                     });
                 }
@@ -267,7 +267,7 @@
 </script>
 
 <div class="space-y-4">
-    <DataTableToolbar {tableModel} {machines} />
+    <DTToolbar {tableModel} {machines} />
     <div class="rounded-md border">
         <Table.Root {...$tableAttrs}>
             <Table.Header>
@@ -278,8 +278,8 @@
                                 <Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
                                     <Table.Head {...attrs}>
                                         {#if cell.id !== 'select' && cell.id !== 'actions'}
-                                            <DataTableColumnHeader {props} {tableModel} cellId={cell.id}>
-                                                <Render of={cell.render()} /></DataTableColumnHeader
+                                            <DTColumnHeader {props} {tableModel} cellId={cell.id}>
+                                                <Render of={cell.render()} /></DTColumnHeader
                                             >
                                         {:else}
                                             <Render of={cell.render()} />
@@ -320,5 +320,5 @@
             </Table.Body>
         </Table.Root>
     </div>
-    <DataTablePagination {tableModel} />
+    <DTPagination {tableModel} />
 </div>
