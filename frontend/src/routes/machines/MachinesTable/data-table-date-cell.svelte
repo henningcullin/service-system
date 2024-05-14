@@ -4,6 +4,6 @@
 
 <div class="flex space-x-2">
     <span class="max-w-[200px] truncate font-medium">
-        {value}
+        {new Date(value).toLocaleString()}
     </span>
 </div>
