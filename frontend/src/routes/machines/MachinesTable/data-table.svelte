@@ -122,9 +122,9 @@
                 colFilter: {
                     fn: ({ filterValue, value }) => {
                         if (filterValue.length === 0) return true;
-                        if (!Array.isArray(filterValue) || typeof value !== 'string') return true;
+                        if (!Array.isArray(filterValue) || typeof value.id !== 'string') return true;
                         return filterValue.some((filter) => {
-                            return value.includes(filter);
+                            return value.id.includes(filter);
                         });
                     },
                     initialFilterValue: [],
@@ -147,10 +147,10 @@
                 colFilter: {
                     fn: ({ filterValue, value }) => {
                         if (filterValue.length === 0) return true;
-                        if (!Array.isArray(filterValue) || typeof value !== 'string') return true;
+                        if (!Array.isArray(filterValue) || typeof value.id !== 'string') return true;
 
                         return filterValue.some((filter) => {
-                            return value.includes(filter);
+                            return value.id.includes(filter);
                         });
                     },
                     initialFilterValue: [],
@@ -173,10 +173,10 @@
                 colFilter: {
                     fn: ({ filterValue, value }) => {
                         if (filterValue.length === 0) return true;
-                        if (!Array.isArray(filterValue) || typeof value !== 'string') return true;
+                        if (!Array.isArray(filterValue) || typeof value.id !== 'string') return true;
 
                         return filterValue.some((filter) => {
-                            return value.includes(filter);
+                            return value.id.includes(filter);
                         });
                     },
                     initialFilterValue: [],
