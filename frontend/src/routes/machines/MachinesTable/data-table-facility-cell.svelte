@@ -9,10 +9,10 @@
     <div class="flex space-x-2">
         <span class="max-w-[200px] truncate font-medium">
             <HoverCard.Root>
-                <HoverCard.Trigger
-                    class="rounded-sm underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-black"
-                >
-                    <Link to="/facility/{value.id}">{value.name}</Link>
+                <HoverCard.Trigger>
+                    <Link to="/facility/{value.id}" class="rounded-sm underline-offset-2 hover:underline"
+                        >{value.name}
+                    </Link>
                 </HoverCard.Trigger>
                 <HoverCard.Content class="w-80">
                     <div class="flex justify-between space-x-4">
