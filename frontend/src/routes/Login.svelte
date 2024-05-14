@@ -5,7 +5,7 @@
     import { navigate } from 'svelte-navigator';
     import { Input } from '$lib/components/ui/input/index.js';
     import { Button } from '$lib/components/ui/button/index.js';
-    import { LoaderCircle } from 'lucide-svelte';
+    import LoaderCircle from 'lucide-svelte/icons/loader-circle';
 
     let emailInput;
     let passwordInput;

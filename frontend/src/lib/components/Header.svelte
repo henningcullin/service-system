@@ -1,7 +1,7 @@
 <script>
     import { account } from '$lib/stores';
     import { SidebarOpen } from '$lib/stores';
-    import { Menu } from 'lucide-svelte';
+    import Menu from 'lucide-svelte/icons/menu';
     import { Link } from 'svelte-navigator';
     import UserNav from './UserNav.svelte';
 
