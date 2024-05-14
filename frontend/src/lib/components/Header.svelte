@@ -32,6 +32,6 @@
         position: fixed;
         top: 0;
         width: 100%;
-        z-index: 100;
+        background-color: hsl(var(--background) / var(--tw-bg-opacity));
     }
 </style>
