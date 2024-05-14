@@ -85,7 +85,7 @@
 </script>
 
 <div
-    class="container relative hidden h-[700px] flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-1 lg:px-0"
+    class="container relative h-[650px] flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-1 lg:px-0"
 >
     <div class="lg:p-8">
         <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
