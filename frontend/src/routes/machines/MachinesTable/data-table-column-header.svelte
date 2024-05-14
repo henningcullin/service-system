@@ -4,7 +4,7 @@
     import ChevronUp from 'lucide-svelte/icons/chevron-up';
     import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
     import type { TableViewModel } from 'svelte-headless-table';
-    import type { Task } from './schema.ts';
+    import type { Machine } from './schema';
     import { Button } from '$lib/components/ui/button/index.js';
     import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 
@@ -18,7 +18,7 @@
         };
         filter: never;
     };
-    export let tableModel: TableViewModel<Task>;
+    export let tableModel: TableViewModel<Machine>;
     export let cellId: string;
 
     const { hiddenColumnIds } = tableModel.pluginStates.hide;
