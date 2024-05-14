@@ -1,6 +1,9 @@
 export { default as DataTableCheckbox } from "./data-table-checkbox.svelte";
-export { default as DataTableTitleCell } from "./data-table-title-cell.svelte";
-export { default as DataTableStatusCell } from "./data-table-status-cell.svelte";
+export { default as DataTableFieldCell } from "./data-table-field-cell.svelte";
+export { default as DataTableMachineTypeCell } from "./data-table-machine-type-cell.svelte";
+export { default as DataTableMachineStatusCell } from "./data-table-machine-status-cell.svelte";
+export { default as DataTableFacilityCell } from "./data-table-facility-cell.svelte";
+export { default as DataTableDateCell } from "./data-table-date-cell.svelte";
 export { default as DataTableRowActions } from "./data-table-row-actions.svelte";
 export { default as DataTablePriorityCell } from "./data-table-priority-cell.svelte";
 export { default as DataTableColumnHeader } from "./data-table-column-header.svelte";
