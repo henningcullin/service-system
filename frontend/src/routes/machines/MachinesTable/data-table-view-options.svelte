@@ -1,11 +1,11 @@
 <script lang="ts">
     import SlidersHorizontal from 'lucide-svelte/icons/sliders-horizontal';
     import type { TableViewModel } from 'svelte-headless-table';
-    import type { Task } from './schema';
+    import type { Machine } from './schema';
     import { Button } from '$lib/components/ui/button/index.js';
     import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 
-    export let tableModel: TableViewModel<Task>;
+    export let tableModel: TableViewModel<Machine>;
     const { pluginStates, flatColumns } = tableModel;
     const { hiddenColumnIds } = pluginStates.hide;
 
@@ -18,7 +18,7 @@
         });
     }
 
-    const hidableCols = ['title', 'status', 'priority'];
+    const hidableCols = ['name', 'make', 'type', 'status', 'facility', 'created', 'edited'];
 </script>
 
 <DropdownMenu.Root>
