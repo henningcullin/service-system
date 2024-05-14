@@ -2,7 +2,6 @@
     import { account } from '$lib/stores';
     import { SidebarOpen } from '$lib/stores';
     import Menu from 'lucide-svelte/icons/menu';
-    import { Link } from 'svelte-navigator';
     import UserNav from './UserNav.svelte';
 
     function toggleSidebar() {
@@ -28,4 +27,11 @@
     </div>
 </header>
 
-<!-- <Link class="account-box" to="/account">{$account.first_name}</Link> -->
+<style>
+    header {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 100;
+    }
+</style>
