@@ -81,52 +81,53 @@
     }
 </script>
 
-<form on:submit|preventDefault={submitForm}>
-    <input
-        type="email"
-        placeholder="Email"
-        required
-        bind:value={email}
-        readonly={type !== 'email'}
-        disabled={type !== 'email'}
-        bind:this={emailInput}
-    />
-    <input
-        type="password"
-        placeholder="Password"
-        bind:value={password}
-        class={type !== 'password' ? 'hidden' : ''}
-        bind:this={passwordInput}
-    />
-    <input
-        type="text"
-        placeholder="One Time Password"
-        bind:value={otp}
-        class={type !== 'otp' ? 'hidden' : ''}
-        bind:this={otpInput}
-    />
-    <button class="olive {processing ? 'disabled' : ''}">{type === 'email' ? 'Send' : 'Login'}</button>
-</form>
+<div
+    class="container relative hidden h-[800px] flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-1 lg:px-0"
+>
+    <div class="lg:p-8">
+        <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+            <div class="flex flex-col space-y-2 text-center">
+                <h1 class="text-2xl font-semibold tracking-tight">Login</h1>
+                <p class="text-sm text-muted-foreground">Enter your email below to start logging in</p>
+            </div>
 
-<style>
-    form {
-        width: 34vw;
-        margin-left: 31vw;
-        margin-top: 25dvh;
-        background-color: var(--secondary);
-        padding: 4%;
-        border-radius: 7.5px;
-        display: grid;
-        place-items: center;
-    }
-
-    input {
-        margin-top: 5px;
-    }
-
-    button {
-        width: 10em;
-        height: 3em;
-        margin-top: 1em;
-    }
-</style>
+            <div class="grid gap-6">
+                <div class="grid gap-4"></div>
+                <form on:submit|preventDefault={submitForm}>
+                    <div class="grid gap-1">
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            required
+                            bind:value={email}
+                            readonly={type !== 'email'}
+                            disabled={type !== 'email'}
+                            bind:this={emailInput}
+                        />
+                    </div>
+                    <div class="grid gap-1">
+                        <input
+                            type="password"
+                            placeholder="Password"
+                            bind:value={password}
+                            class={type !== 'password' ? 'hidden' : ''}
+                            bind:this={passwordInput}
+                        />
+                    </div>
+                    <div class="grid gap-1">
+                        <input
+                            type="text"
+                            placeholder="One Time Password"
+                            bind:value={otp}
+                            class={type !== 'otp' ? 'hidden' : ''}
+                            bind:this={otpInput}
+                        />
+                    </div>
+                    <div class="grid gap-1">
+                        <button class={processing ? 'disabled' : ''}>{type === 'email' ? 'Send' : 'Login'}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
