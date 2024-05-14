@@ -3,19 +3,22 @@
     import { getLoggedIn, sendJSON } from '$utils';
     import { onMount } from 'svelte';
     import { navigate } from 'svelte-navigator';
+    import { Input } from '$lib/components/ui/input/index.js';
+    import { Button } from '$lib/components/ui/button/index.js';
+    import { LoaderCircle } from 'lucide-svelte';
 
     let emailInput;
     let passwordInput;
     let otpInput;
 
-    let processing = false;
+    let isProcessing = false;
     let type = 'email';
     let email = '';
     let password = '';
     let otp = '';
 
     onMount(() => {
-        emailInput.focus();
+        emailInput?.focus();
     });
 
     account.subscribe((user) => {
@@ -25,10 +28,10 @@
     });
 
     async function submitForm() {
-        if (processing) return;
-        processing = true;
+        if (isProcessing) return;
+        isProcessing = true;
         await submit(type);
-        processing = false;
+        isProcessing = false;
     }
 
     async function submit(type) {
@@ -49,8 +52,8 @@
             if (response.status === 200) {
                 type = data.toLowerCase();
                 setTimeout(() => {
-                    if (type === 'password') passwordInput.focus();
-                    else otpInput.focus();
+                    if (type === 'password') passwordInput?.focus();
+                    else otpInput?.focus();
                 }, 1);
             }
         } catch (error) {
@@ -82,7 +85,7 @@
 </script>
 
 <div
-    class="container relative hidden h-[800px] flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-1 lg:px-0"
+    class="container relative hidden h-[700px] flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-1 lg:px-0"
 >
     <div class="lg:p-8">
         <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
@@ -92,39 +95,41 @@
             </div>
 
             <div class="grid gap-6">
-                <div class="grid gap-4"></div>
                 <form on:submit|preventDefault={submitForm}>
-                    <div class="grid gap-1">
-                        <input
+                    <div class="grid gap-2">
+                        <Input
                             type="email"
                             placeholder="Email"
+                            autocapitalize="none"
+                            autocomplete="email"
+                            autocorrect="off"
                             required
                             bind:value={email}
                             readonly={type !== 'email'}
                             disabled={type !== 'email'}
-                            bind:this={emailInput}
                         />
-                    </div>
-                    <div class="grid gap-1">
-                        <input
+                        <Input
                             type="password"
+                            autocapitalize="none"
+                            autocorrect="off"
                             placeholder="Password"
                             bind:value={password}
                             class={type !== 'password' ? 'hidden' : ''}
-                            bind:this={passwordInput}
                         />
-                    </div>
-                    <div class="grid gap-1">
-                        <input
+                        <Input
                             type="text"
+                            autocapitalize="none"
+                            autocorrect="off"
                             placeholder="One Time Password"
                             bind:value={otp}
                             class={type !== 'otp' ? 'hidden' : ''}
-                            bind:this={otpInput}
                         />
-                    </div>
-                    <div class="grid gap-1">
-                        <button class={processing ? 'disabled' : ''}>{type === 'email' ? 'Send' : 'Login'}</button>
+                        <Button type="submit" disabled={isProcessing}>
+                            {#if isProcessing}
+                                <LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+                            {/if}
+                            {type === 'email' ? 'Send' : 'Login'}
+                        </Button>
                     </div>
                 </form>
             </div>
