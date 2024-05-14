@@ -258,7 +258,7 @@
 </script>
 
 <div class="space-y-4">
-    <DataTableToolbar {tableModel} data={$machines} />
+    <DataTableToolbar {tableModel} />
     <div class="rounded-md border">
         <Table.Root {...$tableAttrs}>
             <Table.Header>

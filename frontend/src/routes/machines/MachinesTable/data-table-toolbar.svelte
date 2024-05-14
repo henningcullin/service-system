@@ -2,24 +2,23 @@
     import type { TableViewModel } from 'svelte-headless-table';
     import X from 'lucide-svelte/icons/x';
     import type { Writable } from 'svelte/store';
-    import { machineTypes, machineStatuses, facilities } from '$stores'; // import from $stores
+    import { machineTypes, machineStatuses, facilities, machines } from '$stores'; // import from $stores
     import type { Machine } from './schema';
     import { DataTableFacetedFilter, DataTableViewOptions } from './index.js';
     import Button from '$lib/components/ui/button/button.svelte';
     import { Input } from '$lib/components/ui/input/index.js';
 
     export let tableModel: TableViewModel<Machine>;
-    export let data: Machine[];
 
-    const counts = data.reduce<{
+    const counts = $machines.reduce<{
         machine_type: { [index: string]: number };
         status: { [index: string]: number };
         facility: { [index: string]: number };
     }>(
         (acc, { machine_type, status, facility }) => {
-            acc.machine_type[machine_type.name] = (acc.machine_type[machine_type.name] || 0) + 1;
-            acc.status[status.name] = (acc.status[status.name] || 0) + 1;
-            acc.facility[facility.name] = (acc.facility[facility.name] || 0) + 1;
+            acc.machine_type[machine_type.id] = (acc.machine_type[machine_type.id] || 0) + 1;
+            acc.status[status.id] = (acc.status[status.id] || 0) + 1;
+            acc.facility[facility.id] = (acc.facility[facility.id] || 0) + 1;
             return acc;
         },
         {

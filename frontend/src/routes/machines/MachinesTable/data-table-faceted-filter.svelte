@@ -1,7 +1,6 @@
 <script lang="ts">
     import CirclePlus from 'lucide-svelte/icons/circle-plus';
     import Check from 'lucide-svelte/icons/check';
-    import type { statuses } from './data.ts';
     import * as Command from '$lib/components/ui/command/index.js';
     import * as Popover from '$lib/components/ui/popover/index.js';
     import { Button } from '$lib/components/ui/button/index.js';
@@ -10,7 +9,7 @@
 
     export let filterValues: string[] = [];
     export let title: string;
-    export let options = [] as typeof statuses;
+    export let options = {} as { id: string; name: string }[];
     export let counts: { [index: string]: number } = {};
 
     let open = false;
@@ -58,9 +57,8 @@
                 <Command.Empty>No results found.</Command.Empty>
                 <Command.Group>
                     {#each options as option}
-                        {@const Icon = option}
                         <Command.Item
-                            value={option.value}
+                            value={option.id}
                             onSelect={(currentValue) => {
                                 handleSelect(currentValue);
                             }}
@@ -68,7 +66,7 @@
                             <div
                                 class="
                                     mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary {filterValues.includes(
-                                    option.value,
+                                    option.id,
                                 )
                                     ? 'bg-primary text-primary-foreground'
                                     : 'opacity-50 [&_svg]:invisible'}"
@@ -76,11 +74,11 @@
                                 <Check className="h-4 w-4" />
                             </div>
                             <span>
-                                {option.label}
+                                {option.name}
                             </span>
-                            {#if counts[option.value]}
+                            {#if counts[option.id]}
                                 <span class="ml-auto flex h-4 w-4 items-center justify-center font-mono text-xs">
-                                    {counts[option.value]}
+                                    {counts[option.id]}
                                 </span>
                             {/if}
                         </Command.Item>
