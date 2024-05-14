@@ -1,5 +1,5 @@
 <script>
-    import MachineTable from '../../lib/components/MachinesTable/table.sveltee.svelte';
+    import MachineTable from '$components/MachinesTable/table.svelte';
     import { getMachineStatuses, getMachineTypes, getMachines, getFacilities } from '$utils';
 
     getMachineStatuses();
