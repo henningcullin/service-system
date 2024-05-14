@@ -4,9 +4,20 @@
     import { Button } from '$components/ui/button/index.js';
     import * as DropdownMenu from '$components/ui/dropdown-menu/index.js';
     import * as AlertDialog from '$components/ui/alert-dialog/index.js';
+    import { toast } from 'svelte-sonner';
+    import { sendDelete } from '$utils';
+    import { machines } from '$stores';
 
     async function deleteMachine() {
-        console.log(machine);
+        try {
+            const response = await sendDelete(`/api/auth/machine?id=${row.id}`);
+            if (response.status !== 204) return toast.error('Could not delete the machine');
+            machines.update((prev) => prev.filter((m) => m.id !== machine.id));
+            toast.success('Deleted the machine');
+        } catch (error) {
+            toast.error('Could not delete the machine');
+            console.error(error);
+        }
     }
 
     let deleteDialogOpen = false;

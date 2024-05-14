@@ -8,6 +8,7 @@
     import { getLoggedIn } from '$utils';
     import Header from '$components/Header.svelte';
     import Sidebar from '$components/Sidebar.svelte';
+    import { Toaster } from '$lib/components/ui/sonner';
 
     import Login from '$routes/Login.svelte';
     import Mainmenu from '$routes/Mainmenu.svelte';
@@ -36,6 +37,8 @@
 </script>
 
 <ModeWatcher />
+<Toaster />
+
 <Router primary={false}>
     <Sidebar></Sidebar>
     <pushable class={IsSidebarOpen ? 'push dim' : ''} on:click={closeSidebar}>
