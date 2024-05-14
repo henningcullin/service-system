@@ -69,6 +69,14 @@
             accessor: 'id',
             id: 'id',
             header: 'Machine',
+            cell: ({ value, row }) => {
+                if (row.isData()) {
+                    return createRender(DataTableFieldCell, {
+                        value,
+                    });
+                }
+                return value;
+            },
             plugins: {
                 sort: {
                     disable: true,
@@ -258,7 +266,7 @@
 </script>
 
 <div class="space-y-4">
-    <DataTableToolbar {tableModel} />
+    <DataTableToolbar {tableModel} {machines} />
     <div class="rounded-md border">
         <Table.Root {...$tableAttrs}>
             <Table.Header>

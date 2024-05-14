@@ -2,13 +2,14 @@
     import type { TableViewModel } from 'svelte-headless-table';
     import X from 'lucide-svelte/icons/x';
     import type { Writable } from 'svelte/store';
-    import { machineTypes, machineStatuses, facilities, machines } from '$stores'; // import from $stores
+    import { machineTypes, machineStatuses, facilities } from '$stores'; // import from $stores
     import type { Machine } from './schema';
     import { DataTableFacetedFilter, DataTableViewOptions } from './index.js';
     import Button from '$lib/components/ui/button/button.svelte';
     import { Input } from '$lib/components/ui/input/index.js';
 
     export let tableModel: TableViewModel<Machine>;
+    export let machines: Writable<Machine[]>;
 
     const counts = $machines.reduce<{
         machine_type: { [index: string]: number };
