@@ -55,7 +55,7 @@
 <style>
     pushable {
         width: 100%;
-        min-height: 100dvh;
+        min-height: 95dvh;
         transition:
             margin-left 0.3s,
             opacity 0.3s;
