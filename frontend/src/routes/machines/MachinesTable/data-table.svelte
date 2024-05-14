@@ -67,7 +67,7 @@
         }),
         table.column({
             accessor: 'id',
-            id: 'machine',
+            id: 'id',
             header: 'Machine',
             plugins: {
                 sort: {
@@ -290,7 +290,7 @@
                                 {#each row.cells as cell (cell.id)}
                                     <Subscribe attrs={cell.attrs()} let:attrs>
                                         <Table.Cell {...attrs}>
-                                            {#if cell.id === 'task'}
+                                            {#if cell.id === 'id'}
                                                 <div class="w-[80px]">
                                                     <Render of={cell.render()} />
                                                 </div>
