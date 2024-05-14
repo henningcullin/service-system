@@ -38,7 +38,7 @@
 <ModeWatcher />
 <Router primary={false}>
     <Sidebar></Sidebar>
-    <pusher class={IsSidebarOpen ? 'push dim' : ''} on:click={closeSidebar}>
+    <pushable class={IsSidebarOpen ? 'push dim' : ''} on:click={closeSidebar}>
         <Header></Header>
         <main>
             <Route path="/" component={Mainmenu}></Route>
@@ -49,11 +49,11 @@
 
             <Route path="*" component={NotFound}></Route>
         </main>
-    </pusher>
+    </pushable>
 </Router>
 
 <style>
-    pusher {
+    pushable {
         width: 100%;
         min-height: 100dvh;
         transition:

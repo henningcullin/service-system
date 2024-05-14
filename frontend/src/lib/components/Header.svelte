@@ -10,7 +10,7 @@
     }
 </script>
 
-<div class="border-b">
+<header class="border-b">
     <div class="flex h-14 items-center px-4">
         <nav class="flex items-center space-x-4 lg:space-x-6">
             <button
@@ -26,6 +26,6 @@
             {/if}
         </div>
     </div>
-</div>
+</header>
 
 <!-- <Link class="account-box" to="/account">{$account.first_name}</Link> -->
