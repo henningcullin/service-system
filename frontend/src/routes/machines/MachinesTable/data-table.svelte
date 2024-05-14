@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { get, readable } from 'svelte/store';
+    import { get } from 'svelte/store';
     import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
-    import Tasks from './tasks.json';
+    import { machines } from '$stores';
     import {
         addColumnFilters,
         addHiddenColumns,
@@ -10,25 +10,22 @@
         addSortBy,
         addTableFilter,
     } from 'svelte-headless-table/plugins';
-    import type { Task } from './schema';
     import {
         DataTableCheckbox,
         DataTableColumnHeader,
         DataTablePagination,
-        DataTablePriorityCell,
         DataTableRowActions,
-        DataTableStatusCell,
-        DataTableTitleCell,
+        DataTableMachineTypeCell,
+        DataTableMachineStatusCell,
+        DataTableFieldCell,
         DataTableToolbar,
     } from './index.js';
 
     import * as Table from '$lib/components/ui/table/index.js';
+    import DataTableDateCell from './data-table-date-cell.svelte';
+    import DataTableFacilityCell from './data-table-facility-cell.svelte';
 
-    export let data: Task[];
-
-    data = Tasks;
-
-    const table = createTable(readable(data), {
+    const table = createTable(machines, {
         select: addSelectedRows(),
         sort: addSortBy({
             toggleOrder: ['asc', 'desc'],
@@ -70,10 +67,8 @@
         }),
         table.column({
             accessor: 'id',
-            header: () => {
-                return 'Task';
-            },
-            id: 'task',
+            id: 'machine',
+            header: 'Machine',
             plugins: {
                 sort: {
                     disable: true,
@@ -81,25 +76,37 @@
             },
         }),
         table.column({
-            accessor: 'title',
-            header: 'Title',
-            id: 'title',
+            accessor: 'name',
+            id: 'name',
+            header: 'Name',
             cell: ({ value, row }) => {
                 if (row.isData()) {
-                    return createRender(DataTableTitleCell, {
+                    return createRender(DataTableFieldCell, {
                         value,
-                        labelValue: row.original.label,
                     });
                 }
                 return value;
             },
         }),
         table.column({
-            accessor: 'status',
-            header: 'Status',
-            id: 'status',
+            accessor: 'make',
+            id: 'make',
+            header: 'Make',
+            cell: ({ value, row }) => {
+                if (row.isData()) {
+                    return createRender(DataTableFieldCell, {
+                        value,
+                    });
+                }
+                return value;
+            },
+        }),
+        table.column({
+            accessor: 'machine_type',
+            id: 'machine_type',
+            header: 'Type',
             cell: ({ value }) => {
-                return createRender(DataTableStatusCell, {
+                return createRender(DataTableMachineTypeCell, {
                     value,
                 });
             },
@@ -120,13 +127,97 @@
             },
         }),
         table.column({
-            accessor: 'priority',
-            id: 'priority',
-            header: 'Priority',
+            accessor: 'status',
+            id: 'status',
+            header: 'Status',
             cell: ({ value }) => {
-                return createRender(DataTablePriorityCell, {
+                return createRender(DataTableMachineStatusCell, {
                     value,
                 });
+            },
+            plugins: {
+                colFilter: {
+                    fn: ({ filterValue, value }) => {
+                        if (filterValue.length === 0) return true;
+                        if (!Array.isArray(filterValue) || typeof value !== 'string') return true;
+
+                        return filterValue.some((filter) => {
+                            return value.includes(filter);
+                        });
+                    },
+                    initialFilterValue: [],
+                    render: ({ filterValue }) => {
+                        return get(filterValue);
+                    },
+                },
+            },
+        }),
+        table.column({
+            accessor: 'facility',
+            id: 'facility',
+            header: 'Facility',
+            cell: ({ value }) => {
+                return createRender(DataTableFacilityCell, {
+                    value,
+                });
+            },
+            plugins: {
+                colFilter: {
+                    fn: ({ filterValue, value }) => {
+                        if (filterValue.length === 0) return true;
+                        if (!Array.isArray(filterValue) || typeof value !== 'string') return true;
+
+                        return filterValue.some((filter) => {
+                            return value.includes(filter);
+                        });
+                    },
+                    initialFilterValue: [],
+                    render: ({ filterValue }) => {
+                        return get(filterValue);
+                    },
+                },
+            },
+        }),
+        table.column({
+            accessor: 'created',
+            id: 'created',
+            header: 'Created at',
+            cell: ({ value, row }) => {
+                if (row.isData()) {
+                    return createRender(DataTableDateCell, {
+                        value,
+                    });
+                }
+                return value;
+            },
+            plugins: {
+                colFilter: {
+                    fn: ({ filterValue, value }) => {
+                        if (filterValue.length === 0) return true;
+                        if (!Array.isArray(filterValue) || typeof value !== 'string') return true;
+
+                        return filterValue.some((filter) => {
+                            return value.includes(filter);
+                        });
+                    },
+                    initialFilterValue: [],
+                    render: ({ filterValue }) => {
+                        return get(filterValue);
+                    },
+                },
+            },
+        }),
+        table.column({
+            accessor: 'edited',
+            id: 'edited',
+            header: 'Edited at',
+            cell: ({ value, row }) => {
+                if (row.isData()) {
+                    return createRender(DataTableDateCell, {
+                        value,
+                    });
+                }
+                return value;
             },
             plugins: {
                 colFilter: {
@@ -167,7 +258,7 @@
 </script>
 
 <div class="space-y-4">
-    <DataTableToolbar {tableModel} {data} />
+    <DataTableToolbar {tableModel} data={$machines} />
     <div class="rounded-md border">
         <Table.Root {...$tableAttrs}>
             <Table.Header>
