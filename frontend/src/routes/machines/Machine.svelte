@@ -126,7 +126,6 @@
                 status,
                 facility,
             });
-            console.log(response);
             if (response.status !== 201) return alert('Failed to create the machine');
             const data = await response.json();
             machine.set(data);
