@@ -19,6 +19,7 @@
         DataTableMachineStatusCell,
         DataTableFieldCell,
         DataTableToolbar,
+        DataTableIdCell,
     } from './index.js';
 
     import * as Table from '$lib/components/ui/table/index.js';
@@ -71,7 +72,7 @@
             header: 'Machine',
             cell: ({ value, row }) => {
                 if (row.isData()) {
-                    return createRender(DataTableFieldCell, {
+                    return createRender(DataTableIdCell, {
                         value,
                     });
                 }
