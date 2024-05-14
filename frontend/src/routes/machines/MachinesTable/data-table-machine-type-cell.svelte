@@ -1,12 +1,8 @@
 <script lang="ts">
-    import { statuses } from './data';
-
-    export let value: string;
-    const status = statuses.find((status) => status.value === value);
+    export let value: { id: string; name: string };
+    import { Link } from 'svelte-navigator';
 </script>
 
-{#if status}
-    <div class="flex w-[100px] items-center">
-        <span>{status.label}</span>
-    </div>
-{/if}
+<div class="flex w-[100px] items-center">
+    <Link to="/machine/type/{value.id}">{value.name}</Link>
+</div>
