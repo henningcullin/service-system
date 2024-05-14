@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
     import { get, readable } from 'svelte/store';
     import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
     import {

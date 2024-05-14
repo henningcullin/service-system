@@ -1,8 +1,5 @@
 <script>
-    import EyeNone from 'svelte-radix/EyeNone.svelte';
-    import ArrowDown from 'svelte-radix/ArrowDown.svelte';
-    import ArrowUp from 'svelte-radix/ArrowUp.svelte';
-    import CaretSort from 'svelte-radix/CaretSort.svelte';
+    import { ChevronDown, ChevronUp, ChevronsUpDown, EyeOff } from 'lucide-svelte';
     import { Button } from '$lib/components/ui/button/index.js';
     import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 
@@ -53,26 +50,26 @@
                 <Button variant="ghost" builders={[builder]} class="-ml-3 h-8 data-[state=open]:bg-accent" size="sm">
                     <slot />
                     {#if props.sort.order === 'desc'}
-                        <ArrowDown class="ml-2 h-4 w-4" />
+                        <ChevronDown class="ml-2 h-4 w-4" />
                     {:else if props.sort.order === 'asc'}
-                        <ArrowUp class="ml-2 h-4 w-4" />
+                        <ChevronUp class="ml-2 h-4 w-4" />
                     {:else}
-                        <CaretSort class="ml-2 h-4 w-4" />
+                        <ChevronsUpDown class="ml-2 h-4 w-4" />
                     {/if}
                 </Button>
             </DropdownMenu.Trigger>
             <DropdownMenu.Content align="start">
                 <DropdownMenu.Item on:click={handleAscSort}>
-                    <ArrowUp class="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+                    <ChevronUp class="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
                     Asc
                 </DropdownMenu.Item>
                 <DropdownMenu.Item on:click={handleDescSort}>
-                    <ArrowDown class="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+                    <ChevronDown class="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
                     Desc
                 </DropdownMenu.Item>
                 <DropdownMenu.Separator />
                 <DropdownMenu.Item on:click={handleHide}>
-                    <EyeNone class="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
+                    <EyeOff class="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
                     Hide
                 </DropdownMenu.Item>
             </DropdownMenu.Content>

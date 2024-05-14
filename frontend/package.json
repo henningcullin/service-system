@@ -21,6 +21,7 @@
     "dependencies": {
         "bits-ui": "^0.21.7",
         "clsx": "^2.1.1",
+        "cmdk-sv": "^0.0.17",
         "lucide-svelte": "^0.378.0",
         "mode-watcher": "^0.3.0",
         "svelte-headless-table": "^0.18.2",
