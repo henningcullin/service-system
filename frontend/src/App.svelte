@@ -16,7 +16,6 @@
     import Machines from '$routes/machines/Machines.svelte';
     import Machine from '$routes/machines/Machine.svelte';
     import { ModeWatcher, localStorageKey, setMode, systemPrefersMode, userPrefersMode } from 'mode-watcher';
-    import NewMachines from '$routes/machines/NewMachines.svelte';
 
     $: IsSidebarOpen = $SidebarOpen;
 
@@ -46,7 +45,6 @@
             <Route path="/login/" component={Login}></Route>
 
             <Route path="/machines/*" component={Machines}></Route>
-            <Route path="/testMachine/" component={NewMachines} />
             <Route path="/machine/*" component={Machine}></Route>
 
             <Route path="*" component={NotFound}></Route>
