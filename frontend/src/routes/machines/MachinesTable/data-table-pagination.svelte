@@ -4,11 +4,11 @@
     import ChevronsRight from 'lucide-svelte/icons/chevrons-right';
     import ChevronsLeft from 'lucide-svelte/icons/chevrons-left';
     import type { TableViewModel } from 'svelte-headless-table';
-    import type { Task } from './schema.ts';
+    import type { Machine } from './schema';
     import * as Select from '$lib/components/ui/select/index.js';
     import { Button } from '$lib/components/ui/button/index.js';
 
-    export let tableModel: TableViewModel<Task>;
+    export let tableModel: TableViewModel<Machine>;
 
     const { pageRows, pluginStates, rows } = tableModel;
 
