@@ -1,6 +1,7 @@
 <script lang="ts">
     import { get, readable } from 'svelte/store';
     import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
+    import Tasks from './tasks.json';
     import {
         addColumnFilters,
         addHiddenColumns,
@@ -24,6 +25,8 @@
     import * as Table from '$lib/components/ui/table/index.js';
 
     export let data: Task[];
+
+    data = Tasks;
 
     const table = createTable(readable(data), {
         select: addSelectedRows(),
