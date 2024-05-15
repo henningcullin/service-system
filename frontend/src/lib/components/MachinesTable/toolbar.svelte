@@ -11,7 +11,7 @@
     export let tableModel: TableViewModel<Machine>;
     export let machines: Writable<Machine[]>;
 
-    const counts = $machines.reduce<{
+    $: counts = $machines.reduce<{
         machine_type: { [index: string]: number };
         status: { [index: string]: number };
         facility: { [index: string]: number };
