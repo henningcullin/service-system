@@ -167,6 +167,15 @@
 
     async function updateMachine() {
         try {
+            const changedFields = { id: form.id };
+            for (const field in form) {
+                if (form[field] !== $machine[field]) {
+                    changedFields[field] = form[field];
+                }
+            }
+            if (Object.keys(changedFields).length < 2) return;
+            const response = await sendJSON('/api/auth/machine', 'PUT', changedFields);
+            if (response.status !== 204) return alert('Failed to update the machine');
             navigate('?view=true');
         } catch (error) {
             console.error(error);
