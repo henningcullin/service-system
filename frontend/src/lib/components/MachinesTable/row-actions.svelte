@@ -7,6 +7,7 @@
     import { toast } from 'svelte-sonner';
     import { sendDelete } from '$utils';
     import { machines } from '$stores';
+    import { Link } from 'svelte-navigator';
 
     async function deleteMachine() {
         try {
@@ -34,8 +35,12 @@
         </Button>
     </DropdownMenu.Trigger>
     <DropdownMenu.Content class="w-[160px]" align="end">
-        <DropdownMenu.Item>Edit</DropdownMenu.Item>
-        <DropdownMenu.Item>Favorite</DropdownMenu.Item>
+        <DropdownMenu.Item>
+            <Link style="height:100%;width:100%;" to="/machine/{machine.id}">View</Link>
+        </DropdownMenu.Item>
+        <DropdownMenu.Item>
+            <Link style="height:100%;width:100%;" to="/machine/{machine.id}?edit=true">Edit</Link>
+        </DropdownMenu.Item>
         <DropdownMenu.Separator />
         <DropdownMenu.Item on:click={() => (deleteDialogOpen = true)}>Delete</DropdownMenu.Item>
     </DropdownMenu.Content>
