@@ -57,7 +57,7 @@
 
     $: params = new URLSearchParams($location.search);
 
-    let id;
+    let id: undefined | string | null;
 
     $: {
         const segments = $location.pathname.split('/');
@@ -72,7 +72,7 @@
     });
 
     $: isCreating = params?.get('new') === 'true';
-    $: isEditing = params?.get('edit') === 'true' && id;
+    $: isEditing = (params?.get('edit') === 'true' && id !== null) || id !== undefined;
     $: isViewing = !(isCreating || isEditing);
 
     async function newMachine() {
