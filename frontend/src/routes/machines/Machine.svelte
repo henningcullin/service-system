@@ -4,6 +4,7 @@
     import Label from '$components/ui/label/label.svelte';
     import * as Select from '$components/ui/select/index.js';
     import * as Tabs from '$components/ui/tabs/index.js';
+    import * as AlertDialog from '$components/ui/alert-dialog/index.js';
     import Separator from '$components/ui/separator/separator.svelte';
     import { facilities, machine, machineStatuses, machineTypes } from '$stores';
     import { getFacilities, getMachine, getMachineStatuses, getMachineTypes, sendDelete, sendJSON } from '$utils';
@@ -53,6 +54,8 @@
         form.facility = $machine?.facility?.id;
     }
 
+    let deleteDialogOpen = false;
+
     $: location = useLocation();
 
     $: params = new URLSearchParams($location.search);
@@ -97,8 +100,6 @@
 
     async function deleteMachine() {
         try {
-            const accepted = confirm('Are you sure you want to delete this?');
-            if (!accepted) return;
             const response = await sendDelete(`/api/auth/machine?id=${id}`);
             if (response.status !== 204) return alert('Failed to delete machine');
             machine.set({});
@@ -185,7 +186,13 @@
             <div class="flex space-x-4">
                 <Button on:click={newMachine} disabled={isCreating} variant="outline">New</Button>
                 <Button on:click={editMachine} disabled={isEditing || !id} variant="outline">Edit</Button>
-                <Button on:click={deleteMachine} disabled={!id} variant="destructive">Delete</Button>
+                <Button
+                    on:click={() => {
+                        deleteDialogOpen = true;
+                    }}
+                    disabled={!id}
+                    variant="destructive">Delete</Button
+                >
                 <Button on:click={cancel} disabled={isViewing} variant="outline">Cancel</Button>
             </div>
         </div>
@@ -280,3 +287,18 @@
     <Tabs.Content value="tasks"></Tabs.Content>
     <Tabs.Content value="reports"></Tabs.Content>
 </Tabs.Root>
+
+<AlertDialog.Root bind:open={deleteDialogOpen}>
+    <AlertDialog.Content>
+        <AlertDialog.Header>
+            <AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
+            <AlertDialog.Description>
+                This action cannot be undone. This will permanently delete the machine from our servers.
+            </AlertDialog.Description>
+        </AlertDialog.Header>
+        <AlertDialog.Footer>
+            <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+            <AlertDialog.Action on:click={deleteMachine}>Continue</AlertDialog.Action>
+        </AlertDialog.Footer>
+    </AlertDialog.Content>
+</AlertDialog.Root>
