@@ -157,13 +157,20 @@
             const data = await response.json();
             machine.set(data);
             updateUrl();
+            navigate('?view=true');
             loadFields();
         } catch (error) {
             console.error(error);
         }
     }
 
-    async function updateMachine() {}
+    async function updateMachine() {
+        try {
+            navigate('?view=true');
+        } catch (error) {
+            console.error(error);
+        }
+    }
 </script>
 
 <Tabs.Root class="flex flex-col items-center min-h-screen pt-8">
