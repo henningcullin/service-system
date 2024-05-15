@@ -185,7 +185,7 @@
             <div class="flex space-x-4">
                 <Button on:click={newMachine} disabled={isCreating} variant="outline">New</Button>
                 <Button on:click={editMachine} disabled={isEditing || !id} variant="outline">Edit</Button>
-                <Button on:click={deleteMachine} disabled={isCreating || !id} variant="destructive">Delete</Button>
+                <Button on:click={deleteMachine} disabled={!id} variant="destructive">Delete</Button>
                 <Button on:click={cancel} disabled={isViewing} variant="outline">Cancel</Button>
             </div>
         </div>
