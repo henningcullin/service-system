@@ -72,7 +72,7 @@
     });
 
     $: isCreating = params?.get('new') === 'true';
-    $: isEditing = (params?.get('edit') === 'true' && id !== null) || id !== undefined;
+    $: isEditing = params?.get('edit') === 'true' && !!id;
     $: isViewing = !(isCreating || isEditing);
 
     $: selectedType = form.machine_type
