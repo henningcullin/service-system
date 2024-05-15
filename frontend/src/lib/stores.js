@@ -1,10 +1,14 @@
 import { writable } from 'svelte/store';
+import { Machine } from '$components/MachinesTable/schema';
 
 export const SidebarOpen = writable(false);
 
 export const account = writable({});
 
 export const machines = writable([]);
+/**
+ * @type Writable<Machine>
+ */
 export const machine = writable({});
 
 export const machineTypes = writable([]);
