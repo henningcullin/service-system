@@ -1,8 +1,24 @@
-<script>
+<script lang="ts">
+    import Button from '$components/ui/button/button.svelte';
+    import Input from '$components/ui/input/input.svelte';
+    import Label from '$components/ui/label/label.svelte';
+    import * as Select from '$components/ui/select/index.js';
+    import Separator from '$components/ui/separator/separator.svelte';
     import { facilities, machine, machineStatuses, machineTypes } from '$stores';
     import { getFacilities, getMachine, getMachineStatuses, getMachineTypes, sendDelete, sendJSON } from '$utils';
     import { onMount } from 'svelte';
     import { navigate, useLocation } from 'svelte-navigator';
+    import { z } from 'zod';
+
+    const newMachineSchema = z.object({
+        name: z.string().min(1, 'Name is required'),
+        make: z.string().nullable(),
+        machine_type: z.string().min(1, 'Machine Type is required').uuid('Must be a valid Machine Type'),
+        status: z.string().min(1, 'Status is required').uuid('Must be a valid Status'),
+        facility: z.string().uuid('Must be a valid Facility').nullable(),
+    });
+
+    type NewMachine = z.infer<typeof newMachineSchema>;
 
     getMachineTypes();
     getMachineStatuses();
@@ -139,65 +155,90 @@
     async function updateMachine() {}
 </script>
 
-<tab>
-    <div class="action container">
-        <button on:click={newMachine} disabled={isCreating}>New</button>
-        <button on:click={editMachine} disabled={isEditing || !id}>Edit</button>
-        <button on:click={deleteMachine} disabled={isCreating || !id}>Delete</button>
-        <button on:click={cancel} disabled={isViewing}>Cancel</button>
+<div class="space-y-6 p-10 pb-16 md:block">
+    <div class="space-y-0.5">
+        <h2 class="text-2xl font-bold tracking-tight">Machine</h2>
+        <div class="flex space-x-4">
+            <Button on:click={newMachine} disabled={isCreating} variant="outline">New</Button>
+            <Button on:click={editMachine} disabled={isEditing || !id} variant="outline">Edit</Button>
+            <Button on:click={deleteMachine} disabled={isCreating || !id} variant="destructive">Delete</Button>
+            <Button on:click={cancel} disabled={isViewing} variant="outline">Cancel</Button>
+        </div>
     </div>
+    <Separator class="my-6" />
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <aside></aside>
+        <div>
+            <form on:submit|preventDefault={saveMachine} class="space-y-8">
+                <field>
+                    <Label for="id">Id</Label>
+                    <Input type="text" id="id" bind:value={form.id} disabled />
+                </field>
 
-    <form on:submit|preventDefault={saveMachine}>
-        <label for="id">ID</label>
-        <input type="text" id="id" bind:value={form.id} disabled />
+                <field>
+                    <Label for="name">Name</Label>
+                    <Input type="text" id="name" bind:value={form.name} placeholder="Name" disabled={isViewing} />
+                </field>
 
-        <label for="name">Name</label>
-        <input type="text" id="name" bind:value={form.name} placeholder="Name" disabled={isViewing} />
+                <field>
+                    <Label for="make">Make</Label>
+                    <Input type="text" id="make" bind:value={form.make} placeholder="Make" disabled={isViewing} />
+                </field>
 
-        <label for="make">Make</label>
-        <input type="text" id="make" bind:value={form.make} placeholder="Make" disabled={isViewing} />
+                <field>
+                    <Label for="type">Type</Label>
+                    <Select.Root disabled={isViewing}>
+                        <Select.Trigger>
+                            <Select.Value placeholder="Select a type" />
+                        </Select.Trigger>
+                        <Select.Content>
+                            {#each $machineTypes as machineType}
+                                <Select.Item value={machineType.id} label={machineType.name} />
+                            {/each}
+                        </Select.Content>
+                    </Select.Root>
+                </field>
 
-        <label for="type">Type</label>
-        <select id="type" disabled={isViewing} bind:value={form.machine_type}>
-            <option value="" class="hidden" disabled selected></option>
-            {#each $machineTypes as machineType}
-                <option value={machineType.id}>{machineType.name}</option>
-            {/each}
-        </select>
+                <field>
+                    <Label for="status">Status</Label>
+                    <Select.Root disabled={isViewing}>
+                        <Select.Trigger>
+                            <Select.Value placeholder="Select a status" />
+                        </Select.Trigger>
+                        <Select.Content>
+                            {#each $machineStatuses as machineStatus}
+                                <Select.Item value={machineStatus.id} label={machineStatus.name} />
+                            {/each}
+                        </Select.Content>
+                    </Select.Root>
+                </field>
 
-        <label for="status">Status</label>
-        <select id="status" disabled={isViewing} bind:value={form.status}>
-            <option value="" class="hidden" disabled selected placeholder></option>
-            {#each $machineStatuses as machineStatus}
-                <option value={machineStatus.id}>{machineStatus.name}</option>
-            {/each}
-        </select>
+                <field>
+                    <Label for="facility">Facility</Label>
+                    <Select.Root disabled={isViewing}>
+                        <Select.Trigger>
+                            <Select.Value placeholder="Select a facility" />
+                        </Select.Trigger>
+                        <Select.Content>
+                            {#each $facilities as facility}
+                                <Select.Item value={facility.id} label={facility.name} />
+                            {/each}
+                        </Select.Content>
+                    </Select.Root>
+                </field>
 
-        <label for="facility">Facility</label>
-        <select id="facility" disabled={isViewing} bind:value={form.facility}>
-            <option value="" class="hidden" disabled selected placeholder></option>
-            {#each $facilities as facility}
-                <option value={facility.id}>{facility.name}</option>
-            {/each}
-        </select>
+                <label for="created">Created at</label>
+                <input type="text" id="created" readonly bind:value={form.created} />
 
-        <label for="created">Created at</label>
-        <input type="text" id="created" readonly bind:value={form.created} />
+                <label for="edited">Edited at</label>
+                <input type="text" id="edited" readonly bind:value={form.edited} />
 
-        <label for="edited">Edited at</label>
-        <input type="text" id="edited" readonly bind:value={form.edited} />
-
-        <button class="saveButton" type="submit" disabled={isViewing}>Save</button>
-    </form>
-</tab>
+                <button class="saveButton" type="submit" disabled={isViewing}>Save</button>
+            </form>
+        </div>
+    </div>
+</div>
 
 <tab> </tab>
 
 <tab> </tab>
-
-<style>
-    .saveButton {
-        width: 100%;
-        margin-top: 1.5em;
-    }
-</style>
