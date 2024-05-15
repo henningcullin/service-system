@@ -41,23 +41,24 @@
         }
     }
 
-    let fieldErrors = {};
+    let fieldErrors = { name: '', make: '', machine_type: '', status: '', facility: '' };
     let hasErrors = false;
 
     $: {
         if (!isViewing) {
             try {
                 formSchema.parse(form);
-                fieldErrors = {};
+                fieldErrors = { name: '', make: '', machine_type: '', status: '', facility: '' };
                 hasErrors = false;
             } catch (e) {
                 if (e instanceof z.ZodError) {
+                    // @ts-ignore
                     fieldErrors = e.flatten().fieldErrors;
                     hasErrors = true;
                 }
             }
         } else {
-            fieldErrors = {};
+            fieldErrors = { name: '', make: '', machine_type: '', status: '', facility: '' };
             hasErrors = false;
         }
     }
@@ -244,12 +245,12 @@
                 </div>
 
                 <div>
-                    <Label for="make">Make</Label>
+                    <Label for="make" class={fieldErrors.make ? 'text-red-800' : ''}>Make</Label>
                     <Input type="text" id="make" bind:value={form.make} placeholder="Make" disabled={isViewing} />
                 </div>
 
                 <div>
-                    <Label for="type">Type</Label>
+                    <Label for="type" class={fieldErrors.machine_type ? 'text-red-800' : ''}>Type</Label>
                     <Select.Root
                         disabled={isViewing}
                         selected={selectedType}
@@ -266,10 +267,13 @@
                             {/each}
                         </Select.Content>
                     </Select.Root>
+                    {#if fieldErrors.machine_type}
+                        <p class="text-red-800 ml-auto text-xs pt-1">{fieldErrors.machine_type[0]}</p>
+                    {/if}
                 </div>
 
                 <div>
-                    <Label for="status">Status</Label>
+                    <Label for="status" class={fieldErrors.status ? 'text-red-800' : ''}>Status</Label>
                     <Select.Root
                         disabled={isViewing}
                         selected={selectedStatus}
@@ -286,10 +290,13 @@
                             {/each}
                         </Select.Content>
                     </Select.Root>
+                    {#if fieldErrors.status}
+                        <p class="text-red-800 ml-auto text-xs pt-1">{fieldErrors.status[0]}</p>
+                    {/if}
                 </div>
 
                 <div>
-                    <Label for="facility">Facility</Label>
+                    <Label for="facility" class={fieldErrors.facility ? 'text-red-800' : ''}>Facility</Label>
                     <Select.Root
                         disabled={isViewing}
                         selected={selectedFacility}
@@ -307,6 +314,9 @@
                         </Select.Content>
                         <Select.Input bind:value={form.facility} />
                     </Select.Root>
+                    {#if fieldErrors.facility}
+                        <p class="text-red-800 ml-auto text-xs pt-1">{fieldErrors.facility[0]}</p>
+                    {/if}
                 </div>
 
                 <div>
@@ -314,7 +324,7 @@
                     <div class="ml-auto text-xs text-muted-foreground pt-2">Edited {form.edited}</div>
                 </div>
 
-                <Button type="submit" disabled={isViewing}>Save</Button>
+                <Button type="submit" disabled={isViewing || hasErrors}>Save</Button>
             </form>
         </div>
     </Tabs.Content>
