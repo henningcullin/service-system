@@ -12,15 +12,13 @@
     import { navigate, useLocation } from 'svelte-navigator';
     import { z } from 'zod';
 
-    const newMachineSchema = z.object({
+    const formSchema = z.object({
         name: z.string().min(1, 'Name is required'),
         make: z.string().nullable(),
         machine_type: z.string().min(1, 'Machine Type is required').uuid('Must be a valid Machine Type'),
         status: z.string().min(1, 'Status is required').uuid('Must be a valid Status'),
         facility: z.string().uuid('Must be a valid Facility').nullable(),
     });
-
-    type NewMachine = z.infer<typeof newMachineSchema>;
 
     getMachineTypes();
     getMachineStatuses();
@@ -40,6 +38,27 @@
     function clearFields() {
         for (const field in form) {
             form[field] = '';
+        }
+    }
+
+    let fieldErrors = {};
+    let hasErrors = false;
+
+    $: {
+        if (!isViewing) {
+            try {
+                formSchema.parse(form);
+                fieldErrors = {};
+                hasErrors = false;
+            } catch (e) {
+                if (e instanceof z.ZodError) {
+                    fieldErrors = e.flatten().fieldErrors;
+                    hasErrors = true;
+                }
+            }
+        } else {
+            fieldErrors = {};
+            hasErrors = false;
         }
     }
 
@@ -217,8 +236,11 @@
                 </div>
 
                 <div>
-                    <Label for="name">Name</Label>
+                    <Label for="name" class={fieldErrors.name ? 'text-red-800' : ''}>Name</Label>
                     <Input type="text" id="name" bind:value={form.name} placeholder="Name" disabled={isViewing} />
+                    {#if fieldErrors.name}
+                        <p class="text-red-800 ml-auto text-xs pt-1">{fieldErrors.name[0]}</p>
+                    {/if}
                 </div>
 
                 <div>
