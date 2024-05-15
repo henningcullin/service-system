@@ -75,6 +75,16 @@
     $: isEditing = (params?.get('edit') === 'true' && id !== null) || id !== undefined;
     $: isViewing = !(isCreating || isEditing);
 
+    $: selectedType = form.machine_type
+        ? { label: $machineTypes?.find((mt) => mt.id === form.machine_type)?.name, value: form.machine_type }
+        : null;
+    $: selectedStatus = form.status
+        ? { label: $machineStatuses?.find((ms) => ms.id === form.status)?.name, value: form.status }
+        : null;
+    $: selectedFacility = form.facility
+        ? { label: $facilities?.find((f) => f.id === form.facility)?.name, value: form.facility }
+        : null;
+
     async function newMachine() {
         navigate('?new=true');
         clearFields();
@@ -192,7 +202,13 @@
 
                 <div>
                     <Label for="type">Type</Label>
-                    <Select.Root disabled={isViewing}>
+                    <Select.Root
+                        disabled={isViewing}
+                        selected={selectedType}
+                        onSelectedChange={(opt) => {
+                            opt && (form.machine_type = opt.value);
+                        }}
+                    >
                         <Select.Trigger>
                             <Select.Value placeholder="Select a type" />
                         </Select.Trigger>
@@ -206,7 +222,13 @@
 
                 <div>
                     <Label for="status">Status</Label>
-                    <Select.Root disabled={isViewing}>
+                    <Select.Root
+                        disabled={isViewing}
+                        selected={selectedStatus}
+                        onSelectedChange={(opt) => {
+                            opt && (form.status = opt.value);
+                        }}
+                    >
                         <Select.Trigger>
                             <Select.Value placeholder="Select a status" />
                         </Select.Trigger>
@@ -220,7 +242,13 @@
 
                 <div>
                     <Label for="facility">Facility</Label>
-                    <Select.Root disabled={isViewing}>
+                    <Select.Root
+                        disabled={isViewing}
+                        selected={selectedFacility}
+                        onSelectedChange={(opt) => {
+                            opt && (form.facility = opt.value);
+                        }}
+                    >
                         <Select.Trigger>
                             <Select.Value placeholder="Select a facility" />
                         </Select.Trigger>
@@ -229,6 +257,7 @@
                                 <Select.Item value={facility.id} label={facility.name} />
                             {/each}
                         </Select.Content>
+                        <Select.Input bind:value={form.facility} />
                     </Select.Root>
                 </div>
 
