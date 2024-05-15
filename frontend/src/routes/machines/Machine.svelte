@@ -164,7 +164,7 @@
     </Tabs.List>
     <Tabs.Content value="card" class="flex flex-col min-w-full">
         <div class="space-y-0.5">
-            <h2 class="text-2xl font-bold tracking-tight">Machine</h2>
+            <h2 class="text-2xl font-bold tracking-tight pb-2">Machine</h2>
             <div class="flex space-x-4">
                 <Button on:click={newMachine} disabled={isCreating} variant="outline">New</Button>
                 <Button on:click={editMachine} disabled={isEditing || !id} variant="outline">Edit</Button>
