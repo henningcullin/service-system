@@ -174,23 +174,23 @@
         </div>
         <Separator class="my-6" />
         <div>
-            <form on:submit|preventDefault={saveMachine} class="space-y-8 w-full md:w-auto">
-                <field>
+            <form on:submit|preventDefault={saveMachine} class="space-y-4 w-full md:w-auto">
+                <div>
                     <Label for="id">Id</Label>
                     <Input type="text" id="id" bind:value={form.id} disabled />
-                </field>
+                </div>
 
-                <field>
+                <div>
                     <Label for="name">Name</Label>
                     <Input type="text" id="name" bind:value={form.name} placeholder="Name" disabled={isViewing} />
-                </field>
+                </div>
 
-                <field>
+                <div>
                     <Label for="make">Make</Label>
                     <Input type="text" id="make" bind:value={form.make} placeholder="Make" disabled={isViewing} />
-                </field>
+                </div>
 
-                <field>
+                <div>
                     <Label for="type">Type</Label>
                     <Select.Root disabled={isViewing}>
                         <Select.Trigger>
@@ -202,9 +202,9 @@
                             {/each}
                         </Select.Content>
                     </Select.Root>
-                </field>
+                </div>
 
-                <field>
+                <div>
                     <Label for="status">Status</Label>
                     <Select.Root disabled={isViewing}>
                         <Select.Trigger>
@@ -216,9 +216,9 @@
                             {/each}
                         </Select.Content>
                     </Select.Root>
-                </field>
+                </div>
 
-                <field>
+                <div>
                     <Label for="facility">Facility</Label>
                     <Select.Root disabled={isViewing}>
                         <Select.Trigger>
@@ -230,13 +230,12 @@
                             {/each}
                         </Select.Content>
                     </Select.Root>
-                </field>
+                </div>
 
-                <label for="created">Created at</label>
-                <input type="text" id="created" readonly bind:value={form.created} />
-
-                <label for="edited">Edited at</label>
-                <input type="text" id="edited" readonly bind:value={form.edited} />
+                <div>
+                    <div class="ml-auto text-xs text-muted-foreground">Created {form.created}</div>
+                    <div class="ml-auto text-xs text-muted-foreground pt-2">Edited {form.edited}</div>
+                </div>
 
                 <Button type="submit" disabled={isViewing}>Save</Button>
             </form>
