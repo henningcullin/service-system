@@ -3,6 +3,7 @@
     import Input from '$components/ui/input/input.svelte';
     import Label from '$components/ui/label/label.svelte';
     import * as Select from '$components/ui/select/index.js';
+    import * as Tabs from '$components/ui/tabs/index.js';
     import Separator from '$components/ui/separator/separator.svelte';
     import { facilities, machine, machineStatuses, machineTypes } from '$stores';
     import { getFacilities, getMachine, getMachineStatuses, getMachineTypes, sendDelete, sendJSON } from '$utils';
@@ -155,21 +156,25 @@
     async function updateMachine() {}
 </script>
 
-<div class="space-y-6 p-10 pb-16 md:block">
-    <div class="space-y-0.5">
-        <h2 class="text-2xl font-bold tracking-tight">Machine</h2>
-        <div class="flex space-x-4">
-            <Button on:click={newMachine} disabled={isCreating} variant="outline">New</Button>
-            <Button on:click={editMachine} disabled={isEditing || !id} variant="outline">Edit</Button>
-            <Button on:click={deleteMachine} disabled={isCreating || !id} variant="destructive">Delete</Button>
-            <Button on:click={cancel} disabled={isViewing} variant="outline">Cancel</Button>
+<Tabs.Root class="flex flex-col items-center min-h-screen pt-8">
+    <Tabs.List class="flex space-x-4">
+        <Tabs.Trigger value="card">Machine</Tabs.Trigger>
+        <Tabs.Trigger value="tasks">Tasks</Tabs.Trigger>
+        <Tabs.Trigger value="reports">Reports</Tabs.Trigger>
+    </Tabs.List>
+    <Tabs.Content value="card" class="flex flex-col min-w-full">
+        <div class="space-y-0.5">
+            <h2 class="text-2xl font-bold tracking-tight">Machine</h2>
+            <div class="flex space-x-4">
+                <Button on:click={newMachine} disabled={isCreating} variant="outline">New</Button>
+                <Button on:click={editMachine} disabled={isEditing || !id} variant="outline">Edit</Button>
+                <Button on:click={deleteMachine} disabled={isCreating || !id} variant="destructive">Delete</Button>
+                <Button on:click={cancel} disabled={isViewing} variant="outline">Cancel</Button>
+            </div>
         </div>
-    </div>
-    <Separator class="my-6" />
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <aside></aside>
+        <Separator class="my-6" />
         <div>
-            <form on:submit|preventDefault={saveMachine} class="space-y-8">
+            <form on:submit|preventDefault={saveMachine} class="space-y-8 w-full md:w-auto">
                 <field>
                     <Label for="id">Id</Label>
                     <Input type="text" id="id" bind:value={form.id} disabled />
@@ -233,12 +238,10 @@
                 <label for="edited">Edited at</label>
                 <input type="text" id="edited" readonly bind:value={form.edited} />
 
-                <button class="saveButton" type="submit" disabled={isViewing}>Save</button>
+                <Button type="submit" disabled={isViewing}>Save</Button>
             </form>
         </div>
-    </div>
-</div>
-
-<tab> </tab>
-
-<tab> </tab>
+    </Tabs.Content>
+    <Tabs.Content value="tasks"></Tabs.Content>
+    <Tabs.Content value="reports"></Tabs.Content>
+</Tabs.Root>
