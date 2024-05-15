@@ -175,8 +175,11 @@
             }
             if (Object.keys(changedFields).length < 2) return;
             const response = await sendJSON('/api/auth/machine', 'PUT', changedFields);
-            if (response.status !== 204) return alert('Failed to update the machine');
+            if (response.status !== 200) return alert('Failed to update the machine');
+            const data = await response.json();
+            machine.set(data);
             navigate('?view=true');
+            loadFields();
         } catch (error) {
             console.error(error);
         }
