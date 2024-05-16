@@ -1,6 +1,6 @@
 <script lang="ts">
     import * as Tabs from '$components/ui/tabs/index.js';
-    import MachineCard from './Machine/MachineCard.svelte';
+    import MachineCard from '$components/MachineCard/MachineCard.svelte';
 </script>
 
 <Tabs.Root class="flex flex-col items-center min-h-screen pt-8">
