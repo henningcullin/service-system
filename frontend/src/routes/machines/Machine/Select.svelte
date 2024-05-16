@@ -21,6 +21,6 @@
         </Select.Content>
     </Select.Root>
     {#if errors}
-        <p class="text-red-800 ml-auto text-xs pt-1">{errors}</p>
+        <p class="text-red-800 ml-auto text-xs pt-1">{errors[0]}</p>
     {/if}
 </div>
