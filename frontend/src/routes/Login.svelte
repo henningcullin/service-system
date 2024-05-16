@@ -85,54 +85,52 @@
 </script>
 
 <div
-    class="container relative h-[650px] flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-1 lg:px-0"
+    class="container relative min-h-screen flex items-center justify-center md:grid lg:max-w-none lg:grid-cols-1 lg:px-0"
 >
-    <div class="lg:p-8">
-        <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-            <div class="flex flex-col space-y-2 text-center">
-                <h1 class="text-2xl font-semibold tracking-tight">Login</h1>
-                <p class="text-sm text-muted-foreground">Enter your email below to start logging in</p>
-            </div>
+    <div class="mx-auto flex w-full h-full flex-col justify-center items-center space-y-6 transform -translate-y-10">
+        <div class="flex flex-col space-y-2 text-center">
+            <h1 class="text-2xl font-semibold tracking-tight">Login</h1>
+            <p class="text-sm text-muted-foreground">Enter your email below to start logging in</p>
+        </div>
 
-            <div class="grid gap-6">
-                <form on:submit|preventDefault={submitForm}>
-                    <div class="grid gap-2">
-                        <Input
-                            type="email"
-                            placeholder="Email"
-                            autocapitalize="none"
-                            autocomplete="email"
-                            autocorrect="off"
-                            required
-                            bind:value={email}
-                            readonly={type !== 'email'}
-                            disabled={type !== 'email'}
-                        />
-                        <Input
-                            type="password"
-                            autocapitalize="none"
-                            autocorrect="off"
-                            placeholder="Password"
-                            bind:value={password}
-                            class={type !== 'password' ? 'hidden' : ''}
-                        />
-                        <Input
-                            type="text"
-                            autocapitalize="none"
-                            autocorrect="off"
-                            placeholder="One Time Password"
-                            bind:value={otp}
-                            class={type !== 'otp' ? 'hidden' : ''}
-                        />
-                        <Button type="submit" disabled={isProcessing}>
-                            {#if isProcessing}
-                                <LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
-                            {/if}
-                            {type === 'email' ? 'Send' : 'Login'}
-                        </Button>
-                    </div>
-                </form>
-            </div>
+        <div class="grid gap-6 sm:w-[350px]">
+            <form on:submit|preventDefault={submitForm}>
+                <div class="grid gap-2">
+                    <Input
+                        type="email"
+                        placeholder="Email"
+                        autocapitalize="none"
+                        autocomplete="email"
+                        autocorrect="off"
+                        required
+                        bind:value={email}
+                        readonly={type !== 'email'}
+                        disabled={type !== 'email'}
+                    />
+                    <Input
+                        type="password"
+                        autocapitalize="none"
+                        autocorrect="off"
+                        placeholder="Password"
+                        bind:value={password}
+                        class={type !== 'password' ? 'hidden' : ''}
+                    />
+                    <Input
+                        type="text"
+                        autocapitalize="none"
+                        autocorrect="off"
+                        placeholder="One Time Password"
+                        bind:value={otp}
+                        class={type !== 'otp' ? 'hidden' : ''}
+                    />
+                    <Button type="submit" disabled={isProcessing}>
+                        {#if isProcessing}
+                            <LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+                        {/if}
+                        {type === 'email' ? 'Send' : 'Login'}
+                    </Button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
