@@ -1,7 +1,6 @@
 <script lang="ts">
     import Label from '$components/ui/label/label.svelte';
     import * as Select from '$components/ui/select/index.js';
-    import { Writable } from 'svelte/store';
     import { isViewing } from './common';
 
     export let properties: { id: string; label: string; placeholder: string };
