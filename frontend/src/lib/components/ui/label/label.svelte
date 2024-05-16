@@ -11,7 +11,6 @@
 		className
 	)}
 	{...$$restProps}
-	on:mousedown
 >
 	<slot />
 </LabelPrimitive.Root>
