@@ -60,41 +60,6 @@
                 </Card.Footer>
             </Card.Root>
         </Tabs.Content>
-        <Tabs.Content value="status">
-            <Card.Root>
-                <Card.Header>
-                    <Card.Title>Status</Card.Title>
-                    <Card.Description>Create new or edit existing machine statuses here</Card.Description>
-                </Card.Header>
-                <Card.Content>
-                    <form>
-                        <div class="grid w-full items-center gap-4">
-                            <Select.Root>
-                                <Select.Trigger>
-                                    <Select.Value placeholder="Select a status" />
-                                </Select.Trigger>
-                                <Select.Content>
-                                    {#each $machineStatuses as machineStatus}
-                                        <Select.Item value={machineStatus.id} label={machineStatus.name} />
-                                    {/each}
-                                </Select.Content>
-                            </Select.Root>
-                            <div class="flex flex-col space-y-1.5">
-                                <Label for="name">Name</Label>
-                                <Input id="name" placeholder="Name of type" />
-                            </div>
-                            <div class="flex flex-col space-y-1.5">
-                                <Label for="id">Id</Label>
-                                <Input id="id" placeholder="Id" disabled />
-                            </div>
-                        </div>
-                    </form>
-                </Card.Content>
-                <Card.Footer class="flex justify-between">
-                    <Button variant="outline">Cancel</Button>
-                    <Button>Deploy</Button>
-                </Card.Footer>
-            </Card.Root>
-        </Tabs.Content>
+        <Tabs.Content value="status"></Tabs.Content>
     </Tabs.Root>
 </div>
