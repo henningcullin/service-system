@@ -46,13 +46,13 @@ export function loadFields() {
             formValue.facility = value?.facility?.id;
             return formValue;
         });
-        unsubscribe();
     });
+    unsubscribe();
 }
 
 
-export function updateUrl(id = null) {
-    const url = new URL(window.location.href);
+export function updateUrl(location, id = null) {
+    const url = new URL(location.href);
     const pathArray = url.pathname.split('/');
     if (pathArray.length > 2) pathArray.pop();
     if (id) pathArray.push(id);
