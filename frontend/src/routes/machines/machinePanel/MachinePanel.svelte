@@ -5,6 +5,12 @@
     import Button from '$components/ui/button/button.svelte';
     import Input from '$components/ui/input/input.svelte';
     import Label from '$components/ui/label/label.svelte';
+
+    import { machineTypes, machineType, machineStatuses, machineStatus } from '$stores';
+    import { getMachineTypes, getMachineStatuses } from '$utils';
+
+    getMachineStatuses();
+    getMachineTypes();
 </script>
 
 <div class="w-full min-h-[15vh] flex items-center justify-center">
@@ -26,6 +32,17 @@
                 <Card.Content>
                     <form>
                         <div class="grid w-full items-center gap-4">
+                            <Select.Root>
+                                <Select.Trigger>
+                                    <Select.Value placeholder="Select a type" />
+                                </Select.Trigger>
+                                <Select.Content>
+                                    {#each $machineTypes as machineType}
+                                        <Select.Item value={machineType.id} label={machineType.name} />
+                                    {/each}
+                                </Select.Content>
+                            </Select.Root>
+
                             <div class="flex flex-col space-y-1.5">
                                 <Label for="name">Name</Label>
                                 <Input id="name" placeholder="Name of type" />
@@ -52,6 +69,16 @@
                 <Card.Content>
                     <form>
                         <div class="grid w-full items-center gap-4">
+                            <Select.Root>
+                                <Select.Trigger>
+                                    <Select.Value placeholder="Select a status" />
+                                </Select.Trigger>
+                                <Select.Content>
+                                    {#each $machineStatuses as machineStatus}
+                                        <Select.Item value={machineStatus.id} label={machineStatus.name} />
+                                    {/each}
+                                </Select.Content>
+                            </Select.Root>
                             <div class="flex flex-col space-y-1.5">
                                 <Label for="name">Name</Label>
                                 <Input id="name" placeholder="Name of type" />
