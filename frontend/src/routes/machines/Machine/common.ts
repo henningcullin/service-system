@@ -51,8 +51,8 @@ export function loadFields() {
 }
 
 
-export function updateUrl(location, id = null) {
-    const url = new URL(location.href);
+export function updateUrl(id = null) {
+    const url = new URL(window.location.href);
     const pathArray = url.pathname.split('/');
     if (pathArray.length > 2) pathArray.pop();
     if (id) pathArray.push(id);
