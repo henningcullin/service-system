@@ -2,7 +2,7 @@
     import Button from '$components/ui/button/button.svelte';
     import * as AlertDialog from '$components/ui/alert-dialog/index.js';
     import { navigate } from 'svelte-navigator';
-    import { clearFields, deleteDialogOpen, form, loadFields, isCreating, isEditing, isViewing, id } from './common';
+    import { clearFields, deleteDialogOpen, loadFields, isCreating, isEditing, isViewing, id } from './common';
     import { machine } from '$stores';
 
     async function deleteMachine() {
@@ -10,7 +10,7 @@
             const response = await sendDelete(`/api/auth/machine?id=${$id}`);
             if (response.status !== 204) return alert('Failed to delete machine');
             machine.set({});
-            clearFields($form);
+            clearFields();
             navigate('?view=true');
             updateUrl();
         } catch (error) {
@@ -23,7 +23,7 @@
     <Button
         on:click={() => {
             navigate('?new=true');
-            clearFields($form);
+            clearFields();
         }}
         disabled={$isCreating}
         variant="outline">New</Button
@@ -31,7 +31,7 @@
     <Button
         on:click={() => {
             navigate('?edit=true');
-            if ($id) loadFields($form, $machine);
+            if ($id) loadFields();
         }}
         disabled={$isEditing || !$id}
         variant="outline">Edit</Button
