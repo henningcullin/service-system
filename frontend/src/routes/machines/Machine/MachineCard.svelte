@@ -11,7 +11,7 @@
     getMachineStatuses();
     getFacilities();
 
-    $: location = useLocation();
+    const location = useLocation();
     $: params = new URLSearchParams($location.search);
     $: {
         const segments = $location.pathname.split('/');
@@ -31,7 +31,7 @@
 
 <div class="space-y-0.5">
     <h2 class="text-2xl font-bold tracking-tight pb-2">Machine</h2>
-    <Actions></Actions>
+    <Actions />
 </div>
 <Separator class="my-6" />
 <div>
