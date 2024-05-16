@@ -1,0 +1,23 @@
+body {
+    overflow-x: hidden;
+}
+
+/* SIDEBAR */
+
+sidebar {
+    left: -14em;
+}
+.open {
+    left: 0;
+}
+
+pushable {
+    margin-left: 0;
+}
+.push {
+    margin-left: 14em;
+}
+.dim {
+    opacity: 30%;
+    cursor: pointer;
+}

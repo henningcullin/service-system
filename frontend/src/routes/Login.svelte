@@ -3,19 +3,22 @@
     import { getLoggedIn, sendJSON } from '$utils';
     import { onMount } from 'svelte';
     import { navigate } from 'svelte-navigator';
+    import { Input } from '$lib/components/ui/input/index.js';
+    import { Button } from '$lib/components/ui/button/index.js';
+    import LoaderCircle from 'lucide-svelte/icons/loader-circle';
 
     let emailInput;
     let passwordInput;
     let otpInput;
 
-    let processing = false;
+    let isProcessing = false;
     let type = 'email';
     let email = '';
     let password = '';
     let otp = '';
 
     onMount(() => {
-        emailInput.focus();
+        emailInput?.focus();
     });
 
     account.subscribe((user) => {
@@ -25,10 +28,10 @@
     });
 
     async function submitForm() {
-        if (processing) return;
-        processing = true;
+        if (isProcessing) return;
+        isProcessing = true;
         await submit(type);
-        processing = false;
+        isProcessing = false;
     }
 
     async function submit(type) {
@@ -49,8 +52,8 @@
             if (response.status === 200) {
                 type = data.toLowerCase();
                 setTimeout(() => {
-                    if (type === 'password') passwordInput.focus();
-                    else otpInput.focus();
+                    if (type === 'password') passwordInput?.focus();
+                    else otpInput?.focus();
                 }, 1);
             }
         } catch (error) {
@@ -81,52 +84,53 @@
     }
 </script>
 
-<form on:submit|preventDefault={submitForm}>
-    <input
-        type="email"
-        placeholder="Email"
-        required
-        bind:value={email}
-        readonly={type !== 'email'}
-        disabled={type !== 'email'}
-        bind:this={emailInput}
-    />
-    <input
-        type="password"
-        placeholder="Password"
-        bind:value={password}
-        class={type !== 'password' ? 'hidden' : ''}
-        bind:this={passwordInput}
-    />
-    <input
-        type="text"
-        placeholder="One Time Password"
-        bind:value={otp}
-        class={type !== 'otp' ? 'hidden' : ''}
-        bind:this={otpInput}
-    />
-    <button class="olive {processing ? 'disabled' : ''}">{type === 'email' ? 'Send' : 'Login'}</button>
-</form>
+<div
+    class="container relative min-h-screen flex items-center justify-center md:grid lg:max-w-none lg:grid-cols-1 lg:px-0"
+>
+    <div class="mx-auto flex w-full h-full flex-col justify-center items-center space-y-6 transform -translate-y-10">
+        <div class="flex flex-col space-y-2 text-center">
+            <h1 class="text-2xl font-semibold tracking-tight">Login</h1>
+            <p class="text-sm text-muted-foreground">Enter your email below to start logging in</p>
+        </div>
 
-<style>
-    form {
-        width: 34vw;
-        margin-left: 31vw;
-        margin-top: 25dvh;
-        background-color: var(--secondary);
-        padding: 4%;
-        border-radius: 7.5px;
-        display: grid;
-        place-items: center;
-    }
-
-    input {
-        margin-top: 5px;
-    }
-
-    button {
-        width: 10em;
-        height: 3em;
-        margin-top: 1em;
-    }
-</style>
+        <div class="grid gap-6 sm:w-[350px]">
+            <form on:submit|preventDefault={submitForm}>
+                <div class="grid gap-2">
+                    <Input
+                        type="email"
+                        placeholder="Email"
+                        autocapitalize="none"
+                        autocomplete="email"
+                        autocorrect="off"
+                        required
+                        bind:value={email}
+                        readonly={type !== 'email'}
+                        disabled={type !== 'email'}
+                    />
+                    <Input
+                        type="password"
+                        autocapitalize="none"
+                        autocorrect="off"
+                        placeholder="Password"
+                        bind:value={password}
+                        class={type !== 'password' ? 'hidden' : ''}
+                    />
+                    <Input
+                        type="text"
+                        autocapitalize="none"
+                        autocorrect="off"
+                        placeholder="One Time Password"
+                        bind:value={otp}
+                        class={type !== 'otp' ? 'hidden' : ''}
+                    />
+                    <Button type="submit" disabled={isProcessing}>
+                        {#if isProcessing}
+                            <LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+                        {/if}
+                        {type === 'email' ? 'Send' : 'Login'}
+                    </Button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

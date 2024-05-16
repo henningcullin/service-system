@@ -215,8 +215,10 @@ pub async fn update(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<UpdateMachine>,
-) -> Result<StatusCode, ApiError> {
+) -> Result<(StatusCode, Json<Machine>), ApiError> {
     check_permission(user.role.machine_edit)?;
+
+    let mut tx = app_state.db.begin().await?;
 
     let mut query_builder = QueryBuilder::<Postgres>::new("UPDATE machines SET");
     let mut separated_list = query_builder.separated(",");
@@ -240,12 +242,62 @@ pub async fn update(
     query_builder.push(" WHERE id = ");
     query_builder.push_bind(body.id);
 
-    let result = query_builder.build().execute(&app_state.db).await?;
+    let result = query_builder.build().execute(&mut *tx).await?;
 
-    match result.rows_affected() {
-        1 => Ok(StatusCode::NO_CONTENT),
-        _ => Ok(StatusCode::NOT_FOUND),
+    if result.rows_affected() != 1 {
+        return Err(ApiError::GeneralOversight(
+            "Provided machine to update didn't exist".to_owned(),
+        ));
     }
+
+    let machine = query_as!(
+        Machine,
+        r#"
+        SELECT
+            m.id,
+            m.name,
+            m.make,
+            (
+                mt.id,
+                mt.name
+            ) AS "machine_type!: MachineType",
+            (
+                ms.id,
+                ms.name
+            ) AS "status!: MachineStatus",
+            m.created,
+            m.edited,
+            (
+                f.id,
+                f.name,
+                f.address
+            ) AS "facility?: Facility",
+            m.image
+        FROM
+            machines m
+        INNER JOIN 
+            machine_types mt
+        ON
+            m.machine_type = mt.id
+        INNER JOIN
+            machine_statuses ms
+        ON
+            m.status = ms.id
+        LEFT JOIN
+            facilities f
+        ON
+            m.facility = f.id
+        WHERE
+                m.id = $1
+        "#,
+        body.id
+    )
+    .fetch_one(&mut *tx)
+    .await?;
+
+    tx.commit().await?;
+
+    Ok((StatusCode::OK, Json(machine)))
 }
 
 pub async fn delete(

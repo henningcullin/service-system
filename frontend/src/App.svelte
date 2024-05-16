@@ -1,4 +1,6 @@
 <script>
+    import './app.css';
+    import './custom.css';
     import { onMount } from 'svelte';
     import { Router, Route, navigate } from 'svelte-navigator';
 
@@ -6,20 +8,27 @@
     import { getLoggedIn } from '$utils';
     import Header from '$components/Header.svelte';
     import Sidebar from '$components/Sidebar.svelte';
+    import { Toaster } from '$lib/components/ui/sonner';
 
     import Login from '$routes/Login.svelte';
     import Mainmenu from '$routes/Mainmenu.svelte';
     import NotFound from '$routes/NotFound.svelte';
-    import Account from '$routes/Account.svelte';
 
     import Machines from '$routes/machines/Machines.svelte';
     import Machine from '$routes/machines/Machine.svelte';
+    import MachinePanel from '$routes/machines/machinePanel/MachinePanel.svelte';
+
+    import { ModeWatcher, localStorageKey, setMode, systemPrefersMode, userPrefersMode } from 'mode-watcher';
 
     $: IsSidebarOpen = $SidebarOpen;
 
     function closeSidebar() {
         if (IsSidebarOpen) SidebarOpen.update((state) => !state);
     }
+
+    let preference = localStorage.getItem(localStorageKey);
+    preference ?? ($userPrefersMode === 'system' ? $systemPrefersMode : $userPrefersMode);
+    setMode(preference);
 
     onMount(async function () {
         if (!$account.id) {
@@ -29,27 +38,30 @@
     });
 </script>
 
+<ModeWatcher />
+<Toaster />
+
 <Router primary={false}>
-    <Sidebar />
-    <pusher class={IsSidebarOpen ? 'push dim' : ''} on:click={closeSidebar}>
-        <Header />
+    <Sidebar></Sidebar>
+    <pushable class={IsSidebarOpen ? 'push dim' : ''} on:click={closeSidebar}>
+        <Header></Header>
         <main>
-            <Route path="/" component={Mainmenu} />
-            <Route path="/login/" component={Login} />
-            <Route path="/account/" component={Account} />
+            <Route path="/" component={Mainmenu}></Route>
+            <Route path="/login/" component={Login}></Route>
 
-            <Route path="/machines/*" component={Machines} />
-            <Route path="/machine/*" component={Machine} />
+            <Route path="/machines/*" component={Machines}></Route>
+            <Route path="/machine/panel/*" component={MachinePanel}></Route>
+            <Route path="/machine/*" component={Machine}></Route>
 
-            <Route path="*" component={NotFound} />
+            <Route path="*" component={NotFound}></Route>
         </main>
-    </pusher>
+    </pushable>
 </Router>
 
 <style>
-    pusher {
+    pushable {
         width: 100%;
-        min-height: 100dvh;
+        min-height: 95dvh;
         transition:
             margin-left 0.3s,
             opacity 0.3s;
@@ -59,7 +71,7 @@
 
     main {
         min-height: 95dvh;
-        margin-top: 5dvh;
+        margin-top: 3dvh;
         padding: 1em;
     }
 </style>
