@@ -24,6 +24,16 @@
     getMachineStatuses();
     getFacilities();
 
+    $: selectedType = form.machine_type
+        ? { label: $machineTypes?.find((mt) => mt.id === form.machine_type)?.name, value: form.machine_type }
+        : null;
+    $: selectedStatus = form.status
+        ? { label: $machineStatuses?.find((ms) => ms.id === form.status)?.name, value: form.status }
+        : null;
+    $: selectedFacility = form.facility
+        ? { label: $facilities?.find((f) => f.id === form.facility)?.name, value: form.facility }
+        : null;
+
     const form = {
         id: '',
         name: '',
@@ -39,6 +49,17 @@
         for (const field in form) {
             form[field] = '';
         }
+    }
+
+    function loadFields() {
+        form.id = $machine?.id;
+        form.name = $machine?.name;
+        form.make = $machine?.make;
+        form.machine_type = $machine?.machine_type?.id;
+        form.status = $machine?.status?.id;
+        form.created = new Date($machine?.created).toLocaleString();
+        form.edited = new Date($machine?.edited).toLocaleString();
+        form.facility = $machine?.facility?.id;
     }
 
     let fieldErrors = { name: '', make: '', machine_type: '', status: '', facility: '' };
@@ -61,17 +82,6 @@
             fieldErrors = { name: '', make: '', machine_type: '', status: '', facility: '' };
             hasErrors = false;
         }
-    }
-
-    function loadFields() {
-        form.id = $machine?.id;
-        form.name = $machine?.name;
-        form.make = $machine?.make;
-        form.machine_type = $machine?.machine_type?.id;
-        form.status = $machine?.status?.id;
-        form.created = new Date($machine?.created).toLocaleString();
-        form.edited = new Date($machine?.edited).toLocaleString();
-        form.facility = $machine?.facility?.id;
     }
 
     let deleteDialogOpen = false;
@@ -97,44 +107,6 @@
     $: isCreating = params?.get('new') === 'true';
     $: isEditing = params?.get('edit') === 'true' && !!id;
     $: isViewing = !(isCreating || isEditing);
-
-    $: selectedType = form.machine_type
-        ? { label: $machineTypes?.find((mt) => mt.id === form.machine_type)?.name, value: form.machine_type }
-        : null;
-    $: selectedStatus = form.status
-        ? { label: $machineStatuses?.find((ms) => ms.id === form.status)?.name, value: form.status }
-        : null;
-    $: selectedFacility = form.facility
-        ? { label: $facilities?.find((f) => f.id === form.facility)?.name, value: form.facility }
-        : null;
-
-    async function newMachine() {
-        navigate('?new=true');
-        clearFields();
-    }
-
-    async function editMachine() {
-        navigate('?edit=true');
-        if (id) loadFields();
-    }
-
-    async function deleteMachine() {
-        try {
-            const response = await sendDelete(`/api/auth/machine?id=${id}`);
-            if (response.status !== 204) return alert('Failed to delete machine');
-            machine.set({});
-            clearFields();
-            navigate('?view=true');
-            updateUrl();
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    function cancel() {
-        navigate('?view=true');
-        if (id) loadFields();
-    }
 
     function updateUrl() {
         const url = new URL(window.location.href);
@@ -204,6 +176,19 @@
             console.error(error);
         }
     }
+
+    async function deleteMachine() {
+        try {
+            const response = await sendDelete(`/api/auth/machine?id=${id}`);
+            if (response.status !== 204) return alert('Failed to delete machine');
+            machine.set({});
+            clearFields();
+            navigate('?view=true');
+            updateUrl();
+        } catch (error) {
+            console.error(error);
+        }
+    }
 </script>
 
 <Tabs.Root class="flex flex-col items-center min-h-screen pt-8">
@@ -216,8 +201,22 @@
         <div class="space-y-0.5">
             <h2 class="text-2xl font-bold tracking-tight pb-2">Machine</h2>
             <div class="flex space-x-4">
-                <Button on:click={newMachine} disabled={isCreating} variant="outline">New</Button>
-                <Button on:click={editMachine} disabled={isEditing || !id} variant="outline">Edit</Button>
+                <Button
+                    on:click={() => {
+                        navigate('?new=true');
+                        clearFields();
+                    }}
+                    disabled={isCreating}
+                    variant="outline">New</Button
+                >
+                <Button
+                    on:click={() => {
+                        navigate('?edit=true');
+                        if (id) loadFields();
+                    }}
+                    disabled={isEditing || !id}
+                    variant="outline">Edit</Button
+                >
                 <Button
                     on:click={() => {
                         deleteDialogOpen = true;
@@ -225,7 +224,14 @@
                     disabled={!id}
                     variant="destructive">Delete</Button
                 >
-                <Button on:click={cancel} disabled={isViewing} variant="outline">Cancel</Button>
+                <Button
+                    on:click={() => {
+                        navigate('?view=true');
+                        if (id) loadFields();
+                    }}
+                    disabled={isViewing}
+                    variant="outline">Cancel</Button
+                >
             </div>
         </div>
         <Separator class="my-6" />
