@@ -3,18 +3,20 @@
     import * as AlertDialog from '$components/ui/alert-dialog/index.js';
     import { navigate } from 'svelte-navigator';
     import { clearFields, deleteDialogOpen, loadFields, isCreating, isEditing, isViewing, id } from './common';
-    import { machine } from '$stores';
+    import { task } from '$stores';
+    import { toast } from 'svelte-sonner';
 
-    async function deleteMachine() {
+    async function deleteTask() {
         try {
-            const response = await sendDelete(`/api/auth/machine?id=${$id}`);
-            if (response.status !== 204) return alert('Failed to delete machine');
-            machine.set({});
+            const response = await sendDelete(`/api/auth/task?id=${$id}`);
+            if (response.status !== 204) return toast.error('Failed to delete task');
+            task.set({});
             clearFields();
             navigate('?view=true');
             updateUrl();
+            toast.success('Deleted the task');
         } catch (error) {
-            console.error(error);
+            toast.error('Failed to delete task');
         }
     }
 </script>
@@ -58,12 +60,12 @@
         <AlertDialog.Header>
             <AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
             <AlertDialog.Description>
-                This action cannot be undone. This will permanently delete the machine from our servers.
+                This action cannot be undone. This will permanently delete the task from our servers.
             </AlertDialog.Description>
         </AlertDialog.Header>
         <AlertDialog.Footer>
             <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-            <AlertDialog.Action on:click={deleteMachine}>Continue</AlertDialog.Action>
+            <AlertDialog.Action on:click={deleteTask}>Continue</AlertDialog.Action>
         </AlertDialog.Footer>
     </AlertDialog.Content>
 </AlertDialog.Root>
