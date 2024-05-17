@@ -24,7 +24,8 @@
 
     const selectedType = writable({ label: '', value: '' });
     const selectedStatus = writable({ label: '', value: '' });
-    /* const selectedFacility = writable({ label: '', value: '' }); */
+    const selectedMachine = writable({ label: '', value: '' });
+    const selectedExecutors = writable([{ label: '', value: '' }]);
 
     $: selectedType.set(
         $form.task_type
@@ -36,11 +37,16 @@
             ? { label: $taskStatuses?.find((ms) => ms.id === $form?.status)?.name, value: $form?.status }
             : null,
     );
-    /*     $: selectedFacility.set(
-        $form.facility
-            ? { label: $facilities?.find((f) => f.id === $form?.facility)?.name, value: $form?.facility }
+    $: selectedMachine.set(
+        $form.machine ? { label: $machines?.find((f) => f.id === $form?.machine)?.name, value: $form?.machine } : null,
+    );
+    $: selectedExecutors.set(
+        $form?.executors?.length
+            ? $form?.executors?.map((userId) => {
+                  return { label: $users?.find((u) => u.id === userId)?.first_name, value: userId };
+              })
             : null,
-    ); */
+    );
 
     $: {
         if (!$isViewing) {
@@ -143,7 +149,11 @@
 
     <Input properties={{ id: 'title', label: 'Title' }} bind:value={$form.title} errors={$fieldErrors.title} />
 
-    <Input properties={{ id: 'description', label: 'Description' }} bind:value={$form.description} />
+    <Input
+        properties={{ id: 'description', label: 'Description' }}
+        bind:value={$form.description}
+        errors={$fieldErrors.description}
+    />
 
     <Select
         properties={{ id: 'machine_type', label: 'Type', placeholder: 'Select a type' }}
@@ -171,23 +181,54 @@
         {/each}
     </Select>
 
+    <Select
+        properties={{ id: 'machine', label: 'Machine', placeholder: 'Select a machine' }}
+        bind:selected={$selectedMachine}
+        onSelectedChange={(opt) => {
+            opt && ($form.machine = opt.value);
+        }}
+        errors={$fieldErrors?.machine}
+    >
+        {#each $machines as machine}
+            <SelectItem value={machine.id} label={machine.name} />
+        {/each}
+    </Select>
+
+    <Select
+        properties={{ id: 'executors', label: 'Executors', placeholder: 'Pick executors' }}
+        multiple={true}
+        bind:selected={$selectedExecutors}
+        onSelectedChange={(items) => {
+            if (items) {
+                $form.executors = items?.map((user) => user.value);
+            } else {
+                $form.executors = [];
+            }
+        }}
+        errors={$fieldErrors?.machine}
+    >
+        {#each $users as user}
+            <SelectItem value={user.id} label={user.first_name} />
+        {/each}
+    </Select>
+
     <div>
-        {#if $form?.creator?.id}
+        {#if $task?.creator?.id}
             <HoverCard.Root>
                 <HoverCard.Trigger>
-                    <Link to="/user/{$form?.creator?.id}" class="ml-auto text-xs text-muted-foreground"
-                        >Creator {$form?.creator?.first_name}</Link
+                    <Link to="/user/{$task?.creator?.id}" class="ml-auto text-xs text-muted-foreground"
+                        >Creator {$task?.creator?.first_name}</Link
                     >
                 </HoverCard.Trigger>
                 <HoverCard.Content class="w-80">
                     <div class="flex justify-between space-x-4">
                         <div class="space-y-1">
                             <h4 class="text-sm font-semibold">
-                                {$form?.creator?.first_name}, {$form?.creator?.last_name}
+                                {$task?.creator?.first_name}, {$task?.creator?.last_name}
                             </h4>
-                            <a class="text-sm" href="mailto:{$form?.creator?.email}">{$form?.creator?.email}</a>
+                            <a class="text-sm" href="mailto:{$task?.creator?.email}">{$task?.creator?.email}</a>
                             <div class="flex items-center pt-2">
-                                <span class="text-xs text-muted-foreground"> {$form?.creator?.id} </span>
+                                <span class="text-xs text-muted-foreground"> {$task?.creator?.id} </span>
                             </div>
                         </div>
                     </div>

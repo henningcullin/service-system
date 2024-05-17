@@ -3,10 +3,12 @@
     import { useLocation } from 'svelte-navigator';
     import { onMount } from 'svelte';
     import Separator from '$components/ui/separator/separator.svelte';
-    import { getOneTask, getTaskTypes, getTaskStatuses } from '$utils';
+    import { getOneTask, getTaskTypes, getTaskStatuses, getMachines, getUsers } from '$utils';
     import { id, isCreating, isEditing, isViewing, loadFields } from './common';
     import Form from './Form.svelte';
 
+    getUsers();
+    getMachines();
     getTaskTypes();
     getTaskStatuses();
 
