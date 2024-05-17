@@ -20,6 +20,17 @@
         name: z.string().min(1, 'Name is required').max(255, 'Name must be 255 characters or less'),
     });
 
+    let hasFoundInitial = false;
+
+    $: {
+        if (!hasFoundInitial) {
+            const selected = $sourceStore?.find((item) => item.id === initialSelected);
+            if (selected) {
+                formStore.set({ ...selected });
+            }
+        }
+    }
+
     const errors: { name: string[] } = { name: [] };
     $: hasErrors = errors?.name?.length;
 
