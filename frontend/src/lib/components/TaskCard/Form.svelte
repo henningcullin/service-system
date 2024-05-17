@@ -2,7 +2,7 @@
     import { writable } from 'svelte/store';
     import { task, taskTypes, taskStatuses, users, machines } from '$stores';
     import { sendJSON } from '$utils';
-    import { navigate } from 'svelte-navigator';
+    import { navigate, Link } from 'svelte-navigator';
     import Input from './Input.svelte';
     import {
         fieldErrors,
@@ -19,6 +19,7 @@
     import { z } from 'zod';
     import Select from './Select.svelte';
     import SelectItem from '$components/ui/select/select-item.svelte';
+    import * as HoverCard from '$lib/components/ui/hover-card/index.js';
     import { toast } from 'svelte-sonner';
 
     const selectedType = writable({ label: '', value: '' });
@@ -170,20 +171,29 @@
         {/each}
     </Select>
 
-    <!--     <Select
-        properties={{ id: 'facility', label: 'Facility', placeholder: 'Select a facility' }}
-        bind:selected={$selectedFacility}
-        onSelectedChange={(opt) => {
-            opt && ($form.facility = opt.value);
-        }}
-        errors={$fieldErrors?.facility}
-    >
-        {#each $facilities as facility}
-            <SelectItem value={facility.id} label={facility.name} />
-        {/each}
-    </Select> -->
-
     <div>
+        {#if $form?.creator?.id}
+            <HoverCard.Root>
+                <HoverCard.Trigger>
+                    <Link to="/user/{$form?.creator?.id}" class="ml-auto text-xs text-muted-foreground"
+                        >Creator {$form?.creator?.first_name}</Link
+                    >
+                </HoverCard.Trigger>
+                <HoverCard.Content class="w-80">
+                    <div class="flex justify-between space-x-4">
+                        <div class="space-y-1">
+                            <h4 class="text-sm font-semibold">
+                                {$form?.creator?.first_name}, {$form?.creator?.last_name}
+                            </h4>
+                            <a class="text-sm" href="mailto:{$form?.creator?.email}">{$form?.creator?.email}</a>
+                            <div class="flex items-center pt-2">
+                                <span class="text-xs text-muted-foreground"> {$form?.creator?.id} </span>
+                            </div>
+                        </div>
+                    </div>
+                </HoverCard.Content>
+            </HoverCard.Root>
+        {/if}
         <div class="ml-auto text-xs text-muted-foreground">Created {$form.created}</div>
         <div class="ml-auto text-xs text-muted-foreground pt-2">Edited {$form.edited}</div>
     </div>
