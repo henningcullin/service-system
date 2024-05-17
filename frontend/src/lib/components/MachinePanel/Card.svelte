@@ -55,10 +55,11 @@
 
     async function deleteItem() {
         try {
-            const response = await sendDelete(`/api/auth/${apiEndpoint}/?id=${$formStore.id}`);
+            const response = await sendDelete(`/api/auth/${apiEndpoint}?id=${$formStore.id}`);
             if (response.status !== 204) return toast.error(`Could not delete the ${cardProps.title}`);
             sourceStore.update((prev) => prev.filter((item) => item.id !== $formStore.id));
             toast.success(`Deleted the ${cardProps.title}`);
+            formStore.set({ id: '', name: '' });
         } catch (error) {
             toast.error(`Could not delete the ${cardProps.title}`);
         }
