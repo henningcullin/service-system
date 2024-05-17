@@ -14,11 +14,11 @@
     import Mainmenu from '$routes/Mainmenu.svelte';
     import NotFound from '$routes/NotFound.svelte';
 
-    import Machines from '$routes/machines/page.svelte';
-    import Machine from '$routes/machine/page.svelte';
-    import MachinePanel from '$routes/machine/panel/page.svelte';
+    import Machines from '$routes/machines/machines.svelte';
+    import Machine from '$routes/machine/machine.svelte';
+    import MachinePanel from '$routes/machine/panel/machinePanel.svelte';
 
-    import TaskPanel from '$routes/task/panel/page.svelte';
+    import TaskPanel from '$routes/task/panel/taskPanel.svelte';
 
     import { ModeWatcher, localStorageKey, setMode, systemPrefersMode, userPrefersMode } from 'mode-watcher';
 
