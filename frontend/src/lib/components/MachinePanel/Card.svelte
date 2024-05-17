@@ -19,16 +19,23 @@
         : null;
 
     function onSelectedChange(newValue) {
-        newValue && (($formStore.id = newValue.value), ($formStore.name = newValue.label)) && (state = EDITING_STATE);
+        if (!newValue) return;
+        $formStore.id = newValue.value;
+        $formStore.name = newValue.label;
+        state = EDITING_STATE;
     }
 
     async function deleteItem() {
         sendDelete(`/api/auth/${apiEndpoint}/?id=${$formStore.id}`);
     }
 
-    function createItem() {}
+    function createItem() {
+        console.log('we create');
+    }
 
-    function updateItem() {}
+    function updateItem() {
+        console.log('we update');
+    }
 
     export let formStore;
     export let sourceStore;
@@ -78,7 +85,12 @@
                 open = true;
             }}>Delete</Button
         >
-        <Button on:click={() => {}}>Save</Button>
+        <Button
+            on:click={() => {
+                if (state === CREATING_STATE) createItem();
+                else if (state === EDITING_STATE) updateItem();
+            }}>Save</Button
+        >
     </Card.Footer>
 </Card.Root>
 
