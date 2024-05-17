@@ -11,6 +11,7 @@ import {
     reports,
     reportStatuses,
     reportTypes,
+    users,
 } from '$stores';
 
 export async function sendJSON(url, method, body) {
@@ -107,4 +108,9 @@ export async function getReportTypes() {
 export async function getReportStatuses() {
     const data = await fetchJson('/api/auth/report_statuses');
     reportStatuses.set(data ?? []);
+}
+
+export async function getUsers() {
+    const data = await fetchJson('/api/auth/users');
+    users.set(data ?? []);
 }
