@@ -1,4 +1,14 @@
-import { account, facilities, machine, machineStatuses, machineTypes, machines } from '$stores';
+import {
+    account,
+    facilities,
+    machine,
+    machineStatuses,
+    machineTypes,
+    machines,
+    tasks,
+    taskStatuses,
+    taskTypes,
+} from '$stores';
 
 export async function sendJSON(url, method, body) {
     return fetch(url, {
@@ -59,4 +69,19 @@ export async function getMachineStatuses() {
 export async function getFacilities() {
     const data = await fetchJson('/api/auth/facilities');
     facilities.set(data ?? []);
+}
+
+export async function getTasks() {
+    const data = await fetchJson('/api/auth/tasks');
+    tasks.set(data ?? []);
+}
+
+export async function getTaskTypes() {
+    const data = await fetchJson('/api/auth/task_types');
+    taskTypes.set(data ?? []);
+}
+
+export async function getTaskStatuses() {
+    const data = await fetchJson('/api/auth/task_statuses');
+    taskStatuses.set(data ?? []);
 }
