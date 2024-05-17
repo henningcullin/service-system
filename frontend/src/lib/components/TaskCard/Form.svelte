@@ -21,6 +21,8 @@
     import SelectItem from '$components/ui/select/select-item.svelte';
     import * as HoverCard from '$lib/components/ui/hover-card/index.js';
     import { toast } from 'svelte-sonner';
+    import Label from '$components/ui/label/label.svelte';
+    import Checkbox from '$components/ui/checkbox/checkbox.svelte';
 
     const selectedType = writable({ label: '', value: '' });
     const selectedStatus = writable({ label: '', value: '' });
@@ -211,6 +213,15 @@
             <SelectItem value={user.id} label={user.first_name} />
         {/each}
     </Select>
+
+    <div>
+        <Checkbox id="archived" bind:checked={$form.archived} disabled={$isViewing} />
+        <Label
+            for="archived"
+            class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >Archived</Label
+        >
+    </div>
 
     <div>
         {#if $task?.creator?.id}
