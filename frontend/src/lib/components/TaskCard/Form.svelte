@@ -23,6 +23,9 @@
     import { toast } from 'svelte-sonner';
     import Label from '$components/ui/label/label.svelte';
     import Checkbox from '$components/ui/checkbox/checkbox.svelte';
+    import { Calendar } from '$lib/components/ui/calendar/index.js';
+    import CalendarDays from 'lucide-svelte/icons/calendar-days';
+    import * as Popover from '$lib/components/ui/popover/index.js';
 
     const selectedType = writable({ label: '', value: '' });
     const selectedStatus = writable({ label: '', value: '' });
@@ -213,6 +216,27 @@
             <SelectItem value={user.id} label={user.first_name} />
         {/each}
     </Select>
+
+    <div>
+        <Label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >Due At</Label
+        ><br />
+        <Popover.Root>
+            <Popover.Trigger asChild let:builder>
+                <Button
+                    variant="outline"
+                    class="w-[240px] justify-start text-left font-normal{!$form?.due_at ? 'text-muted-foreground' : ''}"
+                    builders={[builder]}
+                >
+                    <CalendarDays class="mr-2 h-4 w-4" />
+                    {$form?.due_at ? new Date($form?.due_at)?.toDateString() : 'Pick a date'}
+                </Button>
+            </Popover.Trigger>
+            <Popover.Content class="w-auto p-0" align="start">
+                <Calendar bind:value={$form.due_at} />
+            </Popover.Content>
+        </Popover.Root>
+    </div>
 
     <div>
         <Checkbox id="archived" bind:checked={$form.archived} disabled={$isViewing} />
