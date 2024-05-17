@@ -91,10 +91,10 @@
             if (response.status !== 204) toast.error(`Could not save the ${cardProps.title}`);
             sourceStore.update((prev) => {
                 const index = prev.findIndex((item) => item.id === $formStore.id);
-                prev[index] = $formStore;
+                prev[index] = { ...$formStore };
                 return prev;
             });
-            state = VIEWING_STATE;
+            toast.success(`Updated the ${cardProps.title}`);
         } catch (error) {
             toast.error(`Could not save the ${cardProps.title}`);
         }
