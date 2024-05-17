@@ -2,6 +2,7 @@
     import * as Card from '$components/ui/card/index.js';
     import * as Select from '$components/ui/select/index.js';
     import * as Tabs from '$components/ui/tabs/index.js';
+    import TypeStatusCard from '$components/MachinePanel/Card.svelte';
     import Button from '$components/ui/button/button.svelte';
     import Input from '$components/ui/input/input.svelte';
     import Label from '$components/ui/label/label.svelte';
@@ -24,42 +25,32 @@
             <Tabs.Trigger value="status">Status</Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="type">
-            <Card.Root>
-                <Card.Header>
-                    <Card.Title>Type</Card.Title>
-                    <Card.Description>Create new or edit existing machine types here</Card.Description>
-                </Card.Header>
-                <Card.Content>
-                    <form>
-                        <div class="grid w-full items-center gap-4">
-                            <Select.Root>
-                                <Select.Trigger>
-                                    <Select.Value placeholder="Select a type" />
-                                </Select.Trigger>
-                                <Select.Content>
-                                    {#each $machineTypes as machineType}
-                                        <Select.Item value={machineType.id} label={machineType.name} />
-                                    {/each}
-                                </Select.Content>
-                            </Select.Root>
-
-                            <div class="flex flex-col space-y-1.5">
-                                <Label for="name">Name</Label>
-                                <Input id="name" placeholder="Name of type" />
-                            </div>
-                            <div class="flex flex-col space-y-1.5">
-                                <Label for="id">Id</Label>
-                                <Input id="id" placeholder="Id" disabled />
-                            </div>
-                        </div>
-                    </form>
-                </Card.Content>
-                <Card.Footer class="flex justify-between">
-                    <Button variant="outline">Cancel</Button>
-                    <Button>Deploy</Button>
-                </Card.Footer>
-            </Card.Root>
+            <TypeStatusCard
+                props={{
+                    title: 'Type',
+                    desc: 'Manage your machine types',
+                    selectPlaceholder: 'Select a type',
+                    namePlaceholder: 'Name of type',
+                }}
+            >
+                {#each $machineTypes as machineType}
+                    <Select.Item value={machineType.id} label={machineType.name} />
+                {/each}
+            </TypeStatusCard>
         </Tabs.Content>
-        <Tabs.Content value="status"></Tabs.Content>
+        <Tabs.Content value="status">
+            <TypeStatusCard
+                props={{
+                    title: 'Status',
+                    desc: 'Manage your machine statuses',
+                    selectPlaceholder: 'Select a status',
+                    namePlaceholder: 'Name of status',
+                }}
+            >
+                {#each $machineStatuses as machineStatus}
+                    <Select.Item value={machineStatus.id} label={machineStatus.name} />
+                {/each}
+            </TypeStatusCard>
+        </Tabs.Content>
     </Tabs.Root>
 </div>
