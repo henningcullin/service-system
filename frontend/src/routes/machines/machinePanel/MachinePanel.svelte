@@ -1,7 +1,7 @@
 <script lang="ts">
     import * as Select from '$components/ui/select/index.js';
     import * as Tabs from '$components/ui/tabs/index.js';
-    import TypeStatusCard from '$components/MachinePanel/TypeStatusCard.svelte';
+    import TypeStatusCard from '$components/TypeStatusCard.svelte';
     import { machineTypes, machineType, machineStatuses, machineStatus } from '$stores';
     import { getMachineTypes, getMachineStatuses } from '$utils';
 
