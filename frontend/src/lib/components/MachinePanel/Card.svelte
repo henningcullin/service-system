@@ -12,11 +12,15 @@
     const EDITING_STATE = 2;
 
     let open = false;
-    let state = '';
+    let state = VIEWING_STATE;
 
-    $: selectedValue = {};
+    $: selected = $formStore.id
+        ? { label: $sourceStore?.find((item) => item.id === $formStore?.id)?.name, value: $formStore?.id }
+        : null;
 
-    function onSelectedChange() {}
+    function onSelectedChange(newValue) {
+        newValue && (($formStore.id = newValue.value), ($formStore.name = newValue.label)) && (state = EDITING_STATE);
+    }
 
     async function deleteItem() {
         sendDelete(`/api/auth/${apiEndpoint}/?id=${$formStore.id}`);
@@ -27,6 +31,7 @@
     function updateItem() {}
 
     export let formStore;
+    export let sourceStore;
     export let apiEndpoint: string;
     export let cardProps: { title: string; desc: string };
     export let formProps: { selectPlaceholder: string; namePlaceholder: string };
@@ -40,7 +45,7 @@
     <Card.Content>
         <form>
             <div class="grid w-full items-center gap-4">
-                <Select.Root {onSelectedChange}>
+                <Select.Root {selected} {onSelectedChange}>
                     <Select.Trigger>
                         <Select.Value placeholder={formProps.selectPlaceholder} />
                     </Select.Trigger>
@@ -50,11 +55,11 @@
                 </Select.Root>
                 <div class="flex flex-col space-y-1.5">
                     <Label for="name">Name</Label>
-                    <Input id="name" placeholder={formProps.namePlaceholder} />
+                    <Input id="name" bind:value={$formStore.name} placeholder={formProps.namePlaceholder} />
                 </div>
                 <div class="flex flex-col space-y-1.5">
                     <Label for="id">Id</Label>
-                    <Input id="id" placeholder="Id" disabled />
+                    <Input id="id" placeholder="Id" bind:value={$formStore.id} disabled />
                 </div>
             </div>
         </form>
@@ -64,6 +69,7 @@
             variant="outline"
             on:click={() => {
                 formStore.set({ id: '', name: '' });
+                state = CREATING_STATE;
             }}>New</Button
         >
         <Button

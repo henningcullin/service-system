@@ -30,6 +30,7 @@
                     namePlaceholder: 'Name of type',
                 }}
                 formStore={machineType}
+                sourceStore={machineTypes}
                 apiEndpoint="machine_type"
             >
                 {#each $machineTypes as machineType}
@@ -48,6 +49,7 @@
                     namePlaceholder: 'Name of status',
                 }}
                 formStore={machineStatus}
+                sourceStore={machineStatuses}
                 apiEndpoint="machine_status"
             >
                 {#each $machineStatuses as machineStatus}
