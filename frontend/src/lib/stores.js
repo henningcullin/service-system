@@ -41,5 +41,5 @@ export const task = writable({});
 export const taskTypes = writable([]);
 export const taskType = writable({});
 
-export const taskStauses = writable([]);
+export const taskStatuses = writable([]);
 export const taskStatus = writable({});
