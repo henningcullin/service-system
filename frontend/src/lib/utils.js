@@ -79,6 +79,11 @@ export async function getTasks() {
     tasks.set(data ?? []);
 }
 
+export async function getOneTask(id) {
+    const data = await fetchJson(`/api/auth/task?id=${id}`);
+    task.set(data ?? {});
+}
+
 export async function getTaskTypes() {
     const data = await fetchJson('/api/auth/task_types');
     taskTypes.set(data ?? []);
