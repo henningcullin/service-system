@@ -129,7 +129,9 @@
                         <Select.Value placeholder={formProps.selectPlaceholder} />
                     </Select.Trigger>
                     <Select.Content>
-                        <slot />
+                        {#each $sourceStore as item}
+                            <Select.Item value={item.id} label={item.name} />
+                        {/each}
                     </Select.Content>
                 </Select.Root>
                 <div class="flex flex-col space-y-1.5">
