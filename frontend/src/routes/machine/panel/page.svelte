@@ -1,5 +1,4 @@
 <script lang="ts">
-    import * as Select from '$components/ui/select/index.js';
     import * as Tabs from '$components/ui/tabs/index.js';
     import TypeStatusCard from '$components/TypeStatusCard.svelte';
     import { machineTypes, machineType, machineStatuses, machineStatus } from '$stores';
@@ -37,11 +36,7 @@
                 sourceStore={machineTypes}
                 initialSelected={type}
                 apiEndpoint="machine_type"
-            >
-                {#each $machineTypes as machineType}
-                    <Select.Item value={machineType.id} label={machineType.name} />
-                {/each}
-            </TypeStatusCard>
+            ></TypeStatusCard>
         </Tabs.Content>
         <Tabs.Content value="status">
             <TypeStatusCard
@@ -57,11 +52,7 @@
                 sourceStore={machineStatuses}
                 initialSelected={status}
                 apiEndpoint="machine_status"
-            >
-                {#each $machineStatuses as machineStatus}
-                    <Select.Item value={machineStatus.id} label={machineStatus.name} />
-                {/each}
-            </TypeStatusCard>
+            ></TypeStatusCard>
         </Tabs.Content>
     </Tabs.Root>
 </div>
