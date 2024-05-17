@@ -14,9 +14,9 @@
     import Mainmenu from '$routes/Mainmenu.svelte';
     import NotFound from '$routes/NotFound.svelte';
 
-    import Machines from '$routes/machines/Machines.svelte';
-    import Machine from '$routes/machines/Machine.svelte';
-    import MachinePanel from '$routes/machines/machinePanel/MachinePanel.svelte';
+    import Machines from '$routes/machines/page.svelte';
+    import Machine from '$routes/machine/page.svelte';
+    import MachinePanel from '$routes/machine/panel/page.svelte';
 
     import { ModeWatcher, localStorageKey, setMode, systemPrefersMode, userPrefersMode } from 'mode-watcher';
 
