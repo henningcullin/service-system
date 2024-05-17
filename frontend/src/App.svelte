@@ -18,6 +18,8 @@
     import Machine from '$routes/machine/page.svelte';
     import MachinePanel from '$routes/machine/panel/page.svelte';
 
+    import TaskPanel from '$routes/task/panel/page.svelte';
+
     import { ModeWatcher, localStorageKey, setMode, systemPrefersMode, userPrefersMode } from 'mode-watcher';
 
     $: IsSidebarOpen = $SidebarOpen;
@@ -52,6 +54,8 @@
             <Route path="/machines/*" component={Machines}></Route>
             <Route path="/machine/panel/*" component={MachinePanel}></Route>
             <Route path="/machine/*" component={Machine}></Route>
+
+            <Route path="/task/panel/*" component={TaskPanel} />
 
             <Route path="*" component={NotFound}></Route>
         </main>
