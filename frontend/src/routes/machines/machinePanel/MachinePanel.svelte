@@ -1,12 +1,7 @@
 <script lang="ts">
-    import * as Card from '$components/ui/card/index.js';
     import * as Select from '$components/ui/select/index.js';
     import * as Tabs from '$components/ui/tabs/index.js';
     import TypeStatusCard from '$components/MachinePanel/Card.svelte';
-    import Button from '$components/ui/button/button.svelte';
-    import Input from '$components/ui/input/input.svelte';
-    import Label from '$components/ui/label/label.svelte';
-
     import { machineTypes, machineType, machineStatuses, machineStatus } from '$stores';
     import { getMachineTypes, getMachineStatuses } from '$utils';
 
@@ -26,12 +21,16 @@
         </Tabs.List>
         <Tabs.Content value="type">
             <TypeStatusCard
-                props={{
+                cardProps={{
                     title: 'Type',
                     desc: 'Manage your machine types',
+                }}
+                formProps={{
                     selectPlaceholder: 'Select a type',
                     namePlaceholder: 'Name of type',
                 }}
+                formStore={machineType}
+                apiEndpoint="machine_type"
             >
                 {#each $machineTypes as machineType}
                     <Select.Item value={machineType.id} label={machineType.name} />
@@ -40,12 +39,16 @@
         </Tabs.Content>
         <Tabs.Content value="status">
             <TypeStatusCard
-                props={{
+                cardProps={{
                     title: 'Status',
                     desc: 'Manage your machine statuses',
+                }}
+                formProps={{
                     selectPlaceholder: 'Select a status',
                     namePlaceholder: 'Name of status',
                 }}
+                formStore={machineStatus}
+                apiEndpoint="machine_status"
             >
                 {#each $machineStatuses as machineStatus}
                     <Select.Item value={machineStatus.id} label={machineStatus.name} />
