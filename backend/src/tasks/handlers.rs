@@ -399,8 +399,10 @@ pub async fn update(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<UpdateTask>,
-) -> Result<StatusCode, ApiError> {
+) -> Result<Json<Task>, ApiError> {
     check_permission(user.role.task_edit)?;
+
+    let mut tx = app_state.db.begin().await?;
 
     let mut query_builder = QueryBuilder::<Postgres>::new("UPDATE tasks SET");
     let mut separated_list = query_builder.separated(",");
@@ -426,12 +428,107 @@ pub async fn update(
     query_builder.push(" WHERE id = ");
     query_builder.push_bind(body.id);
 
-    let result = query_builder.build().execute(&app_state.db).await?;
+    let result = query_builder.build().execute(&mut *tx).await?;
 
-    match result.rows_affected() {
-        1 => Ok(StatusCode::NO_CONTENT),
-        _ => Ok(StatusCode::NOT_FOUND),
+    if result.rows_affected() != 1 {
+        return Err(ApiError::GeneralOversight(
+            "Provided machine to update didn't exist".to_owned(),
+        ));
     }
+
+    let task = sqlx::query_as!(
+        Task,
+        r#"
+        SELECT
+            t.id,
+            t.title,
+            t.description,
+            (
+                tt.id,
+                tt.name
+            ) AS "task_type!: TaskType",
+            (
+                ts.id,
+                ts.name
+            ) AS "status!: TaskStatus",
+            t.archived,
+            (
+                u.id,
+                u.first_name,
+                u.last_name,
+                u.email,
+                u.image
+            ) AS "creator!: ShortUser",
+            (
+                SELECT array_agg(
+                    (
+                        te.user_id,
+                        u.first_name,
+                        u.last_name,
+                        u.email,
+                        u.image
+                    )
+                )
+                FROM 
+                    task_executors te
+                INNER JOIN 
+                    users u 
+                ON 
+                    te.user_id = u.id
+                WHERE 
+                    te.task_id = t.id 
+            ) AS "executors: Vec<ShortUser>",
+            (
+                SELECT array_agg(
+                    (
+                        td.uri,
+                        td.name,
+                        td.description
+                    )
+                )
+                FROM 
+                    task_documents td
+                WHERE 
+                    td.task_id = t.id
+            ) AS "documents: Vec<TaskDocument>",
+            (
+                m.id,
+                m.name,
+                m.make,
+                m.image
+            ) AS "machine?: ShortMachine",
+            t.created,
+            t.edited,
+            t.due_at
+        FROM
+            tasks t
+        INNER JOIN
+            task_types tt 
+        ON
+            t.task_type = tt.id
+        INNER JOIN
+            task_statuses ts 
+        ON
+            t.status = ts.id
+        INNER JOIN
+            users u
+        ON
+            t.creator = u.id
+        LEFT JOIN
+            machines m
+        ON
+            t.machine = m.id
+        WHERE
+            t.id = $1
+        "#,
+        body.id
+    )
+    .fetch_one(&mut *tx)
+    .await?;
+
+    tx.commit().await?;
+
+    Ok(Json(task))
 }
 
 pub async fn delete(
