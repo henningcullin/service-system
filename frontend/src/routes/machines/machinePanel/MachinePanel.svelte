@@ -5,9 +5,9 @@
     import { machineTypes, machineType, machineStatuses, machineStatus } from '$stores';
     import { getMachineTypes, getMachineStatuses } from '$utils';
 
-    const params = new URLSearchParams(location.href);
-    const type = params?.get('type');
-    const status = params?.get('status');
+    const url = new URL(location.href);
+    const type = url.searchParams?.get('type');
+    const status = url.searchParams?.get('status');
 
     getMachineStatuses();
     getMachineTypes();
@@ -18,7 +18,7 @@
 </div>
 
 <div class="w-full min-h-[65vh] flex items-center justify-center">
-    <Tabs.Root value="type" class="w-[400px]">
+    <Tabs.Root value={status ? 'status' : 'type'} class="w-[400px]">
         <Tabs.List class="grid w-full grid-cols-2">
             <Tabs.Trigger value="type">Type</Tabs.Trigger>
             <Tabs.Trigger value="status">Status</Tabs.Trigger>
