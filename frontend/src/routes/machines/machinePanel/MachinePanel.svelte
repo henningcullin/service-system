@@ -5,6 +5,10 @@
     import { machineTypes, machineType, machineStatuses, machineStatus } from '$stores';
     import { getMachineTypes, getMachineStatuses } from '$utils';
 
+    const params = new URLSearchParams(location.href);
+    const type = params?.get('type');
+    const status = params?.get('status');
+
     getMachineStatuses();
     getMachineTypes();
 </script>
@@ -31,6 +35,7 @@
                 }}
                 formStore={machineType}
                 sourceStore={machineTypes}
+                initialSelected={type}
                 apiEndpoint="machine_type"
             >
                 {#each $machineTypes as machineType}
@@ -50,6 +55,7 @@
                 }}
                 formStore={machineStatus}
                 sourceStore={machineStatuses}
+                initialSelected={status}
                 apiEndpoint="machine_status"
             >
                 {#each $machineStatuses as machineStatus}

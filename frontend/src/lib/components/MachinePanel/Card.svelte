@@ -9,6 +9,7 @@
     import { sendDelete, sendJSON } from '$utils';
     import { z } from 'zod';
 
+    export let initialSelected;
     export let formStore;
     export let sourceStore;
     export let apiEndpoint: string;
