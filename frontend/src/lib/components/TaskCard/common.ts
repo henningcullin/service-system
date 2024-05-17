@@ -78,6 +78,6 @@ export const formSchema = z.object({
     status: z.string().min(1, 'Status must be set').uuid('Must be a valid status'),
     archived: z.boolean({message:'Must be checked or unchecked'}).nullable(),
     executors: z.array(z.string().uuid()).nullable(),
-    machine: z.string().uuid('Must be a valid machine').nullable(),
-    due_at: z.date({message:'Must be a valid date'}).nullable(),
+    machine: z.string().nullable(),
+    due_at: z.date().nullable(),
   });
