@@ -18,7 +18,13 @@
     import Machine from '$routes/machine/machine.svelte';
     import MachinePanel from '$routes/machine/panel/machinePanel.svelte';
 
+    import Tasks from '$routes/tasks/tasks.svelte';
+    import Task from '$routes/task/task.svelte';
     import TaskPanel from '$routes/task/panel/taskPanel.svelte';
+
+    import Reports from '$routes/reports/reports.svelte';
+    import Report from '$routes/report/report.svelte';
+    import ReportPanel from '$routes/report/panel/reportPanel.svelte';
 
     import { ModeWatcher, localStorageKey, setMode, systemPrefersMode, userPrefersMode } from 'mode-watcher';
 
@@ -48,16 +54,22 @@
     <pushable class={IsSidebarOpen ? 'push dim' : ''} on:click={closeSidebar}>
         <Header></Header>
         <main>
-            <Route path="/" component={Mainmenu}></Route>
-            <Route path="/login/" component={Login}></Route>
+            <Route path="/" component={Mainmenu} />
+            <Route path="/login/" component={Login} />
 
-            <Route path="/machines/*" component={Machines}></Route>
-            <Route path="/machine/panel/*" component={MachinePanel}></Route>
-            <Route path="/machine/*" component={Machine}></Route>
+            <Route path="/machines/*" component={Machines} />
+            <Route path="/machine/panel/*" component={MachinePanel} />
+            <Route path="/machine/*" component={Machine} />
 
+            <Route path="/tasks/*" component={Tasks} />
             <Route path="/task/panel/*" component={TaskPanel} />
+            <Route path="/task/*" component={Task} />
 
-            <Route path="*" component={NotFound}></Route>
+            <Route path="/reports/*" component={Reports} />
+            <Route path="/report/panel/*" component={ReportPanel} />
+            <Route path="/report/*" component={Report} />
+
+            <Route path="*" component={NotFound} />
         </main>
     </pushable>
 </Router>
