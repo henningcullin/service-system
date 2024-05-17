@@ -8,6 +8,9 @@ import {
     tasks,
     taskStatuses,
     taskTypes,
+    reports,
+    reportStatuses,
+    reportTypes,
 } from '$stores';
 
 export async function sendJSON(url, method, body) {
@@ -84,4 +87,19 @@ export async function getTaskTypes() {
 export async function getTaskStatuses() {
     const data = await fetchJson('/api/auth/task_statuses');
     taskStatuses.set(data ?? []);
+}
+
+export async function getReports() {
+    const data = await fetchJson('/api/auth/reports');
+    reports.set(data ?? []);
+}
+
+export async function getReportTypes() {
+    const data = await fetchJson('/api/auth/report_types');
+    reportTypes.set(data ?? []);
+}
+
+export async function getReportStatuses() {
+    const data = await fetchJson('/api/auth/report_statuses');
+    reportStatuses.set(data ?? []);
 }
