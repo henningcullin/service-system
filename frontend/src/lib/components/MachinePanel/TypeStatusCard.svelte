@@ -26,6 +26,7 @@
         if (!hasFoundInitial) {
             const selected = $sourceStore?.find((item) => item.id === initialSelected);
             if (selected) {
+                state = EDITING_STATE;
                 formStore.set({ ...selected });
             }
         }
