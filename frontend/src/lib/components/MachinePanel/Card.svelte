@@ -71,7 +71,7 @@
             if (response.status !== 201) toast.error(`Could not create the ${cardProps.title}`);
             const data = await response.json();
             sourceStore.update((prev) => {
-                prev.push(data);
+                prev.push({ ...data });
                 return prev;
             });
             formStore.set(data);
