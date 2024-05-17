@@ -5,6 +5,7 @@ import {
     machineStatuses,
     machineTypes,
     machines,
+    task,
     tasks,
     taskStatuses,
     taskTypes,
