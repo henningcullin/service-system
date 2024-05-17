@@ -215,7 +215,7 @@ pub async fn update(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<UpdateMachine>,
-) -> Result<(StatusCode, Json<Machine>), ApiError> {
+) -> Result<Json<Machine>, ApiError> {
     check_permission(user.role.machine_edit)?;
 
     let mut tx = app_state.db.begin().await?;
@@ -297,7 +297,7 @@ pub async fn update(
 
     tx.commit().await?;
 
-    Ok((StatusCode::OK, Json(machine)))
+    Ok(Json(machine))
 }
 
 pub async fn delete(
