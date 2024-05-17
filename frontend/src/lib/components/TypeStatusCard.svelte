@@ -135,8 +135,11 @@
                     </Select.Content>
                 </Select.Root>
                 <div class="flex flex-col space-y-1.5">
-                    <Label for="name">Name</Label>
+                    <Label for="name" class={errors?.name?.length ? 'text-red-800' : ''}>Name</Label>
                     <Input id="name" bind:value={$formStore.name} placeholder={formProps.namePlaceholder} />
+                    {#if errors?.name?.length}
+                        <p class="text-red-800 text-xs pt-1">{errors?.name[0]}</p>
+                    {/if}
                 </div>
                 <div class="flex flex-col space-y-1.5">
                     <Label for="id">Id</Label>
