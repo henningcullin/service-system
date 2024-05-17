@@ -5,7 +5,35 @@
     import Button from '$components/ui/button/button.svelte';
     import Input from '$components/ui/input/input.svelte';
     import Label from '$components/ui/label/label.svelte';
-    import { sendDelete } from '$utils';
+    import { toast } from 'svelte-sonner';
+    import { sendDelete, sendJSON } from '$utils';
+    import { z } from 'zod';
+
+    export let formStore;
+    export let sourceStore;
+    export let apiEndpoint: string;
+    export let cardProps: { title: string; desc: string };
+    export let formProps: { selectPlaceholder: string; namePlaceholder: string };
+
+    const formSchema = z.object({
+        name: z.string().min(1, 'Name is required').max(255, 'Name must be 255 characters or less'),
+    });
+
+    const errors: { name: string[] } = { name: [] };
+    $: hasErrors = errors?.name?.length;
+
+    $: {
+        if (!VIEWING_STATE) {
+            const formStatus = formSchema.safeParse($formStore);
+            if (!formStatus.success) {
+                errors.name = formStatus?.error?.flatten()?.fieldErrors?.name;
+            } else {
+                errors.name = [];
+            }
+        } else {
+            errors.name = [];
+        }
+    }
 
     const VIEWING_STATE = 0;
     const CREATING_STATE = 1;
@@ -26,22 +54,51 @@
     }
 
     async function deleteItem() {
-        sendDelete(`/api/auth/${apiEndpoint}/?id=${$formStore.id}`);
+        try {
+            const response = await sendDelete(`/api/auth/${apiEndpoint}/?id=${$formStore.id}`);
+            if (response.status !== 204) return toast.error(`Could not delete the ${cardProps.title}`);
+            sourceStore.update((prev) => prev.filter((item) => item.id !== $formStore.id));
+            toast.success(`Deleted the ${cardProps.title}`);
+        } catch (error) {
+            toast.error(`Could not delete the ${cardProps.title}`);
+        }
     }
 
-    function createItem() {
-        console.log('we create');
+    async function createItem() {
+        try {
+            const response = await sendJSON(`/api/auth/${apiEndpoint}`, 'POST', { name: $formStore.name });
+            if (response.status !== 201) toast.error(`Could not create the ${cardProps.title}`);
+            const data = await response.json();
+            sourceStore.update((prev) => {
+                prev.push(data);
+                return prev;
+            });
+            formStore.set(data);
+            toast.success(`Created the ${cardProps.title}`);
+            state = EDITING_STATE;
+        } catch (error) {
+            toast.error(`Could not create the ${cardProps.title}`);
+        }
     }
 
-    function updateItem() {
-        console.log('we update');
-    }
+    async function updateItem() {
+        try {
+            const response = await sendJSON(`/api/auth/${apiEndpoint}`, 'PUT', {
+                id: $formStore.id,
+                name: $formStore.name,
+            });
 
-    export let formStore;
-    export let sourceStore;
-    export let apiEndpoint: string;
-    export let cardProps: { title: string; desc: string };
-    export let formProps: { selectPlaceholder: string; namePlaceholder: string };
+            if (response.status !== 204) toast.error(`Could not save the ${cardProps.title}`);
+            sourceStore.update((prev) => {
+                const index = prev.findIndex((item) => item.id === $formStore.id);
+                prev[index] = $formStore;
+                return prev;
+            });
+            state = VIEWING_STATE;
+        } catch (error) {
+            toast.error(`Could not save the ${cardProps.title}`);
+        }
+    }
 </script>
 
 <Card.Root>
@@ -80,12 +137,14 @@
             }}>New</Button
         >
         <Button
+            disabled={state === CREATING_STATE || !$formStore?.id}
             variant="destructive"
             on:click={() => {
                 open = true;
             }}>Delete</Button
         >
         <Button
+            disabled={hasErrors || state === VIEWING_STATE}
             on:click={() => {
                 if (state === CREATING_STATE) createItem();
                 else if (state === EDITING_STATE) updateItem();
