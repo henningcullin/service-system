@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
     import * as Accordion from '$components/ui/accordion/index.js';
     import Separator from '$components/ui/separator/separator.svelte';
     import { SidebarOpen } from '$lib/stores';
@@ -7,6 +7,7 @@
     import ClipboardList from 'lucide-svelte/icons/clipboard-list';
     import Flag from 'lucide-svelte/icons/flag';
     import CPU from 'lucide-svelte/icons/cpu';
+    import Users from 'lucide-svelte/icons/users';
 
     $: IsSidebarOpen = $SidebarOpen;
 
@@ -51,6 +52,16 @@
                     <Link to="/machine/?new=true" on:click={close}>Create Machine</Link>
                     <Separator />
                     <Link to="/machine/panel/" on:click={close}>Machine Panel</Link>
+                </div>
+            </Accordion.Content>
+        </Accordion.Item>
+        <Accordion.Item value="users">
+            <Accordion.Trigger><Users />Users</Accordion.Trigger>
+            <Accordion.Content>
+                <div class="grid grid-cols-1 gap-2">
+                    <Link to="/users" on:click={close}>Users</Link>
+                    <Separator />
+                    <Link to="/user/?new=true" on:click={close}>Create User</Link>
                 </div>
             </Accordion.Content>
         </Accordion.Item>
