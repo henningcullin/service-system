@@ -309,8 +309,10 @@ pub async fn update(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<UpdateReport>,
-) -> Result<StatusCode, ApiError> {
+) -> Result<Json<Report>, ApiError> {
     check_permission(user.role.report_edit)?;
+
+    let mut tx = app_state.db.begin().await?;
 
     let mut query_builder = QueryBuilder::<Postgres>::new("UPDATE reports SET");
     let mut separated_list = query_builder.separated(",");
@@ -335,12 +337,85 @@ pub async fn update(
     query_builder.push(" WHERE id = ");
     query_builder.push_bind(body.id);
 
-    let result = query_builder.build().execute(&app_state.db).await?;
+    let result = query_builder.build().execute(&mut *tx).await?;
 
-    match result.rows_affected() {
-        1 => Ok(StatusCode::NO_CONTENT),
-        _ => Ok(StatusCode::NOT_FOUND),
+    if result.rows_affected() != 1 {
+        return Err(ApiError::GeneralOversight(
+            "Provided machine to update didn't exist".to_owned(),
+        ));
     }
+
+    let report = query_as!(
+        Report,
+        r#"
+        SELECT
+            r.id,
+            r.title,
+            r.description,
+            (
+                rt.id,
+                rt.name
+            ) AS "report_type!: ReportType",
+            (
+                rs.id,
+                rs.name
+            ) AS "status!: ReportStatus",
+            r.archived,
+            (
+                u.id,
+                u.first_name,
+                u.last_name,
+                u.email,
+                u.image
+            ) AS "creator!: ShortUser",
+            (
+                m.id,
+                m.name,
+                m.make,
+                m.image
+            ) AS "machine?: ShortMachine",
+            (
+                SELECT array_agg(
+                    (
+                        rd.uri,
+                        rd.name,
+                        rd.description
+                    )
+                )
+                FROM report_documents rd
+                WHERE rd.report_id = r.id
+            ) AS "documents: Vec<ReportDocument>",
+            r.created,
+            r.edited
+        FROM
+            reports r
+        INNER JOIN
+            report_types rt
+        ON
+            r.report_type = rt.id
+        INNER JOIN
+            report_statuses rs
+        ON
+            r.status = rs.id
+        INNER JOIN
+            users u
+        ON
+            r.creator = u.id
+        LEFT JOIN
+            machines m
+        ON
+            r.machine = m.id
+        WHERE
+            r.id = $1
+        "#,
+        body.id
+    )
+    .fetch_one(&mut *tx)
+    .await?;
+
+    tx.commit().await?;
+
+    Ok(Json(report))
 }
 
 pub async fn delete(
