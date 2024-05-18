@@ -19,7 +19,6 @@
                         <div class="space-y-1">
                             <h4 class="text-sm font-semibold">{value.name}</h4>
                             <p class="text-sm">Level {value.level}</p>
-
                             <div class="flex items-center pt-2">
                                 <span class="text-xs text-muted-foreground"> {value.id} </span>
                             </div>
