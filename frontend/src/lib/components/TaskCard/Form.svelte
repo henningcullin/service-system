@@ -198,9 +198,6 @@
                     return;
                 }
             }
-
-            console.log(changedFields);
-
             if (Object.keys(changedFields).length < 2) return;
             const response = await sendJSON('/api/auth/task', 'PUT', changedFields);
             if (response.status !== 200) return toast.error('Failed to update the task');
@@ -210,7 +207,6 @@
             loadFields();
             toast.success('Saved the task');
         } catch (error) {
-            console.log(error);
             toast.error('Failed to update the task');
         }
     }
