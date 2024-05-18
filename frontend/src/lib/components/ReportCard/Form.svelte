@@ -1,7 +1,7 @@
 <script>
     import { writable } from 'svelte/store';
     import { report, reportTypes, reportStatuses, machines } from '$stores';
-    import { sendJSON, getOneTask } from '$utils';
+    import { sendJSON } from '$utils';
     import { navigate, Link } from 'svelte-navigator';
     import Input from './Input.svelte';
     import {
@@ -14,7 +14,6 @@
         loadFields,
         updateUrl,
         formSchema,
-        due_at_converter,
     } from './common';
     import Button from '$components/ui/button/button.svelte';
     import { z } from 'zod';
@@ -22,11 +21,6 @@
     import SelectItem from '$components/ui/select/select-item.svelte';
     import * as HoverCard from '$lib/components/ui/hover-card/index.js';
     import { toast } from 'svelte-sonner';
-    import Label from '$components/ui/label/label.svelte';
-    import Checkbox from '$components/ui/checkbox/checkbox.svelte';
-    import { Calendar } from '$lib/components/ui/calendar/index.js';
-    import CalendarDays from 'lucide-svelte/icons/calendar-days';
-    import * as Popover from '$lib/components/ui/popover/index.js';
 
     const selectedType = writable({ label: '', value: '' });
     const selectedStatus = writable({ label: '', value: '' });
