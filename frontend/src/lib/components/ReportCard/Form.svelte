@@ -117,7 +117,11 @@
         try {
             const changedFields = { id: $form?.id };
             const { title, description, report_type, status, machine } = $form;
-
+            if (title !== $report?.title) changedFields['title'] = title;
+            if (description !== $report?.description) changedFields['description'] = description;
+            if (report_type !== $report?.report_type?.id) changedFields['report_type'] = report_type;
+            if (status !== $report?.status?.id) changedFields['status'] = status;
+            if (machine !== $report?.machine?.id) changedFields['machine'] = machine;
             if (Object.keys(changedFields).length < 2) return;
             const response = await sendJSON('/api/auth/report', 'PUT', changedFields);
             if (response.status !== 200) return toast.error('Failed to update the report');
