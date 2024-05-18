@@ -1,6 +1,7 @@
 import { writable } from 'svelte/store';
 import {navigate} from 'svelte-navigator';
 import {task} from '$stores';
+import {CalendarDate, GregorianCalendar, parseDate} from '@internationalized/date';
 
 export const deleteDialogOpen = writable(false);
 
@@ -39,6 +40,10 @@ export function clearFields() {
 
 export function loadFields() {
     const unsubscribe = task.subscribe(value => {
+
+        const due_at_date = value?.due_at ? new Date(value?.due_at) : null;
+        const due_at = due_at_date ? new CalendarDate(new GregorianCalendar(), due_at_date.getUTCFullYear(), due_at_date.getUTCMonth() + 1, due_at_date.getUTCDate()) : null;
+
         form.update(formValue => {
             formValue.id = value?.id;
             formValue.title = value?.title;
@@ -51,7 +56,7 @@ export function loadFields() {
             formValue.machine = value?.machine?.id;
             formValue.created = new Date(value?.created)?.toLocaleString();
             formValue.edited = new Date(value?.edited)?.toLocaleString();
-            formValue.due_at =  value?.due_at ? new Date(value?.due_at)?.toDateString() : null;
+            formValue.due_at =  due_at ?? null;
             return formValue;
         });
     });

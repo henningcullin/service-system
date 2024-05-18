@@ -130,7 +130,7 @@
             const data = await response.json();
             task.set(data);
             updateUrl($task.id);
-            navigate('?view=true');
+            navigate('?edit=true');
             loadFields();
         } catch (error) {
             toast.error('Failed to create the task');
@@ -141,14 +141,34 @@
         try {
             const changedFields = { id: $form.id };
             const { title, description, task_type, status, archived, executors, machine, due_at } = $form;
-            console.log(changedFields);
-            return;
+            if (title !== $task?.title) {
+                changedFields['title'] = title;
+            }
+            if (description !== $task?.description) {
+                changedFields['description'] = description;
+            }
+            if (task_type !== $task?.task_type?.id) {
+                changedFields['task_type'] = task_type;
+            }
+            if (status !== $task?.status?.id) {
+                changedFields['status'] = status;
+            }
+            if (archived !== $task?.archived) {
+                changedFields['archived'] = archived;
+            }
+            if (machine !== $task?.machine?.id) {
+                changedFields['machine'] = machine;
+            }
+            const killMe = due_at.toString() + 'T22:00:00Z';
+            if (killMe !== $task?.due_at) {
+                changedFields['due_at'] = killMe;
+            }
             if (Object.keys(changedFields).length < 2) return;
             const response = await sendJSON('/api/auth/task', 'PUT', changedFields);
             if (response.status !== 200) return toast.error('Failed to update the task');
             const data = await response.json();
             task.set(data);
-            navigate('?view=true');
+            navigate('?edit=true');
             loadFields();
         } catch (error) {
             toast.error('Failed to update the task');
