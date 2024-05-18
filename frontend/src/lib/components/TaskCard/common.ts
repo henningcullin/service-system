@@ -52,7 +52,7 @@ export function loadFields() {
             formValue.machine = value?.machine?.id;
             formValue.created = new Date(value?.created)?.toLocaleString();
             formValue.edited = new Date(value?.edited)?.toLocaleString();
-            formValue.due_at =  new Date(value?.due_at)?.toLocaleString();
+            formValue.due_at =  value?.due_at ? new Date(value?.due_at)?.toDateString() : null;
             return formValue;
         });
     });
@@ -79,6 +79,5 @@ export const formSchema = z.object({
     status: z.string().min(1, 'Status must be set').uuid('Must be a valid status'),
     archived: z.boolean({message:'Must be checked or unchecked'}).nullable(),
     executors: z.array(z.string().uuid()).nullable(),
-    machine: z.string().nullable(),
-    due_at: z.date().nullable(),
+    machine: z.string().nullable()
   });
