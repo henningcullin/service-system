@@ -1,7 +1,7 @@
-<script lang="ts">
+<script>
     import { writable } from 'svelte/store';
     import { task, taskTypes, taskStatuses, users, machines } from '$stores';
-    import { sendJSON } from '$utils';
+    import { sendJSON, getOneTask } from '$utils';
     import { navigate, Link } from 'svelte-navigator';
     import Input from './Input.svelte';
     import {
@@ -132,6 +132,7 @@
             updateUrl($task.id);
             navigate('?edit=true');
             loadFields();
+            toast.success('Created the task');
         } catch (error) {
             toast.error('Failed to create the task');
         }
@@ -139,7 +140,7 @@
 
     async function updateTask() {
         try {
-            const changedFields = { id: $form.id };
+            const changedFields = { id: $form?.id };
             const { title, description, task_type, status, archived, executors, machine, due_at } = $form;
             if (title !== $task?.title) {
                 changedFields['title'] = title;
@@ -159,10 +160,47 @@
             if (machine !== $task?.machine?.id) {
                 changedFields['machine'] = machine;
             }
-            const killMe = due_at.toString() + 'T22:00:00Z';
+            const killMe = due_at ? due_at.toString() + 'T22:00:00Z' : null;
             if (killMe !== $task?.due_at) {
                 changedFields['due_at'] = killMe;
             }
+
+            if (executors && executors instanceof Array) {
+                const executorsToUpdate = [];
+                const oldExecutors =
+                    $task?.executors && $task?.executors instanceof Array ? $task?.executors?.map((usr) => usr.id) : [];
+                for (const executor of executors) {
+                    const isNew = !oldExecutors.includes(executor);
+                    if (isNew) executorsToUpdate.push({ id: executor, type: 'insert' });
+                }
+                for (const executor of oldExecutors) {
+                    const isDeleted = !executors.includes(executor);
+                    if (isDeleted) executorsToUpdate.push({ id: executor, type: 'delete' });
+                }
+                for (const executor of executorsToUpdate) {
+                    if (executor?.type === 'insert') {
+                        await sendJSON('/api/auth/task_executor', 'POST', {
+                            task_id: $task?.id,
+                            user_id: executor?.id,
+                        });
+                    } else {
+                        await sendJSON('/api/auth/task_executor', 'DELETE', {
+                            task_id: $task?.id,
+                            user_id: executor?.id,
+                        });
+                    }
+                }
+                if (Object.keys(changedFields).length < 2) {
+                    await getOneTask($task?.id);
+                    navigate('?edit=true');
+                    loadFields();
+                    toast.success('Saved the task executors');
+                    return;
+                }
+            }
+
+            console.log(changedFields);
+
             if (Object.keys(changedFields).length < 2) return;
             const response = await sendJSON('/api/auth/task', 'PUT', changedFields);
             if (response.status !== 200) return toast.error('Failed to update the task');
@@ -170,7 +208,9 @@
             task.set(data);
             navigate('?edit=true');
             loadFields();
+            toast.success('Saved the task');
         } catch (error) {
+            console.log(error);
             toast.error('Failed to update the task');
         }
     }
