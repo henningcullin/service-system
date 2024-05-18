@@ -9,6 +9,7 @@ import {
     tasks,
     taskStatuses,
     taskTypes,
+    report,
     reports,
     reportStatuses,
     reportTypes,
@@ -96,6 +97,13 @@ export async function getTaskTypes() {
 export async function getTaskStatuses() {
     const data = await fetchJson('/api/auth/task_statuses');
     taskStatuses.set(data ?? []);
+}
+
+export async function getOneReport(id) {
+    const data = await fetchJson(`/api/auth/report?report_id=${id}`);
+    if (data instanceof Array && data?.length === 1) {
+        report.set(data[0]);
+    } else report.set({});
 }
 
 export async function getReports() {

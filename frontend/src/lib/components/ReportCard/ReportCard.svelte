@@ -3,7 +3,7 @@
     import { useLocation } from 'svelte-navigator';
     import { onMount } from 'svelte';
     import Separator from '$components/ui/separator/separator.svelte';
-    import { getMachines, getUsers, getReportTypes, getReportStatuses } from '$utils';
+    import { getMachines, getUsers, getReportTypes, getReportStatuses, getOneReport } from '$utils';
     import { id, isCreating, isEditing, isViewing, loadFields } from './common';
     import Form from './Form.svelte';
 
@@ -30,11 +30,11 @@
     });
 </script>
 
-<div class="space-y-0.5">
-    <h2 class="text-2xl font-bold tracking-tight pb-2">Task</h2>
+<div class="space-y-0.5 min-w-full">
+    <h2 class="text-2xl font-bold tracking-tight pb-2">Report</h2>
     <Actions />
 </div>
 <Separator class="my-6" />
-<div>
+<div class="min-w-full">
     <Form />
 </div>
