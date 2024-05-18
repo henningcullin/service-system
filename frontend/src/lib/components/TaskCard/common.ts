@@ -39,6 +39,7 @@ export function clearFields() {
 
 export function loadFields() {
     const unsubscribe = task.subscribe(value => {
+        console.log(value);
         form.update(formValue => {
             formValue.id = value?.id;
             formValue.title = value?.title;
@@ -47,8 +48,8 @@ export function loadFields() {
             formValue.status = value?.status?.id;
             formValue.archived = value?.archived;
             formValue.creator = value?.creator;
-            formValue.executors = value?.executors;
-            formValue.machine = value?.machine;
+            formValue.executors = value?.executors instanceof Array ? value?.executors?.map(exec => exec?.id) : [];
+            formValue.machine = value?.machine?.id;
             formValue.created = new Date(value?.created)?.toLocaleString();
             formValue.edited = new Date(value?.edited)?.toLocaleString();
             formValue.due_at =  new Date(value?.due_at)?.toLocaleString();
