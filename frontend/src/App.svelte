@@ -26,6 +26,9 @@
     import Report from '$routes/report/report.svelte';
     import ReportPanel from '$routes/report/panel/reportPanel.svelte';
 
+    import Users from '$routes/users/users.svelte';
+    import User from '$routes/user/user.svelte';
+
     import { ModeWatcher, localStorageKey, setMode, systemPrefersMode, userPrefersMode } from 'mode-watcher';
 
     $: IsSidebarOpen = $SidebarOpen;
@@ -68,6 +71,9 @@
             <Route path="/reports/*" component={Reports} />
             <Route path="/report/panel/*" component={ReportPanel} />
             <Route path="/report/*" component={Report} />
+
+            <Route path="/users/*" component={Users} />
+            <Route path="/user/*" component={User} />
 
             <Route path="*" component={NotFound} />
         </main>
