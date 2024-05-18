@@ -1,8 +1,8 @@
 <script>
     import { writable } from 'svelte/store';
-    import { report, reportTypes, reportStatuses, machines } from '$stores';
+    import { user, roles, facilities } from '$stores';
     import { sendJSON } from '$utils';
-    import { navigate, Link } from 'svelte-navigator';
+    import { navigate } from 'svelte-navigator';
     import Input from './Input.svelte';
     import {
         fieldErrors,
@@ -19,36 +19,30 @@
     import { z } from 'zod';
     import Select from './Select.svelte';
     import SelectItem from '$components/ui/select/select-item.svelte';
-    import * as HoverCard from '$lib/components/ui/hover-card/index.js';
+    import Label from '$components/ui/label/label.svelte';
+    import Checkbox from '$components/ui/checkbox/checkbox.svelte';
     import { toast } from 'svelte-sonner';
 
-    const selectedType = writable({ label: '', value: '' });
-    const selectedStatus = writable({ label: '', value: '' });
-    const selectedMachine = writable({ label: '', value: '' });
+    const selectedRole = writable({ label: '', value: '' });
+    const selectedFacility = writable({ label: '', value: '' });
 
-    $: selectedType.set(
-        $form.report_type
-            ? { label: $reportTypes?.find((rt) => rt.id === $form?.report_type)?.name, value: $form?.report_type }
+    $: selectedRole.set(
+        $form.role ? { label: $roles?.find((r) => r.id === $form?.role)?.name, value: $form?.role } : null,
+    );
+    $: selectedFacility.set(
+        $form.facility
+            ? { label: $facilities?.find((f) => f.id === $form?.facility)?.name, value: $form?.facility }
             : null,
     );
-    $: selectedStatus.set(
-        $form.status
-            ? { label: $reportStatuses?.find((rs) => rs.id === $form?.status)?.name, value: $form?.status }
-            : null,
-    );
-    $: selectedMachine.set(
-        $form.machine ? { label: $machines?.find((f) => f.id === $form?.machine)?.name, value: $form?.machine } : null,
-    );
-
     $: {
         if (!$isViewing) {
             try {
                 formSchema.parse($form);
                 $fieldErrors = {
-                    title: '',
-                    description: '',
-                    task_type: '',
-                    status: '',
+                    first_name: '',
+                    last_name: '',
+                    email: '',
+                    role: '',
                 };
                 $hasErrors = false;
             } catch (e) {
@@ -60,10 +54,10 @@
             }
         } else {
             $fieldErrors = {
-                title: '',
-                description: '',
-                task_type: '',
-                status: '',
+                first_name: '',
+                last_name: '',
+                email: '',
+                role: '',
             };
             $hasErrors = false;
         }
@@ -71,139 +65,131 @@
 
     let isSaving = false;
 
-    async function saveReport() {
+    async function saveUser() {
         if (isSaving) return;
         isSaving = true;
         switch (true) {
             case $isViewing:
                 return (isSaving = false);
             case $isCreating:
-                await createReport();
+                await createUser();
                 break;
             case $isEditing:
-                await updateReport();
+                await updateUser();
                 break;
         }
         isSaving = false;
     }
 
-    async function createReport() {
+    async function createUser() {
         try {
-            const { title, description, report_type, status, machine } = $form;
-            const formObj = { title, description, report_type, status };
-            if (machine) {
-                formObj['machine'] = machine;
+            const { first_name, last_name, email, role, phone, active, occupation, facility } = $form;
+            const formObj = { first_name, last_name, email, role };
+            if (phone) {
+                formObj['phone'] = phone;
             }
-            const response = await sendJSON('/api/auth/report', 'POST', formObj);
-            if (response.status !== 201) return toast.error('Failed to create the report');
+            if (occupation) {
+                formObj['occupation'] = occupation;
+            }
+            if (facility) {
+                formObj['facility'] = facility;
+            }
+            if (active !== null && active !== undefined) {
+                formObj['active'] = active;
+            }
+            const response = await sendJSON('/api/auth/user', 'POST', formObj);
+            if (response.status !== 201) return toast.error('Failed to create the user');
             const data = await response.json();
-            report.set(data);
-            updateUrl($report.id);
+            user.set(data);
+            updateUrl($user.id);
             navigate('?edit=true');
             loadFields();
-            toast.success('Created the report');
+            toast.success('Created the user');
         } catch (error) {
-            toast.error('Failed to create the report');
+            toast.error('Failed to create the user');
         }
     }
 
-    async function updateReport() {
+    async function updateUser() {
         try {
             const changedFields = { id: $form?.id };
-            const { title, description, report_type, status, machine } = $form;
-            if (title !== $report?.title) changedFields['title'] = title;
-            if (description !== $report?.description) changedFields['description'] = description;
-            if (report_type !== $report?.report_type?.id) changedFields['report_type'] = report_type;
-            if (status !== $report?.status?.id) changedFields['status'] = status;
-            if (machine !== $report?.machine?.id) changedFields['machine'] = machine;
+            const { first_name, last_name, email, role, phone, active, occupation, facility } = $form;
+            if (first_name !== $user?.first_name) changedFields['title'] = title;
+            if (last_name !== $user?.last_name) changedFields['last_name'] = last_name;
+            if (email !== $user?.email) changedFields['email'] = email;
+            if (role !== $user?.role?.id) changedFields['role'] = role;
+            if (phone !== $user?.phone) changedFields['phone'] = phone;
+            if (active !== $user?.active) changedFields['active'] = active;
+            if (occupation !== $user?.occupation) changedFields['occupation'] = occupation;
+            if (facility !== $user?.facility?.id) changedFields['facility'] = facility;
             if (Object.keys(changedFields).length < 2) return;
-            const response = await sendJSON('/api/auth/report', 'PUT', changedFields);
-            if (response.status !== 200) return toast.error('Failed to update the report');
+            const response = await sendJSON('/api/auth/user', 'PUT', changedFields);
+            if (response.status !== 200) return toast.error('Failed to update the user');
             const data = await response.json();
-            report.set(data);
+            user.set(data);
             navigate('?edit=true');
             loadFields();
-            toast.success('Saved the report');
+            toast.success('Saved the user');
         } catch (error) {
-            toast.error('Failed to update the report');
+            toast.error('Failed to update the user');
         }
     }
 </script>
 
-<form on:submit|preventDefault={saveReport} class="space-y-4 w-full md:w-auto">
+<form on:submit|preventDefault={saveUser} class="space-y-4 w-full md:w-auto">
     <Input properties={{ id: 'id', label: 'Id' }} bind:value={$form.id} disabled={true} />
 
-    <Input properties={{ id: 'title', label: 'Title' }} bind:value={$form.title} errors={$fieldErrors.title} />
-
     <Input
-        properties={{ id: 'description', label: 'Description' }}
-        bind:value={$form.description}
-        errors={$fieldErrors.description}
+        properties={{ id: 'first_name', label: 'First Name' }}
+        bind:value={$form.first_name}
+        errors={$fieldErrors.first_name}
     />
+    <Input
+        properties={{ id: 'last_name', label: 'Last Name' }}
+        bind:value={$form.last_name}
+        errors={$fieldErrors.last_name}
+    />
+    <Input properties={{ id: 'email', label: 'Email' }} bind:value={$form.email} errors={$fieldErrors.email} />
+    <Input properties={{ id: 'phone', label: 'Phone' }} bind:value={$form.phone} />
 
     <Select
-        properties={{ id: 'report_type', label: 'Type', placeholder: 'Select a type' }}
-        bind:selected={$selectedType}
+        properties={{ id: 'role', label: 'Role', placeholder: 'Select a role' }}
+        bind:selected={$selectedRole}
         onSelectedChange={(opt) => {
-            opt && ($form.report_type = opt.value);
+            opt && ($form.role = opt.value);
         }}
-        errors={$fieldErrors?.report_type}
+        errors={$fieldErrors?.role}
     >
-        {#each $reportTypes as reportType}
-            <SelectItem value={reportType.id} label={reportType.name} />
+        {#each $roles as role}
+            <SelectItem value={role.id} label={role.name} />
         {/each}
     </Select>
 
     <Select
-        properties={{ id: 'status', label: 'Status', placeholder: 'Select a status' }}
-        bind:selected={$selectedStatus}
+        properties={{ id: 'facility', label: 'Facility', placeholder: 'Select a facility' }}
+        bind:selected={$selectedFacility}
         onSelectedChange={(opt) => {
-            opt && ($form.status = opt.value);
-        }}
-        errors={$fieldErrors?.status}
-    >
-        {#each $reportStatuses as reportStatus}
-            <SelectItem value={reportStatus.id} label={reportStatus.name} />
-        {/each}
-    </Select>
-
-    <Select
-        properties={{ id: 'machine', label: 'Machine', placeholder: 'Select a machine' }}
-        bind:selected={$selectedMachine}
-        onSelectedChange={(opt) => {
-            opt && ($form.machine = opt.value);
+            opt && ($form.facility = opt.value);
         }}
     >
-        {#each $machines as machine}
-            <SelectItem value={machine.id} label={machine.name} />
+        {#each $facilities as facility}
+            <SelectItem value={facility.id} label={facility.name} />
         {/each}
     </Select>
 
     <div>
-        {#if $report?.creator?.id}
-            <HoverCard.Root>
-                <HoverCard.Trigger>
-                    <Link to="/user/{$report?.creator?.id}" class="ml-auto text-xs text-muted-foreground"
-                        >Creator {$report?.creator?.first_name}</Link
-                    >
-                </HoverCard.Trigger>
-                <HoverCard.Content class="w-80">
-                    <div class="flex justify-between space-x-4">
-                        <div class="space-y-1">
-                            <h4 class="text-sm font-semibold">
-                                {$report?.creator?.first_name}, {$report?.creator?.last_name}
-                            </h4>
-                            <a class="text-sm" href="mailto:{$report?.creator?.email}">{$report?.creator?.email}</a>
-                            <div class="flex items-center pt-2">
-                                <span class="text-xs text-muted-foreground"> {$report?.creator?.id} </span>
-                            </div>
-                        </div>
-                    </div>
-                </HoverCard.Content>
-            </HoverCard.Root>
-        {/if}
-        <div class="ml-auto text-xs text-muted-foreground">Created {$form.created}</div>
-        <div class="ml-auto text-xs text-muted-foreground pt-2">Edited {$form.edited}</div>
+        <Checkbox id="active" bind:checked={$form.active} disabled={$isViewing} />
+        <Label
+            for="active"
+            class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >Active</Label
+        >
+    </div>
+
+    <Input properties={{ id: 'occupation', label: 'Occupation' }} bind:value={$form.occupation} />
+
+    <div>
+        <div class="ml-auto text-xs text-muted-foreground">Last login {$form.last_login}</div>
     </div>
 
     <Button type="submit" disabled={$isViewing || $hasErrors}>Save</Button>
