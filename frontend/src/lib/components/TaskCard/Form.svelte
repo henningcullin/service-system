@@ -112,16 +112,20 @@
     async function createTask() {
         try {
             const { title, description, task_type, status, machine, executors, due_at, archived } = $form;
-            const response = await sendJSON('/api/auth/task', 'POST', {
-                title,
-                description,
-                task_type,
-                status,
-                machine,
-                executors,
-                due_at: due_at_converter(due_at),
-                archived,
-            });
+            const formObj = { title, description, task_type, status };
+            if (machine) {
+                formObj['machine'] = machine;
+            }
+            if (executors && executors instanceof Array) {
+                formObj['executors'] = executors;
+            }
+            if (archived !== undefined && archived !== null) {
+                formObj['archived'] = archived;
+            }
+            if (due_at !== undefined && due_at !== null) {
+                formObj['due_at'] = due_at_converter(due_at);
+            }
+            const response = await sendJSON('/api/auth/task', 'POST', formObj);
             if (response.status !== 201) return toast.error('Failed to create the task');
             const data = await response.json();
             task.set(data);
@@ -135,14 +139,10 @@
 
     async function updateTask() {
         try {
-            console.log($form);
-            return;
             const changedFields = { id: $form.id };
-            for (const field in $form) {
-                if ($form[field] !== $task[field] && field !== 'executors') {
-                    changedFields[field] = $form[field];
-                }
-            }
+            const { title, description, task_type, status, archived, executors, machine, due_at } = $form;
+            console.log(changedFields);
+            return;
             if (Object.keys(changedFields).length < 2) return;
             const response = await sendJSON('/api/auth/task', 'PUT', changedFields);
             if (response.status !== 200) return toast.error('Failed to update the task');
