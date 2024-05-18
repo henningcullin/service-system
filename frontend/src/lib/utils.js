@@ -82,8 +82,10 @@ export async function getTasks() {
 }
 
 export async function getOneTask(id) {
-    const data = await fetchJson(`/api/auth/task?id=${id}`);
-    task.set(data ?? {});
+    const data = await fetchJson(`/api/auth/task?task_id=${id}`);
+    if (data instanceof Array && data?.length === 1) {
+        task.set(data[0]);
+    } else task.set({});
 }
 
 export async function getTaskTypes() {
