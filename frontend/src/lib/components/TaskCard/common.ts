@@ -81,8 +81,6 @@ export const formSchema = z.object({
     description: z.string().min(1, 'Description is required').max(255, 'Description must be 255 characters or less'),
     task_type: z.string().min(1, 'Type must be set').uuid('Must be a valid type'),
     status: z.string().min(1, 'Status must be set').uuid('Must be a valid status'),
-    archived: z.boolean().nullable(),
-    executors: z.array(z.string().uuid().nullable()).nullable(),
     machine: z.string().nullable()
 });
 
