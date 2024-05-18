@@ -7,7 +7,7 @@ use axum::{
     Extension, Json,
 };
 use rand_core::OsRng;
-use sqlx::{query_as, query_scalar, Postgres, QueryBuilder};
+use sqlx::{query, query_as, query_scalar, Postgres, QueryBuilder};
 use validator::Validate;
 
 use crate::{
@@ -392,6 +392,89 @@ pub async fn update(
     query_builder.push_bind(body.id);
 
     let result = query_builder.build().execute(&app_state.db).await?;
+
+    match result.rows_affected() {
+        1 => Ok(StatusCode::NO_CONTENT),
+        _ => Ok(StatusCode::NOT_FOUND),
+    }
+}
+
+pub async fn delete(
+    Extension(user): Extension<User>,
+    State(app_state): State<Arc<AppState>>,
+    Query(params): Query<QueryUser>,
+) -> Result<StatusCode, ApiError> {
+    check_permission(user.role.user_delete)?;
+
+    let target_user = query_as!(
+        User,
+        r#"
+        SELECT
+            u.id,
+            u.first_name,
+            u.last_name,
+            u.email,
+            u.phone,
+            (
+                r.id,
+                r.name,
+                r.level,
+                r.has_password,
+                r.user_view,
+                r.user_create,
+                r.user_edit,
+                r.user_delete,
+                r.machine_view,
+                r.machine_create,
+                r.machine_edit,
+                r.machine_delete,
+                r.task_view,
+                r.task_create,
+                r.task_edit,
+                r.task_delete,
+                r.report_view,
+                r.report_create,
+                r.report_edit,
+                r.report_delete,
+                r.facility_view,
+                r.facility_create,
+                r.facility_edit,
+                r.facility_delete
+            ) AS "role!: Role",
+            u.active,
+            u.last_login,
+            u.occupation,
+            u.image,
+            (
+                f.id,
+                f.name,
+                f.address
+            ) AS "facility?: Facility"
+        FROM
+            users u
+        INNER JOIN
+            roles r
+        ON
+            u.role = r.id
+        LEFT JOIN
+            facilities f
+        ON
+            u.facility = f.id
+        WHERE
+            u.id = $1
+        "#,
+        params.id
+    )
+    .fetch_one(&app_state.db)
+    .await?;
+
+    if target_user.role.level <= user.role.level {
+        return Err(ApiError::Forbidden(ForbiddenReason::MissingPermission));
+    }
+
+    let result = query!(r#"DELETE FROM users WHERE id = $1"#, params.id)
+        .execute(&app_state.db)
+        .await?;
 
     match result.rows_affected() {
         1 => Ok(StatusCode::NO_CONTENT),
