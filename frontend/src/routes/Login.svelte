@@ -85,7 +85,7 @@
 </script>
 
 <div
-    class="container relative min-h-screen flex items-center justify-center md:grid lg:max-w-none lg:grid-cols-1 lg:px-0"
+    class="container relative min-h-[90vh] flex items-center justify-center md:grid lg:max-w-none lg:grid-cols-1 lg:px-0"
 >
     <div class="mx-auto flex w-full h-full flex-col justify-center items-center space-y-6 transform -translate-y-10">
         <div class="flex flex-col space-y-2 text-center">
