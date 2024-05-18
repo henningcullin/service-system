@@ -39,7 +39,6 @@ export function clearFields() {
 
 export function loadFields() {
     const unsubscribe = task.subscribe(value => {
-        console.log(value);
         form.update(formValue => {
             formValue.id = value?.id;
             formValue.title = value?.title;
