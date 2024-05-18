@@ -2,9 +2,19 @@
     import Button from '$components/ui/button/button.svelte';
     import * as AlertDialog from '$components/ui/alert-dialog/index.js';
     import { navigate } from 'svelte-navigator';
-    import { clearFields, deleteDialogOpen, loadFields, isCreating, isEditing, isViewing, id } from './common';
+    import {
+        clearFields,
+        deleteDialogOpen,
+        loadFields,
+        isCreating,
+        isEditing,
+        isViewing,
+        id,
+        updateUrl,
+    } from './common';
     import { task } from '$stores';
     import { toast } from 'svelte-sonner';
+    import { sendDelete } from '$utils';
 
     async function deleteTask() {
         try {
