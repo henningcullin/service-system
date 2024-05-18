@@ -13,7 +13,9 @@ import {
     reports,
     reportStatuses,
     reportTypes,
+    user,
     users,
+    roles,
 } from '$stores';
 
 export async function sendJSON(url, method, body) {
@@ -124,4 +126,14 @@ export async function getReportStatuses() {
 export async function getUsers() {
     const data = await fetchJson('/api/auth/users');
     users.set(data ?? []);
+}
+
+export async function getUser(id) {
+    const data = await fetchJson(`/api/auth/user?id=${id}`);
+    user.set(data ?? {});
+}
+
+export async function getRoles() {
+    const data = await fetchJson('/api/auth/roles');
+    roles.set(data ?? []);
 }
