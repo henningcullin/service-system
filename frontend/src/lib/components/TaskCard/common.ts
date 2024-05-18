@@ -80,4 +80,8 @@ export const formSchema = z.object({
     archived: z.boolean({message:'Must be checked or unchecked'}).nullable(),
     executors: z.array(z.string().uuid()).nullable(),
     machine: z.string().nullable()
-  });
+});
+
+export function due_at_converter(source) {
+    return source ? new Date(`${source?.month}-${source?.day}-${source?.year}`).toISOString() : null;
+}
