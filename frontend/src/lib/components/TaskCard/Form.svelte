@@ -14,6 +14,7 @@
         loadFields,
         updateUrl,
         formSchema,
+        due_at_converter,
     } from './common';
     import Button from '$components/ui/button/button.svelte';
     import { z } from 'zod';
@@ -110,12 +111,16 @@
 
     async function createTask() {
         try {
-            const { title, description, task_type, status } = $form;
-            const response = await sendJSON('/api/auth/machine', 'POST', {
+            const { title, description, task_type, status, machine, executors, due_at, archived } = $form;
+            const response = await sendJSON('/api/auth/task', 'POST', {
                 title,
                 description,
                 task_type,
                 status,
+                machine,
+                executors,
+                due_at: due_at_converter(due_at),
+                archived,
             });
             if (response.status !== 201) return toast.error('Failed to create the task');
             const data = await response.json();
@@ -130,6 +135,8 @@
 
     async function updateTask() {
         try {
+            console.log($form);
+            return;
             const changedFields = { id: $form.id };
             for (const field in $form) {
                 if ($form[field] !== $task[field] && field !== 'executors') {
@@ -137,7 +144,7 @@
                 }
             }
             if (Object.keys(changedFields).length < 2) return;
-            const response = await sendJSON('/api/auth/machine', 'PUT', changedFields);
+            const response = await sendJSON('/api/auth/task', 'PUT', changedFields);
             if (response.status !== 200) return toast.error('Failed to update the task');
             const data = await response.json();
             task.set(data);
