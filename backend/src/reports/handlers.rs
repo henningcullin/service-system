@@ -101,7 +101,7 @@ pub async fn details(
             machines m
         ON
             r.machine = m.id
-         WHERE
+        WHERE
             ($1::UUID IS NULL OR r.id = $1)
         AND
             ($2::UUID IS NULL OR r.creator = $2)
