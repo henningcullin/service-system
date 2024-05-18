@@ -49,11 +49,6 @@
             <Label for="toggle-color-mode">Dark mode</Label>
         </div>
         <DropdownMenu.Separator />
-        <DropdownMenu.Group>
-            <DropdownMenu.Item>Profile</DropdownMenu.Item>
-            <DropdownMenu.Item>Settings</DropdownMenu.Item>
-        </DropdownMenu.Group>
-        <DropdownMenu.Separator />
         <DropdownMenu.Item on:click={logout}>Log out</DropdownMenu.Item>
     </DropdownMenu.Content>
 </DropdownMenu.Root>
