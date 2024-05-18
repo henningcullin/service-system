@@ -10,3 +10,4 @@ export { default as DTPagination } from "./pagination.svelte";
 export { default as DTViewOptions } from "./view-options.svelte";
 export { default as DTMachineCell } from "./machine-cell.svelte";
 export { default as DTCreatorCell } from "./creator-cell.svelte";
+export { default as DTExecutorsCell } from "./executors-cell.svelte";

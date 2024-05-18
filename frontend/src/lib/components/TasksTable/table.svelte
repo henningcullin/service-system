@@ -20,6 +20,7 @@
         DTDateCell,
         DTMachineCell,
         DTCreatorCell,
+        DTExecutorsCell,
     } from './index.js';
 
     import * as Table from '$lib/components/ui/table/index.js';
@@ -56,7 +57,7 @@
         table.column({
             accessor: 'title',
             id: 'title',
-            header: 'title',
+            header: 'Title',
             cell: ({ value, row }) => {
                 if (row.isData()) {
                     return createRender(DTFieldCell, {
@@ -115,6 +116,26 @@
             header: 'Creator',
             cell: ({ value }) => {
                 return createRender(DTCreatorCell, {
+                    value,
+                });
+            },
+        }),
+        table.column({
+            accessor: 'executors',
+            id: 'executors',
+            header: 'Executors',
+            cell: ({ value }) => {
+                return createRender(DTExecutorsCell, {
+                    value,
+                });
+            },
+        }),
+        table.column({
+            accessor: 'due_at',
+            id: 'due_at',
+            header: 'Due at',
+            cell: ({ value }) => {
+                return createRender(DTDateCell, {
                     value,
                 });
             },
