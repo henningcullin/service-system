@@ -10,7 +10,7 @@
         <span class="max-w-[200px] truncate font-medium">
             <HoverCard.Root>
                 <HoverCard.Trigger>
-                    <Link to="/facility/{value.id}" class="rounded-sm underline-offset-2 hover:underline"
+                    <Link to="/machine/{value.id}" class="rounded-sm underline-offset-2 hover:underline"
                         >{value.name}
                     </Link>
                 </HoverCard.Trigger>
