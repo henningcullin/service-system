@@ -327,7 +327,7 @@ pub async fn update(
     Extension(user): Extension<User>,
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<UpdateUser>,
-) -> Result<StatusCode, ApiError> {
+) -> Result<Json<User>, ApiError> {
     let permissions_ok = user.role.user_edit || body.id == user.id;
 
     if !permissions_ok {
@@ -338,7 +338,9 @@ pub async fn update(
         body.validate()?;
     }
 
-    let target_user = user_from_id!(body.id).fetch_one(&app_state.db).await?;
+    let mut tx = app_state.db.begin().await?;
+
+    let target_user = user_from_id!(body.id).fetch_one(&mut *tx).await?;
 
     if target_user.role.level <= user.role.level && target_user.id != user.id {
         return Err(ApiError::Forbidden(ForbiddenReason::MissingPermission));
@@ -357,7 +359,7 @@ pub async fn update(
             "#,
             role_id
         )
-        .fetch_one(&app_state.db)
+        .fetch_one(&mut *tx)
         .await?;
 
         if role.level <= user.role.level {
@@ -391,12 +393,77 @@ pub async fn update(
     query_builder.push(" WHERE id = ");
     query_builder.push_bind(body.id);
 
-    let result = query_builder.build().execute(&app_state.db).await?;
+    let result = query_builder.build().execute(&mut *tx).await?;
 
-    match result.rows_affected() {
-        1 => Ok(StatusCode::NO_CONTENT),
-        _ => Ok(StatusCode::NOT_FOUND),
+    if result.rows_affected() != 1 {
+        return Err(ApiError::GeneralOversight(
+            "Provided machine to update didn't exist".to_owned(),
+        ));
     }
+
+    let user = query_as!(
+        User,
+        r#"
+        SELECT
+            u.id,
+            u.first_name,
+            u.last_name,
+            u.email,
+            u.phone,
+            (
+                r.id,
+                r.name,
+                r.level,
+                r.has_password,
+                r.user_view,
+                r.user_create,
+                r.user_edit,
+                r.user_delete,
+                r.machine_view,
+                r.machine_create,
+                r.machine_edit,
+                r.machine_delete,
+                r.task_view,
+                r.task_create,
+                r.task_edit,
+                r.task_delete,
+                r.report_view,
+                r.report_create,
+                r.report_edit,
+                r.report_delete,
+                r.facility_view,
+                r.facility_create,
+                r.facility_edit,
+                r.facility_delete
+            ) AS "role!: Role",
+            u.active,
+            u.last_login,
+            u.occupation,
+            u.image,
+            (
+                f.id,
+                f.name,
+                f.address
+            ) AS "facility?: Facility"
+        FROM
+            users u
+        INNER JOIN
+            roles r
+        ON
+            u.role = r.id
+        LEFT JOIN
+            facilities f
+        ON
+            u.facility = f.id
+        WHERE
+            u.id = $1
+        "#,
+        body.id
+    )
+    .fetch_one(&mut *tx)
+    .await?;
+
+    Ok(Json(user))
 }
 
 pub async fn delete(
