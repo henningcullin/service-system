@@ -14,6 +14,7 @@
         loadFields,
         updateUrl,
         formSchema,
+        formSchemaWithPW,
     } from './common';
     import Button from '$components/ui/button/button.svelte';
     import { z } from 'zod';
@@ -26,6 +27,7 @@
     const selectedRole = writable({ label: '', value: '' });
     const selectedFacility = writable({ label: '', value: '' });
 
+    $: isPasswordRequired = $roles?.find((r) => r.id === $form?.role)?.has_password && $isCreating;
     $: selectedRole.set(
         $form.role ? { label: $roles?.find((r) => r.id === $form?.role)?.name, value: $form?.role } : null,
     );
@@ -37,11 +39,13 @@
     $: {
         if (!$isViewing) {
             try {
-                formSchema.parse($form);
+                if (isPasswordRequired) formSchemaWithPW.parse($form);
+                else formSchema.parse($form);
                 $fieldErrors = {
                     first_name: '',
                     last_name: '',
                     email: '',
+                    password: '',
                     role: '',
                 };
                 $hasErrors = false;
@@ -57,6 +61,7 @@
                 first_name: '',
                 last_name: '',
                 email: '',
+                password: '',
                 role: '',
             };
             $hasErrors = false;
@@ -83,8 +88,11 @@
 
     async function createUser() {
         try {
-            const { first_name, last_name, email, role, phone, active, occupation, facility } = $form;
+            const { first_name, last_name, email, password, role, phone, active, occupation, facility } = $form;
             const formObj = { first_name, last_name, email, role };
+            if (password) {
+                formObj['password'] = password;
+            }
             if (phone) {
                 formObj['phone'] = phone;
             }
@@ -94,7 +102,7 @@
             if (facility) {
                 formObj['facility'] = facility;
             }
-            if (active !== null && active !== undefined) {
+            if (active !== null && active !== undefined && active !== '') {
                 formObj['active'] = active;
             }
             const response = await sendJSON('/api/auth/user', 'POST', formObj);
@@ -113,10 +121,11 @@
     async function updateUser() {
         try {
             const changedFields = { id: $form?.id };
-            const { first_name, last_name, email, role, phone, active, occupation, facility } = $form;
+            const { first_name, last_name, email, password, role, phone, active, occupation, facility } = $form;
             if (first_name !== $user?.first_name) changedFields['title'] = title;
             if (last_name !== $user?.last_name) changedFields['last_name'] = last_name;
             if (email !== $user?.email) changedFields['email'] = email;
+            if (password) changedFields['password'] = password;
             if (role !== $user?.role?.id) changedFields['role'] = role;
             if (phone !== $user?.phone) changedFields['phone'] = phone;
             if (active !== $user?.active) changedFields['active'] = active;
@@ -150,6 +159,12 @@
         errors={$fieldErrors.last_name}
     />
     <Input properties={{ id: 'email', label: 'Email' }} bind:value={$form.email} errors={$fieldErrors.email} />
+    <Input
+        properties={{ id: 'password', label: 'Password' }}
+        type={'password'}
+        bind:value={$form.password}
+        errors={$fieldErrors?.password}
+    />
     <Input properties={{ id: 'phone', label: 'Phone' }} bind:value={$form.phone} />
 
     <Select

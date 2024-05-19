@@ -8,7 +8,7 @@ export const isCreating = writable(false);
 export const isEditing = writable(false);
 export const isViewing = writable(false);
 
-export const fieldErrors = writable({ first_name: '', last_name: '', email: '', role: ''});
+export const fieldErrors = writable({ first_name: '', last_name: '', email: '', password: '', role: ''});
 export const hasErrors = writable(false);
 
 export const id = writable(null);
@@ -18,6 +18,7 @@ export const form = writable({
     first_name: '',
     last_name: '',
     email: '',
+    password: '',
     phone: '',
     role: '',
     active: '',
@@ -42,6 +43,7 @@ export function loadFields() {
             formValue.first_name = value?.first_name;
             formValue.last_name = value?.last_name;
             formValue.email = value?.email;
+            formValue.password = '';
             formValue.phone = value?.phone;
             formValue.role = value?.role?.id;
             formValue.active = value?.active;
@@ -71,5 +73,13 @@ export const formSchema = z.object({
     first_name: z.string().min(1, 'First name is required').max(255, 'First name must be 255 characters or less'),
     last_name: z.string().min(1, 'Last name is required').max(255, 'Last name must be 255 characters or less'),
     email: z.string().min(1, 'Email is required').max(255, 'Email must be 255 characters or less').email('Must be a valid email'),
+    role: z.string().min(1, 'Role must be set').uuid('Must be a valid role'),
+});
+
+export const formSchemaWithPW = z.object({
+    first_name: z.string().min(1, 'First name is required').max(255, 'First name must be 255 characters or less'),
+    last_name: z.string().min(1, 'Last name is required').max(255, 'Last name must be 255 characters or less'),
+    email: z.string().min(1, 'Email is required').max(255, 'Email must be 255 characters or less').email('Must be a valid email'),
+    password: z.string().min(1, 'This role requires password').max(255, 'Password must be 255 characters or less'),
     role: z.string().min(1, 'Role must be set').uuid('Must be a valid role'),
 });
