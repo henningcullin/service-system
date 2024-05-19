@@ -11,7 +11,7 @@
     import { Toaster } from '$lib/components/ui/sonner';
 
     import Login from '$routes/Login.svelte';
-    import Mainmenu from '$routes/Mainmenu.svelte';
+    import Mainmenu from '$routes/mainmenu/Mainmenu.svelte';
     import NotFound from '$routes/NotFound.svelte';
 
     import Machines from '$routes/machines/machines.svelte';
