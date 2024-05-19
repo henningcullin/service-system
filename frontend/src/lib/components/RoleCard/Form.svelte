@@ -17,9 +17,9 @@
     import { z } from 'zod';
     import { toast } from 'svelte-sonner';
     import { role, roles } from '$stores';
-    import Checkbox from '$components/ui/checkbox/checkbox.svelte';
-    import Label from '$components/ui/label/label.svelte';
     import Separator from '$components/ui/separator/separator.svelte';
+    import Checkbox from './Checkbox.svelte';
+    import { Label } from '$components/ui/label';
 
     $: {
         if (!$isViewing) {
@@ -100,7 +100,6 @@
             loadFields();
             toast.success('Saved the role');
         } catch (error) {
-            console.log(error);
             toast.error('Failed to update the role');
         }
     }
@@ -118,73 +117,46 @@
         type="number"
     />
 
-    <Label>Has Password</Label>
-    <Checkbox bind:checked={$form.has_password} />
+    <Checkbox label="Has Password" bind:checked={$form.has_password} />
 
     <Separator />
 
     <Label>User</Label><br />
 
-    <Label>View</Label>
-    <Checkbox bind:checked={$form.user_view} /><br />
-    <Label>Create</Label>
-    <Checkbox bind:checked={$form.user_create} /><br />
-    <Label>Edit</Label>
-    <Checkbox bind:checked={$form.user_edit} /><br />
-    <Label>Delete</Label>
-    <Checkbox bind:checked={$form.user_delete} />
+    <Checkbox label="View" bind:checked={$form.user_view} />
+    <Checkbox label="Create" bind:checked={$form.user_create} />
+    <Checkbox label="Edit" bind:checked={$form.user_edit} />
+    <Checkbox label="Delete" bind:checked={$form.user_delete} />
 
     <Separator />
 
     <Label>Machine</Label><br />
-
-    <Label>View</Label>
-    <Checkbox bind:checked={$form.machine_view} /><br />
-    <Label>Create</Label>
-    <Checkbox bind:checked={$form.machine_create} /><br />
-    <Label>Edit</Label>
-    <Checkbox bind:checked={$form.machine_edit} /><br />
-    <Label>Delete</Label>
-    <Checkbox bind:checked={$form.machine_delete} />
+    <Checkbox label="View" bind:checked={$form.machine_view} />
+    <Checkbox label="Create" bind:checked={$form.machine_create} />
+    <Checkbox label="Edit" bind:checked={$form.machine_edit} />
+    <Checkbox label="Delete" bind:checked={$form.machine_delete} />
 
     <Separator />
 
     <Label>Task</Label><br />
-
-    <Label>View</Label>
-    <Checkbox bind:checked={$form.task_view} /><br />
-    <Label>Create</Label>
-    <Checkbox bind:checked={$form.task_create} /><br />
-    <Label>Edit</Label>
-    <Checkbox bind:checked={$form.task_edit} /><br />
-    <Label>Delete</Label>
-    <Checkbox bind:checked={$form.task_delete} />
-
+    <Checkbox label="View" bind:checked={$form.task_view} />
+    <Checkbox label="Create" bind:checked={$form.task_create} />
+    <Checkbox label="Edit" bind:checked={$form.task_edit} />
+    <Checkbox label="Delete" bind:checked={$form.task_delete} />
     <Separator />
 
     <Label>Report</Label><br />
-
-    <Label>View</Label>
-    <Checkbox bind:checked={$form.report_view} /><br />
-    <Label>Create</Label>
-    <Checkbox bind:checked={$form.report_create} /><br />
-    <Label>Edit</Label>
-    <Checkbox bind:checked={$form.report_edit} /><br />
-    <Label>Delete</Label>
-    <Checkbox bind:checked={$form.report_delete} />
-
+    <Checkbox label="View" bind:checked={$form.report_view} />
+    <Checkbox label="Create" bind:checked={$form.report_create} />
+    <Checkbox label="Edit" bind:checked={$form.report_edit} />
+    <Checkbox label="Delete" bind:checked={$form.report_delete} />
     <Separator />
 
     <Label>Facility</Label><br />
-
-    <Label>View</Label>
-    <Checkbox bind:checked={$form.facility_view} /><br />
-    <Label>Create</Label>
-    <Checkbox bind:checked={$form.facility_create} /><br />
-    <Label>Edit</Label>
-    <Checkbox bind:checked={$form.facility_edit} /><br />
-    <Label>Delete</Label>
-    <Checkbox bind:checked={$form.facility_delete} /><br />
+    <Checkbox label="View" bind:checked={$form.facility_view} />
+    <Checkbox label="Create" bind:checked={$form.facility_create} />
+    <Checkbox label="Edit" bind:checked={$form.facility_edit} />
+    <Checkbox label="Delete" bind:checked={$form.facility_delete} />
 
     <Button type="submit" disabled={$isViewing || $hasErrors}>Save</Button>
 </form>
