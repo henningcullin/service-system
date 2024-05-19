@@ -97,6 +97,7 @@
             loadFields();
             toast.success('Saved the role');
         } catch (error) {
+            console.log(error);
             toast.error('Failed to update the role');
         }
     }
@@ -108,7 +109,7 @@
     <Input properties={{ id: 'name', label: 'Name' }} bind:value={$form.name} errors={$fieldErrors.name} />
 
     <Input
-        properties={{ id: 'level', label: 'level' }}
+        properties={{ id: 'level', label: 'Level' }}
         bind:value={$form.level}
         errors={$fieldErrors.level}
         type="number"

@@ -16,7 +16,7 @@ export const id = writable(null);
 export const form = writable({
     id: '',
     name: '',
-    level: 0,
+    level: '',
     has_password: true,
     user_view: false,
     user_create: false,
@@ -44,7 +44,7 @@ export function clearFields() {
     form.update(formState => {
         formState.id = '';
         formState.name = '';
-        formState.level = 0;
+        formState.level = '';
         formState.has_password = true;
         for (const field in formState) {
             if (field !== 'id' && field !== 'name' && field !== 'level' && field !== 'has_password')
@@ -56,6 +56,7 @@ export function clearFields() {
 
 export function loadFields() {
     const unsubscribe = role.subscribe(value => {
+        value['level'] = String(value['level']);
         form.set({...value});
     });
     unsubscribe();
@@ -76,5 +77,5 @@ import { z } from 'zod';
 
 export const formSchema = z.object({
   name: z.string().min(1, 'Name is required').max(255, 'Name must be at most 255 characters long'),
-  level: z.string().min(0, 'Level is required'),
+  level: z.string().min(1, 'Level is required'),
 });
