@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
 import {navigate} from 'svelte-navigator';
-import {facility} from '$stores';
+import {role} from '$stores';
 
 export const deleteDialogOpen = writable(false);
 
@@ -55,7 +55,7 @@ export function clearFields() {
 }
 
 export function loadFields() {
-    const unsubscribe = facility.subscribe(value => {
+    const unsubscribe = role.subscribe(value => {
         form.set({...value});
     });
     unsubscribe();
