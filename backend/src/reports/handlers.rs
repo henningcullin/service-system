@@ -341,7 +341,7 @@ pub async fn update(
 
     if result.rows_affected() != 1 {
         return Err(ApiError::GeneralOversight(
-            "Provided machine to update didn't exist".to_owned(),
+            "Provided report to update didn't exist".to_owned(),
         ));
     }
 
