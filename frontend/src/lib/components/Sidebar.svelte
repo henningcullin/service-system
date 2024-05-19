@@ -8,6 +8,7 @@
     import Flag from 'lucide-svelte/icons/flag';
     import CPU from 'lucide-svelte/icons/cpu';
     import Users from 'lucide-svelte/icons/users';
+    import Factory from 'lucide-svelte/icons/factory';
 
     $: IsSidebarOpen = $SidebarOpen;
 
@@ -66,6 +67,7 @@
             </Accordion.Content>
         </Accordion.Item>
     </Accordion.Root>
+    <Link to="/facility" on:click={close}><Factory style="display:inherit" /> Facilities</Link>
 </sidebar>
 
 <style>
@@ -76,8 +78,6 @@
         height: 100%;
         transition: left 0.3s;
         background-color: var(--secondary);
-        display: flex;
-        flex-direction: column;
-        text-align: center;
+        display: block;
     }
 </style>
