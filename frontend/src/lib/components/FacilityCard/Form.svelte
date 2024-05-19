@@ -16,7 +16,7 @@
     import Button from '$components/ui/button/button.svelte';
     import { z } from 'zod';
     import { toast } from 'svelte-sonner';
-    import { facility } from '$stores';
+    import { facilities, facility } from '$stores';
 
     $: {
         if (!$isViewing) {
@@ -65,6 +65,10 @@
             if (response.status !== 201) return toast.error('Failed to create the facility');
             const data = await response.json();
             facility.set(data);
+            facilities.update((prev) => {
+                prev.push({ ...$facility });
+                return prev;
+            });
             updateUrl($facility.id);
             navigate('?view=true');
             loadFields();
@@ -84,9 +88,13 @@
             }
             if (Object.keys(changedFields).length < 2) return;
             const response = await sendJSON('/api/auth/facility', 'PUT', changedFields);
-            if (response.status !== 200) return toast.error('Failed to update the facility');
-            const data = await response.json();
-            facility.set(data);
+            if (response.status !== 204) return toast.error('Failed to update the facility');
+            facility.set({ ...$form });
+            const oldIndex = $facilities.findIndex((f) => f.id === $facility.id);
+            facilities.update((prev) => {
+                prev[oldIndex] = { ...$facility };
+                return prev;
+            });
             navigate('?view=true');
             loadFields();
             toast.success('Saved the facility');
