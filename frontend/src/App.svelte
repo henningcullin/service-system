@@ -18,6 +18,8 @@
     import Machine from '$routes/machine/machine.svelte';
     import MachinePanel from '$routes/machine/panel/machinePanel.svelte';
 
+    import Facilities from '$routes/facilities/facilities.svelte';
+
     import Tasks from '$routes/tasks/tasks.svelte';
     import Task from '$routes/task/task.svelte';
     import TaskPanel from '$routes/task/panel/taskPanel.svelte';
@@ -63,6 +65,8 @@
             <Route path="/machines/*" component={Machines} />
             <Route path="/machine/panel/*" component={MachinePanel} />
             <Route path="/machine/*" component={Machine} />
+
+            <Route path="/facilities/*" component={Facilities} />
 
             <Route path="/tasks/*" component={Tasks} />
             <Route path="/task/panel/*" component={TaskPanel} />
