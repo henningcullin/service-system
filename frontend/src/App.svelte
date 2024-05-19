@@ -31,6 +31,8 @@
     import Users from '$routes/users/users.svelte';
     import User from '$routes/user/user.svelte';
 
+    import Roles from '$routes/roles/roles.svelte';
+
     import { ModeWatcher, localStorageKey, setMode, systemPrefersMode, userPrefersMode } from 'mode-watcher';
 
     $: IsSidebarOpen = $SidebarOpen;
@@ -78,6 +80,8 @@
 
             <Route path="/users/*" component={Users} />
             <Route path="/user/*" component={User} />
+
+            <Route path="/role/*" component={Roles} />
 
             <Route path="*" component={NotFound} />
         </main>
