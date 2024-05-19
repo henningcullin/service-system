@@ -36,6 +36,7 @@
     <Button
         on:click={() => {
             navigate('?new=true');
+            facility.set({});
             clearFields();
         }}
         disabled={$isCreating}
