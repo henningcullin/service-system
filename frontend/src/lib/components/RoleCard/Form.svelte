@@ -17,6 +17,9 @@
     import { z } from 'zod';
     import { toast } from 'svelte-sonner';
     import { role, roles } from '$stores';
+    import Checkbox from '$components/ui/checkbox/checkbox.svelte';
+    import Label from '$components/ui/label/label.svelte';
+    import Separator from '$components/ui/separator/separator.svelte';
 
     $: {
         if (!$isViewing) {
@@ -115,7 +118,73 @@
         type="number"
     />
 
-    <Input properties={{ id: 'address', label: 'Address' }} bind:value={$form.address} />
+    <Label>Has Password</Label>
+    <Checkbox bind:checked={$form.has_password} />
+
+    <Separator />
+
+    <Label>User</Label><br />
+
+    <Label>View</Label>
+    <Checkbox bind:checked={$form.user_view} /><br />
+    <Label>Create</Label>
+    <Checkbox bind:checked={$form.user_create} /><br />
+    <Label>Edit</Label>
+    <Checkbox bind:checked={$form.user_edit} /><br />
+    <Label>Delete</Label>
+    <Checkbox bind:checked={$form.user_delete} />
+
+    <Separator />
+
+    <Label>Machine</Label><br />
+
+    <Label>View</Label>
+    <Checkbox bind:checked={$form.machine_view} /><br />
+    <Label>Create</Label>
+    <Checkbox bind:checked={$form.machine_create} /><br />
+    <Label>Edit</Label>
+    <Checkbox bind:checked={$form.machine_edit} /><br />
+    <Label>Delete</Label>
+    <Checkbox bind:checked={$form.machine_delete} />
+
+    <Separator />
+
+    <Label>Task</Label><br />
+
+    <Label>View</Label>
+    <Checkbox bind:checked={$form.task_view} /><br />
+    <Label>Create</Label>
+    <Checkbox bind:checked={$form.task_create} /><br />
+    <Label>Edit</Label>
+    <Checkbox bind:checked={$form.task_edit} /><br />
+    <Label>Delete</Label>
+    <Checkbox bind:checked={$form.task_delete} />
+
+    <Separator />
+
+    <Label>Report</Label><br />
+
+    <Label>View</Label>
+    <Checkbox bind:checked={$form.report_view} /><br />
+    <Label>Create</Label>
+    <Checkbox bind:checked={$form.report_create} /><br />
+    <Label>Edit</Label>
+    <Checkbox bind:checked={$form.report_edit} /><br />
+    <Label>Delete</Label>
+    <Checkbox bind:checked={$form.report_delete} />
+
+    <Separator />
+
+    <Label>Facility</Label><br />
+
+    <Label>View</Label>
+    <Checkbox bind:checked={$form.facility_view} /><br />
+    <Label>Create</Label>
+    <Checkbox bind:checked={$form.facility_create} /><br />
+    <Label>Edit</Label>
+    <Checkbox bind:checked={$form.facility_edit} /><br />
+    <Label>Delete</Label>
+    <Checkbox bind:checked={$form.facility_delete} /><br />
 
     <Button type="submit" disabled={$isViewing || $hasErrors}>Save</Button>
 </form>
