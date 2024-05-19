@@ -463,6 +463,8 @@ pub async fn update(
     .fetch_one(&mut *tx)
     .await?;
 
+    tx.commit().await?;
+
     Ok(Json(user))
 }
 
