@@ -57,6 +57,7 @@
 
     async function createRole() {
         try {
+            typeof $form?.level === 'number' ? null : ($form.level = Number($form?.level));
             const response = await sendJSON('/api/auth/role', 'POST', { $form });
             if (response.status !== 201) return toast.error('Failed to create the role');
             const data = await response.json();
@@ -82,6 +83,7 @@
                     changedFields[field] = $form[field];
                 }
             }
+            if (typeof changedFields['level'] === 'string') changedFields['level'] = Number(changedFields['level']);
             if (Object.keys(changedFields).length < 2) return;
             const response = await sendJSON('/api/auth/role', 'PUT', changedFields);
             if (response.status !== 204) return toast.error('Failed to update the role');
@@ -109,7 +111,7 @@
         properties={{ id: 'level', label: 'level' }}
         bind:value={$form.level}
         errors={$fieldErrors.level}
-        type="level"
+        type="number"
     />
 
     <Input properties={{ id: 'address', label: 'Address' }} bind:value={$form.address} />

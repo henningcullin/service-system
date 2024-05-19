@@ -76,5 +76,5 @@ import { z } from 'zod';
 
 export const formSchema = z.object({
   name: z.string().min(1, 'Name is required').max(255, 'Name must be at most 255 characters long'),
-  level: z.number().min(0, 'Must be 0 or greater'),
+  level: z.string().min(0, 'Level is required'),
 });
