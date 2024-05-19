@@ -104,9 +104,10 @@
     <Input properties={{ id: 'id', label: 'Id' }} bind:value={$form.id} disabled={true} />
 
     <Input properties={{ id: 'name', label: 'Name' }} bind:value={$form.name} errors={$fieldErrors.name} />
+
     <Input
         properties={{ id: 'level', label: 'level' }}
-        bind:value={$form.name}
+        bind:value={$form.level}
         errors={$fieldErrors.level}
         type="level"
     />
