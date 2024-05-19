@@ -2,15 +2,25 @@
     import Button from '$components/ui/button/button.svelte';
     import * as AlertDialog from '$components/ui/alert-dialog/index.js';
     import { navigate } from 'svelte-navigator';
-    import { clearFields, deleteDialogOpen, loadFields, isCreating, isEditing, isViewing, id } from './common';
-    import { machine } from '$stores';
+    import {
+        clearFields,
+        deleteDialogOpen,
+        loadFields,
+        isCreating,
+        isEditing,
+        isViewing,
+        id,
+        updateUrl,
+    } from './common';
+    import { facility } from '$stores';
     import { toast } from 'svelte-sonner';
+    import { sendDelete } from '$utils';
 
     async function deleteFacility() {
         try {
             const response = await sendDelete(`/api/auth/facility?id=${$id}`);
             if (response.status !== 204) return toast.error('Failed to delete facility');
-            machine.set({});
+            facility.set({});
             clearFields();
             navigate('?view=true');
             updateUrl();
