@@ -12,7 +12,7 @@
         id,
         updateUrl,
     } from './common';
-    import { facility } from '$stores';
+    import { facilities, facility } from '$stores';
     import { toast } from 'svelte-sonner';
     import { sendDelete } from '$utils';
 
@@ -20,6 +20,7 @@
         try {
             const response = await sendDelete(`/api/auth/facility?id=${$id}`);
             if (response.status !== 204) return toast.error('Failed to delete facility');
+            facilities.update((prev) => prev.filter((f) => f.id !== $facility?.id));
             facility.set({});
             clearFields();
             navigate('?view=true');
