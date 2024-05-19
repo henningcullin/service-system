@@ -66,7 +66,7 @@
             <Route path="/machine/panel/*" component={MachinePanel} />
             <Route path="/machine/*" component={Machine} />
 
-            <Route path="/facilities/*" component={Facilities} />
+            <Route path="/facility/*" component={Facilities} />
 
             <Route path="/tasks/*" component={Tasks} />
             <Route path="/task/panel/*" component={TaskPanel} />
