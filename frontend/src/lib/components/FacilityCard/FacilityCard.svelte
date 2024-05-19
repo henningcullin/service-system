@@ -2,7 +2,7 @@
     import Actions from './Actions.svelte';
     import { useLocation } from 'svelte-navigator';
     import Separator from '$components/ui/separator/separator.svelte';
-    import { id, isCreating, isEditing, isViewing, loadFields } from './common';
+    import { id, isCreating, isEditing, isViewing, loadFields, updateUrl } from './common';
     import Form from './Form.svelte';
     import { getFacilities } from '$utils';
     import { onMount } from 'svelte';
@@ -15,6 +15,7 @@
     function onSelectedChange(opt) {
         if (!opt) return;
         facility.set($facilities.find((f) => f.id === opt?.value));
+        updateUrl($facility?.id);
         loadFields();
     }
 
