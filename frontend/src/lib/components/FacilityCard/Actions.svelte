@@ -12,7 +12,7 @@
         id,
         updateUrl,
     } from './common';
-    import { facilities, facility } from '$stores';
+    import { account, facilities, facility } from '$stores';
     import { toast } from 'svelte-sonner';
     import { sendDelete } from '$utils';
 
@@ -39,7 +39,7 @@
             facility.set({});
             clearFields();
         }}
-        disabled={$isCreating}
+        disabled={$isCreating || !$account?.role?.facility_create}
         variant="outline">New</Button
     >
     <Button
@@ -47,14 +47,14 @@
             navigate('?edit=true');
             if ($id) loadFields();
         }}
-        disabled={$isEditing || !$id}
+        disabled={$isEditing || !$id || !$account?.role?.facility_edit}
         variant="outline">Edit</Button
     >
     <Button
         on:click={() => {
             $deleteDialogOpen = true;
         }}
-        disabled={!$id}
+        disabled={!$id || !$account?.role?.facility_delete}
         variant="destructive">Delete</Button
     >
     <Button
