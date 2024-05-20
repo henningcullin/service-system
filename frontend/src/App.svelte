@@ -61,28 +61,29 @@
     <pushable class={IsSidebarOpen ? 'push dim' : ''} on:click={closeSidebar}>
         <Header></Header>
         <main>
-            <Route path="/" component={Mainmenu} />
             <Route path="/login/" component={Login} />
+            {#if $account?.id}
+                <Route path="/" component={Mainmenu} />
 
-            <Route path="/machines/*" component={Machines} />
-            <Route path="/machine/panel/*" component={MachinePanel} />
-            <Route path="/machine/*" component={Machine} />
+                <Route path="/machines/*" component={Machines} />
+                <Route path="/machine/panel/*" component={MachinePanel} />
+                <Route path="/machine/*" component={Machine} />
 
-            <Route path="/facility/*" component={Facilities} />
+                <Route path="/facility/*" component={Facilities} />
 
-            <Route path="/tasks/*" component={Tasks} />
-            <Route path="/task/panel/*" component={TaskPanel} />
-            <Route path="/task/*" component={Task} />
+                <Route path="/tasks/*" component={Tasks} />
+                <Route path="/task/panel/*" component={TaskPanel} />
+                <Route path="/task/*" component={Task} />
 
-            <Route path="/reports/*" component={Reports} />
-            <Route path="/report/panel/*" component={ReportPanel} />
-            <Route path="/report/*" component={Report} />
+                <Route path="/reports/*" component={Reports} />
+                <Route path="/report/panel/*" component={ReportPanel} />
+                <Route path="/report/*" component={Report} />
 
-            <Route path="/users/*" component={Users} />
-            <Route path="/user/*" component={User} />
+                <Route path="/users/*" component={Users} />
+                <Route path="/user/*" component={User} />
 
-            <Route path="/role/*" component={Roles} />
-
+                <Route path="/role/*" component={Roles} />
+            {/if}
             <Route path="*" component={NotFound} />
         </main>
     </pushable>
