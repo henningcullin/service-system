@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 import {navigate} from 'svelte-navigator';
 import {task} from '$stores';
-import {CalendarDate, GregorianCalendar, parseDate} from '@internationalized/date';
+import {CalendarDate, GregorianCalendar} from '@internationalized/date';
 
 export const deleteDialogOpen = writable(false);
 

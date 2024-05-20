@@ -19,6 +19,7 @@ export const form = writable({
     description: '',
     report_type: '',
     status: '',
+    archived: false,
     creator: '',
     machine: '',
     created: '',
@@ -42,6 +43,7 @@ export function loadFields() {
             formValue.description = value?.description;
             formValue.report_type = value?.report_type?.id;
             formValue.status = value?.status?.id;
+            formValue.archived = value?.archived;
             formValue.creator = value?.creator;
             formValue.machine = value?.machine?.id;
             formValue.created = new Date(value?.created)?.toLocaleString();

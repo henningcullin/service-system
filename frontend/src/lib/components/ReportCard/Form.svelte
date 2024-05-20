@@ -21,6 +21,8 @@
     import SelectItem from '$components/ui/select/select-item.svelte';
     import * as HoverCard from '$lib/components/ui/hover-card/index.js';
     import { toast } from 'svelte-sonner';
+    import Checkbox from '$components/ui/checkbox/checkbox.svelte';
+    import Label from '$components/ui/label/label.svelte';
 
     const selectedType = writable({ label: '', value: '' });
     const selectedStatus = writable({ label: '', value: '' });
@@ -89,10 +91,13 @@
 
     async function createReport() {
         try {
-            const { title, description, report_type, status, machine } = $form;
+            const { title, description, report_type, status, machine, archived } = $form;
             const formObj = { title, description, report_type, status };
             if (machine) {
                 formObj['machine'] = machine;
+            }
+            if (archived !== undefined && archived !== null) {
+                formObj['archived'] = archived;
             }
             const response = await sendJSON('/api/auth/report', 'POST', formObj);
             if (response.status !== 201) return toast.error('Failed to create the report');
@@ -110,12 +115,13 @@
     async function updateReport() {
         try {
             const changedFields = { id: $form?.id };
-            const { title, description, report_type, status, machine } = $form;
+            const { title, description, report_type, status, machine, archived } = $form;
             if (title !== $report?.title) changedFields['title'] = title;
             if (description !== $report?.description) changedFields['description'] = description;
             if (report_type !== $report?.report_type?.id) changedFields['report_type'] = report_type;
             if (status !== $report?.status?.id) changedFields['status'] = status;
             if (machine !== $report?.machine?.id) changedFields['machine'] = machine;
+            if (archived !== $report?.archived?.id) changedFields['archived'] = archived;
             if (Object.keys(changedFields).length < 2) return;
             const response = await sendJSON('/api/auth/report', 'PUT', changedFields);
             if (response.status !== 200) return toast.error('Failed to update the report');
@@ -178,6 +184,15 @@
             <SelectItem value={machine.id} label={machine.name} />
         {/each}
     </Select>
+
+    <div>
+        <Checkbox id="archived" bind:checked={$form.archived} disabled={$isViewing} />
+        <Label
+            for="archived"
+            class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >Archived</Label
+        >
+    </div>
 
     <div>
         {#if $report?.creator?.id}
