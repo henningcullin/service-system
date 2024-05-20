@@ -10,12 +10,14 @@ This project is meant to explore the following areas:
 - Middleware
 - CRUD operations
 - REST API
-- MySQL database
+- Server Sent Events
+- PostgreSQL database
 - Database Drivers
 - Authentication
 - Passwordless JWT
 - Password JWT
 - Role Based System
+- Shadcn UI
 
 ### Features
 This project is a service system where you can do the following:
@@ -23,7 +25,8 @@ This project is a service system where you can do the following:
 - Manage machines
 - Manage users
 - Manage tasks
-- Manage workers
+- Manage reports
+- Manage facilities
 
 ### Techstack
 
@@ -31,8 +34,9 @@ This project is a service system where you can do the following:
 
 - Rust (language)
 - Axum (framework)
-- MySQL (database)
+- PostgreSQL (database)
 
 #### Frontend
 
-To be decided
+- Svelte
+- Shadcn UI
