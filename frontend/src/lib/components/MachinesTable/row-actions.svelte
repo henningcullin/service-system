@@ -1,19 +1,18 @@
-<script lang="ts">
+<script>
     import Ellipsis from 'lucide-svelte/icons/ellipsis';
-    import { type Machine, machineSchema } from './schema';
     import { Button } from '$components/ui/button/index.js';
     import * as DropdownMenu from '$components/ui/dropdown-menu/index.js';
     import * as AlertDialog from '$components/ui/alert-dialog/index.js';
     import { toast } from 'svelte-sonner';
     import { sendDelete } from '$utils';
-    import { machines } from '$stores';
+    import { account, machines } from '$stores';
     import { Link } from 'svelte-navigator';
 
     async function deleteMachine() {
         try {
             const response = await sendDelete(`/api/auth/machine?id=${row.id}`);
             if (response.status !== 204) return toast.error('Could not delete the machine');
-            machines.update((prev) => prev.filter((m) => m.id !== machine.id));
+            machines.update((prev) => prev.filter((m) => m.id !== row.id));
             toast.success('Deleted the machine');
         } catch (error) {
             toast.error('Could not delete the machine');
@@ -23,8 +22,7 @@
 
     let deleteDialogOpen = false;
 
-    export let row: Machine;
-    const machine = machineSchema.parse(row);
+    export let row;
 </script>
 
 <DropdownMenu.Root>
@@ -36,13 +34,17 @@
     </DropdownMenu.Trigger>
     <DropdownMenu.Content class="w-[160px]" align="end">
         <DropdownMenu.Item>
-            <Link style="height:100%;width:100%;" to="/machine/{machine.id}">View</Link>
+            <Link style="height:100%;width:100%;" to="/machine/{row.id}">View</Link>
         </DropdownMenu.Item>
-        <DropdownMenu.Item>
-            <Link style="height:100%;width:100%;" to="/machine/{machine.id}?edit=true">Edit</Link>
-        </DropdownMenu.Item>
+        {#if $account?.role?.machine_edit}
+            <DropdownMenu.Item>
+                <Link style="height:100%;width:100%;" to="/machine/{row.id}?edit=true">Edit</Link>
+            </DropdownMenu.Item>
+        {/if}
         <DropdownMenu.Separator />
-        <DropdownMenu.Item on:click={() => (deleteDialogOpen = true)}>Delete</DropdownMenu.Item>
+        {#if $account?.role?.machine_delete}
+            <DropdownMenu.Item on:click={() => (deleteDialogOpen = true)}>Delete</DropdownMenu.Item>
+        {/if}
     </DropdownMenu.Content>
 </DropdownMenu.Root>
 
