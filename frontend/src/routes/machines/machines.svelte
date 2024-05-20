@@ -1,10 +1,9 @@
 <script>
     import MachineTable from '$components/MachinesTable/table.svelte';
     import { getMachineStatuses, getMachineTypes, getMachines, getFacilities } from '$utils';
+    import MachineCard from '$components/MobileCards/MachineCard.svelte';
 
     import { machines } from '$stores';
-    import * as Card from '$components/ui/card';
-    import { Link } from 'svelte-navigator';
 
     getMachineStatuses();
     getMachineTypes();
@@ -30,12 +29,6 @@
         </div>
     </div>
     {#each $machines as machine}
-        <Card.Root class="w-[100%]">
-            <Card.Header>
-                <Card.Title><Link to="/machine/{machine?.id}">{machine?.name}</Link></Card.Title>
-                <Card.Description></Card.Description>
-                <Card.Content></Card.Content>
-            </Card.Header>
-        </Card.Root>
+        <MachineCard {machine} />
     {/each}
 </div>
