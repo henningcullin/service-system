@@ -1,9 +1,8 @@
 <script>
     import TaskTable from '$components/TasksTable/table.svelte';
-    import * as Card from '$components/ui/card';
+    import TaskCard from '$components/MainMenu/TaskCard.svelte';
     import { tasks } from '$stores';
     import { getTasks, evToObj, getOne } from '$utils';
-    import { Link } from 'svelte-navigator';
     import { onMount } from 'svelte';
     getTasks();
 
@@ -66,11 +65,6 @@
         </div>
     </div>
     {#each $tasks as task}
-        <Card.Root class="w-[100%]">
-            <Card.Header>
-                <Card.Title><Link to="/task/{task?.id}">{task?.title}</Link></Card.Title>
-                <Card.Description>{task?.description}</Card.Description>
-            </Card.Header>
-        </Card.Root>
+        <TaskCard {task} />
     {/each}
 </div>
