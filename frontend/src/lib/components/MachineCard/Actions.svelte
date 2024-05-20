@@ -4,17 +4,19 @@
     import { navigate } from 'svelte-navigator';
     import { clearFields, deleteDialogOpen, loadFields, isCreating, isEditing, isViewing, id } from './common';
     import { machine } from '$stores';
+    import { toast } from 'svelte-sonner';
 
     async function deleteMachine() {
         try {
             const response = await sendDelete(`/api/auth/machine?id=${$id}`);
-            if (response.status !== 204) return alert('Failed to delete machine');
+            if (response.status !== 204) return toast.error('Failed to delete machine');
             machine.set({});
             clearFields();
             navigate('?view=true');
             updateUrl();
+            toast.success('Deleted the machine');
         } catch (error) {
-            console.error(error);
+            toast.error('Failed to delete machine');
         }
     }
 </script>

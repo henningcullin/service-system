@@ -8,6 +8,8 @@
     import { navigate } from 'svelte-navigator';
     import { setMode, mode } from 'mode-watcher';
 
+    import { toast } from 'svelte-sonner';
+
     let initials = '';
 
     $: {
@@ -19,10 +21,15 @@
     $: setMode(isDark ? 'dark' : 'light');
 
     async function logout() {
-        const response = await fetch('/api/auth/logout');
-        if (response.status !== 200) return alert('Failed to log out');
-        account.set({});
-        navigate('/login');
+        try {
+            const response = await fetch('/api/auth/logout');
+            if (response.status !== 200) return toast.error('Failed to log out');
+            account.set({});
+            navigate('/login');
+            toast.success('Successfully logged out');
+        } catch (error) {
+            toast.error('Failed to log out');
+        }
     }
 </script>
 
