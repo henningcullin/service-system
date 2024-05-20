@@ -111,7 +111,7 @@
             machine.set(data);
             navigate('?view=true');
             loadFields();
-            toast.error('Saved the machine');
+            toast.success('Saved the machine');
         } catch (error) {
             toast.error('Failed to update the machine');
         }
