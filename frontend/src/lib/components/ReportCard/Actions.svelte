@@ -12,7 +12,7 @@
         id,
         updateUrl,
     } from './common';
-    import { report } from '$stores';
+    import { report, account } from '$stores';
     import { toast } from 'svelte-sonner';
     import { sendDelete } from '$utils';
 
@@ -37,7 +37,7 @@
             navigate('?new=true');
             clearFields();
         }}
-        disabled={$isCreating}
+        disabled={$isCreating || !$account?.role?.report_create}
         variant="outline">New</Button
     >
     <Button
@@ -45,14 +45,14 @@
             navigate('?edit=true');
             if ($id) loadFields();
         }}
-        disabled={$isEditing || !$id}
+        disabled={$isEditing || !$id || !$account?.role?.report_edit}
         variant="outline">Edit</Button
     >
     <Button
         on:click={() => {
             $deleteDialogOpen = true;
         }}
-        disabled={!$id}
+        disabled={!$id || !$account?.role?.report_delete}
         variant="destructive">Delete</Button
     >
     <Button
