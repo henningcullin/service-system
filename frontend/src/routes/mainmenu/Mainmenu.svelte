@@ -10,15 +10,41 @@
     import ReportCard from '$components/MainMenu/ReportCard.svelte';
     import { Button } from '$components/ui/button/';
 
+    function eventToObj(ev) {
+        try {
+            const data = JSON.parse(ev.data);
+            return data;
+        } catch (error) {
+            return false;
+        }
+    }
+
     onMount(function () {
         reports.set([]);
         tasks.set([]);
         getMyReports($account?.id);
         getTasksToExecute($account?.id);
-    });
 
-    const taskChannel = new EventSource('/api/auth/channels/tasks');
-    const reportChannel = new EventSource('/api/auth/channels/reports');
+        const taskChannel = new EventSource('/api/auth/channel/tasks');
+        const reportChannel = new EventSource('/api/auth/channel/reports');
+
+        taskChannel.onmessage = (e) => {
+            const message = eventToObj(e);
+            if (!message) return;
+            console.log('task message', message);
+        };
+
+        reportChannel.onmessage = (e) => {
+            const message = eventToObj(e);
+            if (!message) return;
+            console.log('report message', message);
+        };
+
+        return () => {
+            taskChannel.close();
+            reportChannel.close();
+        };
+    });
 
     let type = 'task';
     let activeTab = 'active';
