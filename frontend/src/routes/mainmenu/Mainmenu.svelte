@@ -3,52 +3,15 @@
     import { Input } from '$components/ui/input/index.js';
     import { Separator } from '$components/ui/select/index.js';
     import * as Tabs from '$components/ui/tabs/index.js';
+    import { reports, tasks } from '$stores';
 
-    export let defaultLayout = [265, 440, 655];
+    let activeTab = 'active';
 </script>
 
 <div class="mainGrid">
-    <!-- <Resizable.PaneGroup direction="horizontal" class="h-full items-stretch">
-        <Resizable.Pane defaultSize={defaultLayout[0]} minSize={15} maxSize={20}>
-            <Separator />
-            Reports or tasks 
-        </Resizable.Pane>
-        <Resizable.Handle withHandle />
-        <Resizable.Pane defaultSize={defaultLayout[1]} minSize={30}>
-            <Tabs.Root value="all">
-                <div class="flex items-center px-4 py-2">
-                    <h1 class="text-xl font-bold">Inbox</h1>
-                    <Tabs.List class="ml-auto">
-                        <Tabs.Trigger value="all" class="text-zinc-600 dark:text-zinc-200">All</Tabs.Trigger>
-                        <Tabs.Trigger value="active" class="text-zinc-600 dark:text-zinc-200">Active</Tabs.Trigger>
-                    </Tabs.List>
-                </div>
-                <Separator />
-                <div class="bg-background/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                    <form>
-                        <div class="relative">
-                            <Search class="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
-                            <Input placeholder="Search" class="pl-8" />
-                        </div>
-                    </form>
-                </div>
-                <Tabs.Content value="all" class="m-0">
-                     All reports / tasks 
-                </Tabs.Content>
-                <Tabs.Content value="active" class="m-0">
-                     Non archived reports / tasks  
-                </Tabs.Content>
-            </Tabs.Root>
-        </Resizable.Pane>
-        <Resizable.Handle withHandle />
-        <Resizable.Pane defaultSize={defaultLayout[2]}>
-             Mail display 
-        </Resizable.Pane>
-    </Resizable.PaneGroup> -->
-
     <div>Panel one</div>
     <div>
-        <Tabs.Root value="all">
+        <Tabs.Root bind:value={activeTab}>
             <div class="flex items-center px-4 py-2">
                 <h1 class="text-xl font-bold">Inbox</h1>
                 <Tabs.List class="ml-auto">
