@@ -1,7 +1,7 @@
 <script>
     import UserTable from '$components/UsersTable/table.svelte';
     import { users } from '$stores';
-    import UserCard from '$components/MobieCards/UserCard.svelte';
+    import UserCard from '$components/MobileCards/UserCard.svelte';
     import { getUsers } from '$utils';
     getUsers();
 
