@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
-import {navigate} from 'svelte-navigator';
-import {machine} from '$stores';
+import { navigate } from 'svelte-navigator';
+import { machine } from '$stores';
 
 export const deleteDialogOpen = writable(false);
 
@@ -25,7 +25,7 @@ export const form = writable({
 });
 
 export function clearFields() {
-    form.update(value => {
+    form.update((value) => {
         for (const field in value) {
             value[field] = '';
         }
@@ -34,8 +34,8 @@ export function clearFields() {
 }
 
 export function loadFields() {
-    const unsubscribe = machine.subscribe(value => {
-        form.update(formValue => {
+    const unsubscribe = machine.subscribe((value) => {
+        form.update((formValue) => {
             formValue.id = value?.id;
             formValue.name = value?.name;
             formValue.make = value?.make;
@@ -49,7 +49,6 @@ export function loadFields() {
     });
     unsubscribe();
 }
-
 
 export function updateUrl(id = null) {
     const url = new URL(window.location.href);
@@ -68,5 +67,4 @@ export const formSchema = z.object({
     make: z.string().max(255, 'Make must be 255 characters or less').nullable(),
     machine_type: z.string().min(1, 'Machine Type is required').uuid('Must be a valid Machine Type'),
     status: z.string().min(1, 'Status is required').uuid('Must be a valid Status'),
-    facility: z.string().uuid('Must be a valid Facility').nullable(),
 });
