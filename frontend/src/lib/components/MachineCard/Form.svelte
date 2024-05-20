@@ -19,6 +19,7 @@
     import { z } from 'zod';
     import Select from './Select.svelte';
     import SelectItem from '$components/ui/select/select-item.svelte';
+    import { toast } from 'svelte-sonner';
 
     const selectedType = writable({ label: '', value: '' });
     const selectedStatus = writable({ label: '', value: '' });
@@ -80,21 +81,18 @@
     async function createMachine() {
         try {
             const { name, make, machine_type, status, facility } = $form;
-            const response = await sendJSON('/api/auth/machine', 'POST', {
-                name,
-                make,
-                machine_type,
-                status,
-                facility,
-            });
-            if (response.status !== 201) return alert('Failed to create the machine');
+            const formObj = { name, make, machine_type, status };
+            if (facility) formObj['facility'] = facility;
+            const response = await sendJSON('/api/auth/machine', 'POST', formObj);
+            if (response.status !== 201) return toast.error('Failed to create the machine');
             const data = await response.json();
             machine.set(data);
             updateUrl($machine.id);
             navigate('?view=true');
             loadFields();
+            toast.success('Created the machine');
         } catch (error) {
-            console.error(error);
+            toast.error('Failed to create the machine');
         }
     }
 
@@ -108,13 +106,14 @@
             }
             if (Object.keys(changedFields).length < 2) return;
             const response = await sendJSON('/api/auth/machine', 'PUT', changedFields);
-            if (response.status !== 200) return alert('Failed to update the machine');
+            if (response.status !== 200) return toast.error('Failed to update the machine');
             const data = await response.json();
             machine.set(data);
             navigate('?view=true');
             loadFields();
+            toast.error('Saved the machine');
         } catch (error) {
-            console.error(error);
+            toast.error('Failed to update the machine');
         }
     }
 </script>
