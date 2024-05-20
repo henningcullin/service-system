@@ -79,9 +79,9 @@
 
 <style>
     .mainGrid {
-        padding-top: 2%;
+        padding-top: 5%;
         height: 90dvh;
-        width: 90%;
+        width: 100%;
     }
 
     .mainGrid > div {
