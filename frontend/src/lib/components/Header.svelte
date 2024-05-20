@@ -33,6 +33,6 @@
         top: 0;
         width: 100%;
         background-color: hsl(var(--background) / var(--tw-bg-opacity));
-        z-index: 1000;
+        z-index: 100;
     }
 </style>
