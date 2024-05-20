@@ -18,11 +18,11 @@ CREATE TABLE machines (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(255) NOT NULL,
     make VARCHAR(255),
-    machine_type UUID NOT NULL REFERENCES machine_types(id),
-    status UUID NOT NULL REFERENCES machine_statuses(id),
+    machine_type UUID NOT NULL REFERENCES machine_types(id) ON DELETE CASCADE,
+    status UUID NOT NULL REFERENCES machine_statuses(id) ON DELETE CASCADE,
     created TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     edited TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    facility UUID REFERENCES facilities(id),
+    facility UUID REFERENCES facilities(id) ON DELETE SET NULL,
     image VARCHAR(512)
 );
 

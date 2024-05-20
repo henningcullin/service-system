@@ -5,12 +5,12 @@ CREATE TABLE users (
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255),
     phone VARCHAR(255) UNIQUE,
-    role UUID NOT NULL REFERENCES roles(id),
+    role UUID NOT NULL REFERENCES roles(id) ON DELETE RESTRICT,
     active BOOLEAN NOT NULL DEFAULT TRUE,
     last_login TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     occupation VARCHAR(255),
     image VARCHAR(512),
-    facility UUID REFERENCES facilities(id)
+    facility UUID REFERENCES facilities(id) ON DELETE SET NULL,
 );
 
 CREATE OR REPLACE FUNCTION is_password_required(role_id UUID, user_password VARCHAR)

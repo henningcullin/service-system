@@ -12,11 +12,11 @@ CREATE TABLE reports (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
-    report_type UUID NOT NULL REFERENCES report_types(id),
-    status UUID NOT NULL REFERENCES report_statuses(id),
+    report_type UUID NOT NULL REFERENCES report_types(id) ON DELETE CASCADE,
+    status UUID NOT NULL REFERENCES report_statuses(id) ON DELETE CASCADE,
     archived BOOLEAN NOT NULL DEFAULT FALSE,
-    creator UUID NOT NULL REFERENCES users(id),
-    machine UUID REFERENCES machines(id),
+    creator UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    machine UUID REFERENCES machines(id) ON DELETE CASCADE,
     created TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     edited TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
