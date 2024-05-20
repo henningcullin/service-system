@@ -135,7 +135,9 @@
                     </Select.Content>
                 </Select.Root>
                 <div class="flex flex-col space-y-1.5">
-                    <Label for="name" class={errors?.name?.length ? 'text-red-800' : ''}>Name</Label>
+                    <Label for="name" class={errors?.name?.length && state !== VIEWING_STATE ? 'text-red-800' : ''}
+                        >Name</Label
+                    >
                     <Input
                         id="name"
                         disabled={state === VIEWING_STATE}
