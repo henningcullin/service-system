@@ -1,9 +1,10 @@
 <script>
     import Search from 'lucide-svelte/icons/search';
-    import { Input } from '$components/ui/input/index.js';
-    import { Separator } from '$components/ui/select/index.js';
-    import * as Tabs from '$components/ui/tabs/index.js';
+    import { Input } from '$components/ui/input/';
+    import { Separator } from '$components/ui/select/';
+    import * as Tabs from '$components/ui/tabs/';
     import { reports, tasks } from '$stores';
+    import * as Card from '$components/ui/card';
 
     let activeTab = 'active';
 </script>
