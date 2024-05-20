@@ -57,7 +57,7 @@ pub struct UpdateTask {
     pub description: Option<String>,
     pub task_type: Option<Uuid>,
     pub status: Option<Uuid>,
-    pub archived: Option<Uuid>,
+    pub archived: Option<bool>,
     #[serde(default)]
     pub machine: Nullable<Uuid>,
     #[serde(default)]
