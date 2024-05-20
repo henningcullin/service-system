@@ -2,9 +2,50 @@
     import TaskTable from '$components/TasksTable/table.svelte';
     import * as Card from '$components/ui/card';
     import { tasks } from '$stores';
-    import { getTasks } from '$utils';
+    import { getTasks, evToObj, getOne } from '$utils';
     import { Link } from 'svelte-navigator';
+    import { onMount } from 'svelte';
     getTasks();
+
+    onMount(() => {
+        const taskChannel = new EventSource('/api/auth/channel/tasks');
+
+        taskChannel.onmessage = async (e) => {
+            const message = evToObj(e);
+            if (!message) return;
+            const { id, kind } = message;
+            switch (kind) {
+                case 'INSERT':
+                    const insertData = await getOne(`/api/auth/task?task_id=${id}`);
+                    if (!insertData) return;
+                    tasks.update((prev) => {
+                        prev.unshift(insertData);
+                        return prev;
+                    });
+                    break;
+                case 'UPDATE':
+                    const updateData = await getOne(`/api/auth/task?task_id=${id}`);
+                    if (!updateData) return;
+                    const index = $tasks.findIndex((t) => t.id === id);
+                    tasks.update((prev) => {
+                        prev[index] = updateData;
+                        return prev;
+                    });
+                    break;
+                case 'DELETE':
+                    tasks.update((prev) => prev.filter((t) => t.id !== id));
+                    break;
+            }
+        };
+
+        window.onbeforeunload = () => {
+            taskChannel.close();
+        };
+
+        return () => {
+            taskChannel.close();
+        };
+    });
 </script>
 
 <div class="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
