@@ -3,14 +3,36 @@
     import { Input } from '$components/ui/input/';
     import { Separator } from '$components/ui/select/';
     import * as Tabs from '$components/ui/tabs/';
-    import { reports, tasks } from '$stores';
+    import { account, reports, tasks } from '$stores';
     import * as Card from '$components/ui/card';
+    import { getMyReports, getTasksToExecute } from '$utils';
+    import { onMount } from 'svelte';
 
+    const TASK_VIEWING = 0;
+    const REPORT_VIEWING = 1;
+
+    onMount(async function () {
+        reports.set([]);
+        tasks.set([]);
+        getMyReports($account?.id);
+        getTasksToExecute($account?.id);
+    });
+
+    let sourceStore = [];
+    let allResults = [];
+    let activeResults = [];
+
+    let type = TASK_VIEWING;
     let activeTab = 'active';
 </script>
 
 <div class="mainGrid">
-    <div>Panel one</div>
+    <div>
+        <Tabs.Root bind:value={type}>
+            <Tabs.Trigger value={TASK_VIEWING}>Tasks</Tabs.Trigger>
+            <Tabs.Trigger value={REPORT_VIEWING}>Reports</Tabs.Trigger>
+        </Tabs.Root>
+    </div>
     <div>
         <Tabs.Root bind:value={activeTab}>
             <div class="flex items-center px-4 py-2">
