@@ -136,8 +136,13 @@
                 </Select.Root>
                 <div class="flex flex-col space-y-1.5">
                     <Label for="name" class={errors?.name?.length ? 'text-red-800' : ''}>Name</Label>
-                    <Input id="name" bind:value={$formStore.name} placeholder={formProps.namePlaceholder} />
-                    {#if errors?.name?.length}
+                    <Input
+                        id="name"
+                        disabled={state === VIEWING_STATE}
+                        bind:value={$formStore.name}
+                        placeholder={formProps.namePlaceholder}
+                    />
+                    {#if errors?.name?.length && state !== VIEWING_STATE}
                         <p class="text-red-800 text-xs pt-1">{errors?.name[0]}</p>
                     {/if}
                 </div>
