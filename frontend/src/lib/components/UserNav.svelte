@@ -41,7 +41,7 @@
             </Avatar.Root>
         </Button>
     </DropdownMenu.Trigger>
-    <DropdownMenu.Content class="w-56" align="end" style="z-index:101;">
+    <DropdownMenu.Content class="w-56" align="end">
         <DropdownMenu.Label class="font-normal">
             <div class="flex flex-col space-y-1">
                 <p class="text-sm font-medium leading-none">{$account.first_name}</p>
