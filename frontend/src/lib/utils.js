@@ -137,3 +137,13 @@ export async function getRoles() {
     const data = await fetchJson('/api/auth/roles');
     roles.set(data ?? []);
 }
+
+export async function getMyReports(id) {
+    const data = await fetchJson(`/api/auth/report?creator_id=${id}`);
+    reports.set(data ?? []);
+}
+
+export async function getTasksToExecute(id) {
+    const data = await fetchJson(`/api/auth/task?executor_id=${id}`);
+    tasks.set(data ?? []);
+}
