@@ -42,7 +42,7 @@
         table.column({
             accessor: 'id',
             id: 'id',
-            header: 'Report',
+            header: 'User',
             cell: ({ value, row }) => {
                 if (row.isData()) {
                     return createRender(DTIdCell, {
