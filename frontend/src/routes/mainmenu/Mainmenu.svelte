@@ -5,17 +5,16 @@
     import * as Tabs from '$components/ui/tabs/';
     import { account, reports, tasks } from '$stores';
     import { getMyReports, getTasksToExecute } from '$utils';
-    import { onMount } from 'svelte';
     import TaskCard from '$components/MainMenu/TaskCard.svelte';
     import ReportCard from '$components/MainMenu/ReportCard.svelte';
     import { Button } from '$components/ui/button/';
 
-    onMount(function () {
-        reports.set([]);
-        tasks.set([]);
+    reports.set([]);
+    tasks.set([]);
+    $: {
         getMyReports($account?.id);
         getTasksToExecute($account?.id);
-    });
+    }
 
     let type = 'task';
     let activeTab = 'active';
