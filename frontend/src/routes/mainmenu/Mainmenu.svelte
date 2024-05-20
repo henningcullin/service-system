@@ -4,61 +4,17 @@
     import { Separator } from '$components/ui/separator';
     import * as Tabs from '$components/ui/tabs/';
     import { account, reports, tasks } from '$stores';
-    import { fetchJson, getMyReports, getTasksToExecute } from '$utils';
+    import { getMyReports, getTasksToExecute } from '$utils';
     import { onMount } from 'svelte';
     import TaskCard from '$components/MainMenu/TaskCard.svelte';
     import ReportCard from '$components/MainMenu/ReportCard.svelte';
     import { Button } from '$components/ui/button/';
-
-    function eventToObj(ev) {
-        try {
-            const data = JSON.parse(ev.data);
-            return data;
-        } catch (error) {
-            return false;
-        }
-    }
 
     onMount(function () {
         reports.set([]);
         tasks.set([]);
         getMyReports($account?.id);
         getTasksToExecute($account?.id);
-
-        const taskChannel = new EventSource('/api/auth/channel/tasks');
-        const reportChannel = new EventSource('/api/auth/channel/reports');
-
-        taskChannel.onmessage = (e) => {
-            const message = eventToObj(e);
-            if (!message) return;
-            console.log('task message', message);
-        };
-
-        reportChannel.onmessage = async (e) => {
-            const message = eventToObj(e);
-            if (!message) return;
-            const { id, kind } = message;
-            switch (kind) {
-                case 'INSERT':
-                    break;
-                case 'UPDATE':
-                    const data = await fetchJson(`/api/auth/report?report_id=${id}`);
-                    break;
-                case 'DELETE':
-                    reports.update((prev) => prev.filter((r) => r.id !== id));
-                    break;
-            }
-        };
-
-        window.onbeforeunload = () => {
-            taskChannel.close();
-            reportChannel.close();
-        };
-
-        return () => {
-            taskChannel.close();
-            reportChannel.close();
-        };
     });
 
     let type = 'task';
@@ -89,6 +45,11 @@
                 </form>
             </div>
             <div class="p-1">
+                {#if type === 'task'}
+                    <h2>Tasks to do</h2>
+                {:else}
+                    <h2>My reports</h2>
+                {/if}
                 <Tabs.Content value="all" class="p-2">
                     {#if type === 'task'}
                         {#each $tasks as task}
