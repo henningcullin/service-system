@@ -45,7 +45,7 @@ export async function getLoggedIn() {
     }
 }
 
-async function fetchJson(url) {
+export async function fetchJson(url) {
     try {
         const response = await fetch(url);
         return response.json();

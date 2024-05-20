@@ -4,7 +4,7 @@
     import { Separator } from '$components/ui/separator';
     import * as Tabs from '$components/ui/tabs/';
     import { account, reports, tasks } from '$stores';
-    import { getMyReports, getTasksToExecute } from '$utils';
+    import { fetchJson, getMyReports, getTasksToExecute } from '$utils';
     import { onMount } from 'svelte';
     import TaskCard from '$components/MainMenu/TaskCard.svelte';
     import ReportCard from '$components/MainMenu/ReportCard.svelte';
@@ -34,10 +34,25 @@
             console.log('task message', message);
         };
 
-        reportChannel.onmessage = (e) => {
+        reportChannel.onmessage = async (e) => {
             const message = eventToObj(e);
             if (!message) return;
-            console.log('report message', message);
+            const { id, kind } = message;
+            switch (kind) {
+                case 'INSERT':
+                    break;
+                case 'UPDATE':
+                    const data = await fetchJson(`/api/auth/report?report_id=${id}`);
+                    break;
+                case 'DELETE':
+                    reports.update((prev) => prev.filter((r) => r.id !== id));
+                    break;
+            }
+        };
+
+        window.onbeforeunload = () => {
+            taskChannel.close();
+            reportChannel.close();
         };
 
         return () => {
@@ -55,8 +70,6 @@
         <Tabs.Root bind:value={activeTab}>
             <div class="flex items-center px-4 py-2">
                 <h1 class="text-xl font-bold">Inbox</h1>
-                <Button on:click={() => (type = 'task')}>Tasks to do</Button>
-                <Button on:click={() => (type = 'report')}>My Reports</Button>
                 <Tabs.List class="ml-auto">
                     <Tabs.Trigger value="all" class="text-zinc-600 dark:text-zinc-200">All</Tabs.Trigger>
                     <Tabs.Trigger value="active" class="text-zinc-600 dark:text-zinc-200">Active</Tabs.Trigger>
@@ -65,6 +78,10 @@
             <Separator />
             <div class="bg-background/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 <form>
+                    <div>
+                        <Button variant="outline" on:click={() => (type = 'task')}>Tasks to do</Button>
+                        <Button variant="outline" on:click={() => (type = 'report')}>My Reports</Button>
+                    </div>
                     <div class="relative">
                         <Search class="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
                         <Input placeholder="Search" class="pl-8" />
@@ -101,8 +118,6 @@
 <style>
     .mainGrid {
         padding-top: 2%;
-        display: grid;
-        grid-template-columns: 1fr 2fr 4fr;
         height: 90dvh;
         width: 90%;
     }
@@ -110,6 +125,5 @@
     .mainGrid > div {
         height: 100%;
         width: 100%;
-        border: 1px solid red;
     }
 </style>
