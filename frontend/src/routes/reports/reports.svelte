@@ -1,11 +1,10 @@
 <script>
     import ReportTable from '$components/ReportsTable/table.svelte';
     import { reports } from '$stores';
-    import { getReports } from '$utils';
+    import { getReports, evToObj, getOne } from '$utils';
     import * as Card from '$components/ui/card';
     import { Link } from 'svelte-navigator';
     import { onMount } from 'svelte';
-    import { evToObj, getOne } from '$utils';
     getReports();
 
     onMount(() => {
