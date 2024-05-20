@@ -70,7 +70,7 @@
         <AlertDialog.Header>
             <AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
             <AlertDialog.Description>
-                This action cannot be undone. This will annonymize all references to this user.
+                This action cannot be undone. This will permanently remove all references to this user.
             </AlertDialog.Description>
         </AlertDialog.Header>
         <AlertDialog.Footer>
