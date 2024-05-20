@@ -7,6 +7,8 @@
     import { Button } from '$lib/components/ui/button/index.js';
     import LoaderCircle from 'lucide-svelte/icons/loader-circle';
 
+    document.title = 'Login';
+
     let emailInput;
     let passwordInput;
     let otpInput;

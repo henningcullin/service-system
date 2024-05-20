@@ -1,6 +1,8 @@
 <script lang="ts">
     import * as Tabs from '$components/ui/tabs/index.js';
     import RoleCard from '$components/RoleCard/RoleCard.svelte';
+
+    document.title = 'Roles';
 </script>
 
 <Tabs.Root class="flex flex-col items-center min-h-screen pt-8">

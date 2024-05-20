@@ -5,6 +5,8 @@
     import { getUsers } from '$utils';
     import { Link } from 'svelte-navigator';
     getUsers();
+
+    document.title = 'Users';
 </script>
 
 <div class="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">

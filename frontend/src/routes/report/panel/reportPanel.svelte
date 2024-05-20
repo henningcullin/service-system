@@ -10,6 +10,8 @@
 
     getReportTypes();
     getReportStatuses();
+
+    document.title = 'Report Panel';
 </script>
 
 <div class="w-full min-h-[15vh] flex items-center justify-center">

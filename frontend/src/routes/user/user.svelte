@@ -1,6 +1,8 @@
 <script lang="ts">
     import * as Tabs from '$components/ui/tabs/index.js';
     import UserCard from '$components/UserCard/UserCard.svelte';
+
+    document.title = 'User';
 </script>
 
 <Tabs.Root class="flex flex-col items-center min-h-screen pt-8">

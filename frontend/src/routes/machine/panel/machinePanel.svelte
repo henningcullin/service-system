@@ -4,6 +4,8 @@
     import { machineTypes, machineType, machineStatuses, machineStatus } from '$stores';
     import { getMachineTypes, getMachineStatuses } from '$utils';
 
+    document.title = 'Machine Panel';
+
     const url = new URL(location.href);
     const type = url.searchParams?.get('type');
     const status = url.searchParams?.get('status');

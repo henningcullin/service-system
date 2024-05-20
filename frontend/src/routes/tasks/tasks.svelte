@@ -7,6 +7,8 @@
     import { onMount } from 'svelte';
     getTasks();
 
+    document.title = 'Tasks';
+
     onMount(() => {
         const taskChannel = new EventSource('/api/auth/channel/tasks');
 

@@ -10,6 +10,8 @@
 
     getTaskTypes();
     getTaskStatuses();
+
+    document.title = 'Task Panel';
 </script>
 
 <div class="w-full min-h-[15vh] flex items-center justify-center">

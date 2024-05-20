@@ -9,6 +9,8 @@
     import ReportCard from '$components/MainMenu/ReportCard.svelte';
     import { Button } from '$components/ui/button/';
 
+    document.title = 'Mainmenu';
+
     reports.set([]);
     tasks.set([]);
     $: {

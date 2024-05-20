@@ -7,6 +7,8 @@
     import { onMount } from 'svelte';
     getReports();
 
+    document.title = 'Reports';
+
     onMount(() => {
         const reportChannel = new EventSource('/api/auth/channel/reports');
 
