@@ -12,10 +12,10 @@ sidebar {
 }
 
 pushable {
-    margin-left: 0;
+    margin-left: 0 !important;
 }
 .push {
-    margin-left: 14em;
+    margin-left: 14em !important;
 }
 .dim {
     opacity: 30%;
