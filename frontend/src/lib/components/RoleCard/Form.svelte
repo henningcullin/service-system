@@ -60,8 +60,8 @@
 
     async function createRole() {
         try {
-            typeof $form?.level === 'number' ? null : ($form.level = Number($form?.level));
-            const response = await sendJSON('/api/auth/role', 'POST', { $form });
+            $form.level = Number($form?.level);
+            const response = await sendJSON('/api/auth/role', 'POST', { ...$form });
             if (response.status !== 201) return toast.error('Failed to create the role');
             const data = await response.json();
             role.set(data);
