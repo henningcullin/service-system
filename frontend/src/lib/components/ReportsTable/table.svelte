@@ -20,6 +20,7 @@
         DTDateCell,
         DTMachineCell,
         DTCreatorCell,
+        DTArchivedCell,
     } from './index.js';
 
     import * as Table from '$lib/components/ui/table/index.js';
@@ -115,6 +116,16 @@
             header: 'Creator',
             cell: ({ value }) => {
                 return createRender(DTCreatorCell, {
+                    value,
+                });
+            },
+        }),
+        table.column({
+            accessor: 'archived',
+            id: 'archived',
+            header: 'Archived',
+            cell: ({ value }) => {
+                return createRender(DTArchivedCell, {
                     value,
                 });
             },
