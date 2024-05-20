@@ -11,35 +11,29 @@
     import Factory from 'lucide-svelte/icons/factory';
     $: IsSidebarOpen = $SidebarOpen;
 
-    $: anyTaskPerms =
-        $account?.role?.task_view ||
-        $account?.role?.task_create ||
-        $account?.role?.task_edit ||
+    $: allTaskPerms =
+        $account?.role?.task_view &&
+        $account?.role?.task_create &&
+        $account?.role?.task_edit &&
         $account?.role?.task_delete;
 
-    $: anyReportPerms =
-        $account?.role?.report_view ||
-        $account?.role?.report_create ||
-        $account?.role?.report_edit ||
+    $: allReportPerms =
+        $account?.role?.report_view &&
+        $account?.role?.report_create &&
+        $account?.role?.report_edit &&
         $account?.role?.report_delete;
 
-    $: anyMachinePerms =
-        $account?.role?.machine_view ||
-        $account?.role?.machine_create ||
-        $account?.role?.machine_edit ||
+    $: allMachinePerms =
+        $account?.role?.machine_view &&
+        $account?.role?.machine_create &&
+        $account?.role?.machine_edit &&
         $account?.role?.machine_delete;
 
-    $: anyUserPerms =
-        $account?.role?.user_view ||
-        $account?.role?.user_create ||
-        $account?.role?.user_edit ||
+    $: allUserPerms =
+        $account?.role?.user_view &&
+        $account?.role?.user_create &&
+        $account?.role?.user_edit &&
         $account?.role?.user_delete;
-
-    $: anyFacilityPerms =
-        $account?.role?.facility_view ||
-        $account?.role?.facility_create ||
-        $account?.role?.facility_edit ||
-        $account?.role?.facility_delete;
 
     function close() {
         SidebarOpen.set(false);
@@ -49,80 +43,72 @@
 <sidebar class={IsSidebarOpen ? 'open' : ''}>
     <Link to="/" on:click={close}><LayoutDashboard style="display:inherit" /> Mainmenu</Link>
     <Accordion.Root class="w-full">
-        {#if anyTaskPerms}
+        {#if $account?.role?.task_view}
             <Accordion.Item value="tasks">
                 <Accordion.Trigger><ClipboardList />Tasks</Accordion.Trigger>
                 <Accordion.Content>
                     <div class="grid grid-cols-1 gap-2">
-                        {#if $account?.role?.task_view}
-                            <Link to="/tasks" on:click={close}>Tasks</Link>
-                            <Separator />
+                        <Link to="/tasks" on:click={close}>Tasks</Link>
+                        <Separator />
+                        <Link to="/task/?new=true" on:click={close}>Create Task</Link>
+                        <Separator />
+                        {#if allTaskPerms}
+                            <Link to="/task/panel/" on:click={close}>Task Panel</Link>
                         {/if}
-                        {#if $account?.role?.task_create}
-                            <Link to="/task/?new=true" on:click={close}>Create Task</Link>
-                            <Separator />
-                        {/if}
-                        <Link to="/task/panel/" on:click={close}>Task Panel</Link>
                     </div>
                 </Accordion.Content>
             </Accordion.Item>
         {/if}
-        {#if anyReportPerms}
+        {#if $account?.role?.report_view}
             <Accordion.Item value="reports">
                 <Accordion.Trigger><Flag /> Reports</Accordion.Trigger>
                 <Accordion.Content>
                     <div class="grid grid-cols-1 gap-2">
-                        {#if $account?.role?.report_view}
-                            <Link to="/reports" on:click={close}>Reports</Link>
-                            <Separator />
+                        <Link to="/reports" on:click={close}>Reports</Link>
+                        <Separator />
+                        <Link to="/report/?new=true" on:click={close}>Create Report</Link>
+                        <Separator />
+                        {#if allReportPerms}
+                            <Link to="/report/panel/" on:click={close}>Report Panel</Link>
                         {/if}
-                        {#if $account?.role?.report_create}
-                            <Link to="/report/?new=true" on:click={close}>Create Report</Link>
-                            <Separator />
-                        {/if}
-                        <Link to="/report/panel/" on:click={close}>Report Panel</Link>
                     </div>
                 </Accordion.Content>
             </Accordion.Item>
         {/if}
-        {#if anyMachinePerms}
+        {#if $account?.role?.machine_view}
             <Accordion.Item value="machines">
                 <Accordion.Trigger><CPU />Machines</Accordion.Trigger>
                 <Accordion.Content>
                     <div class="grid grid-cols-1 gap-2">
-                        {#if $account?.role?.machine_view}
-                            <Link to="/machines" on:click={close}>Machines</Link>
-                            <Separator />
+                        <Link to="/machines" on:click={close}>Machines</Link>
+                        <Separator />
+                        <Link to="/machine/?new=true" on:click={close}>Create Machine</Link>
+                        <Separator />
+                        {#if allMachinePerms}
+                            <Link to="/machine/panel/" on:click={close}>Machine Panel</Link>
                         {/if}
-                        {#if $account?.role?.machine_create}
-                            <Link to="/machine/?new=true" on:click={close}>Create Machine</Link>
-                            <Separator />
-                        {/if}
-                        <Link to="/machine/panel/" on:click={close}>Machine Panel</Link>
                     </div>
                 </Accordion.Content>
             </Accordion.Item>
         {/if}
-        {#if anyUserPerms}
+        {#if $account?.role?.user_view}
             <Accordion.Item value="users">
                 <Accordion.Trigger><Users />Users</Accordion.Trigger>
                 <Accordion.Content>
                     <div class="grid grid-cols-1 gap-2">
-                        {#if $account?.role?.user_view}
-                            <Link to="/users" on:click={close}>Users</Link>
-                            <Separator />
+                        <Link to="/users" on:click={close}>Users</Link>
+                        <Separator />
+                        <Link to="/user/?new=true" on:click={close}>Create User</Link>
+                        <Separator />
+                        {#if allUserPerms}
+                            <Link to="/role/" on:click={close}>Roles</Link>
                         {/if}
-                        {#if $account?.role?.user_create}
-                            <Link to="/user/?new=true" on:click={close}>Create User</Link>
-                            <Separator />
-                        {/if}
-                        <Link to="/role/" on:click={close}>Roles</Link>
                     </div>
                 </Accordion.Content>
             </Accordion.Item>
         {/if}
     </Accordion.Root>
-    {#if anyFacilityPerms}
+    {#if $account?.role?.facility_view}
         <Link to="/facility" on:click={close}><Factory style="display:inherit" /> Facilities</Link>
     {/if}
 </sidebar>
