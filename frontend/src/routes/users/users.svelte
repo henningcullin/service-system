@@ -1,9 +1,8 @@
 <script>
     import UserTable from '$components/UsersTable/table.svelte';
     import { users } from '$stores';
-    import * as Card from '$components/ui/card';
+    import UserCard from '$components/MobieCards/UserCard.svelte';
     import { getUsers } from '$utils';
-    import { Link } from 'svelte-navigator';
     getUsers();
 
     document.title = 'Users';
@@ -25,11 +24,6 @@
         </div>
     </div>
     {#each $users as user}
-        <Card.Root class="w-[100%]">
-            <Card.Header>
-                <Card.Title><Link to="/user/{user?.id}">{user?.first_name} {user?.last_name}</Link></Card.Title>
-                <Card.Description><a href="mailto:{user?.email}">{user?.email}</a></Card.Description>
-            </Card.Header>
-        </Card.Root>
+        <UserCard {user} />
     {/each}
 </div>
