@@ -2,8 +2,7 @@
     import ReportTable from '$components/ReportsTable/table.svelte';
     import { reports } from '$stores';
     import { getReports, evToObj, getOne } from '$utils';
-    import * as Card from '$components/ui/card';
-    import { Link } from 'svelte-navigator';
+    import ReportCard from '$components/MainMenu/ReportCard.svelte';
     import { onMount } from 'svelte';
     getReports();
 
@@ -66,11 +65,6 @@
         </div>
     </div>
     {#each $reports as report}
-        <Card.Root class="w-[100%]">
-            <Card.Header>
-                <Card.Title><Link to="/report/{report?.id}">{report?.title}</Link></Card.Title>
-                <Card.Description>{report?.description}</Card.Description>
-            </Card.Header>
-        </Card.Root>
+        <ReportCard {report} />
     {/each}
 </div>
