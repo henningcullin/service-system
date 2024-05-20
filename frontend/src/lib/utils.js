@@ -147,3 +147,25 @@ export async function getTasksToExecute(id) {
     const data = await fetchJson(`/api/auth/task?executor_id=${id}`);
     tasks.set(data ?? []);
 }
+
+// SSE STUFF
+
+export function evToObj(ev) {
+    try {
+        const data = JSON.parse(ev.data);
+        return data;
+    } catch (error) {
+        return false;
+    }
+}
+
+export async function getOne(url) {
+    try {
+        const data = await fetchJson(url);
+        if (data instanceof Array && data?.length === 1) {
+            return data[0];
+        } else return false;
+    } catch (error) {
+        return false;
+    }
+}
