@@ -11,9 +11,11 @@
         <Tabs.Trigger value="tasks"></Tabs.Trigger>
         <Tabs.Trigger value="reports"></Tabs.Trigger>
     </Tabs.List>
-    <Tabs.Content value="card" class="flex flex-col min-w-full">
-        <FacilityCard />
-    </Tabs.Content>
-    <Tabs.Content value="tasks"></Tabs.Content>
-    <Tabs.Content value="reports"></Tabs.Content>
+    <div class="flex flex-col min-w-full">
+        <Tabs.Content value="card">
+            <FacilityCard />
+        </Tabs.Content>
+        <Tabs.Content value="tasks"></Tabs.Content>
+        <Tabs.Content value="reports"></Tabs.Content>
+    </div>
 </Tabs.Root>
