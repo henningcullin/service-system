@@ -1,15 +1,14 @@
 <script>
     import Search from 'lucide-svelte/icons/search';
     import { Input } from '$components/ui/input/';
-    import { Separator } from '$components/ui/select/';
+    import { Separator } from '$components/ui/separator';
     import * as Tabs from '$components/ui/tabs/';
     import { account, reports, tasks } from '$stores';
     import * as Card from '$components/ui/card';
     import { getMyReports, getTasksToExecute } from '$utils';
     import { onMount } from 'svelte';
-
-    const TASK_VIEWING = 0;
-    const REPORT_VIEWING = 1;
+    import { Button } from '$components/ui/button/';
+    import { Link } from 'svelte-navigator';
 
     onMount(async function () {
         reports.set([]);
@@ -18,20 +17,14 @@
         getTasksToExecute($account?.id);
     });
 
-    let sourceStore = [];
-    let allResults = [];
-    let activeResults = [];
-
-    let type = TASK_VIEWING;
+    let type = 'task';
     let activeTab = 'active';
 </script>
 
 <div class="mainGrid">
     <div>
-        <Tabs.Root bind:value={type}>
-            <Tabs.Trigger value={TASK_VIEWING}>Tasks</Tabs.Trigger>
-            <Tabs.Trigger value={REPORT_VIEWING}>Reports</Tabs.Trigger>
-        </Tabs.Root>
+        <Button on:click={() => (type = 'task')}>Tasks to do</Button>
+        <Button on:click={() => (type = 'report')}>My Reports</Button>
     </div>
     <div>
         <Tabs.Root bind:value={activeTab}>
@@ -51,8 +44,63 @@
                     </div>
                 </form>
             </div>
-            <Tabs.Content value="all" class="m-0">All reports / tasks</Tabs.Content>
-            <Tabs.Content value="active" class="m-0">Non archived reports / tasks</Tabs.Content>
+            <Tabs.Content value="all" class="m-0">
+                {#if type === 'task'}
+                    {#each $tasks as task}
+                        <p>{task?.id}</p>
+                    {/each}
+                {:else}
+                    {#each $reports as report}
+                        <p>{report?.id}</p>{/each}
+                {/if}
+            </Tabs.Content>
+            <Tabs.Content value="active" class="m-0">
+                {#if type === 'task'}
+                    {#each $tasks?.filter((t) => !t?.archived) as task}
+                        <Card.Root>
+                            <Card.Header>
+                                <Card.Title
+                                    ><b class="ml-auto text-xs text-muted-foreground">Title </b><Link
+                                        to="/task/{task?.id}">{task?.title}</Link
+                                    ></Card.Title
+                                >
+                            </Card.Header>
+                            <Card.Content>
+                                <p>
+                                    <b class="ml-auto text-xs text-muted-foreground">Type</b>
+                                    <Link to="/task/panel/?type={task?.task_type?.id}">{task?.task_type?.name}</Link>
+                                </p>
+                                <p>
+                                    <b class="ml-auto text-xs text-muted-foreground">Status</b>
+                                    <Link to="/task/panel/?status={task?.status?.id}">{task?.status?.name}</Link>
+                                </p>
+                                {#if task?.machine?.id}
+                                    <p>
+                                        <b class="ml-auto text-xs text-muted-foreground">Machine</b>
+
+                                        <Link to="/machine/{task?.machine?.id}">{task?.machine?.name}</Link>
+                                    </p>
+                                {/if}
+                                <p>
+                                    <b class="ml-auto text-xs text-muted-foreground">Creator</b>
+                                    <Link to="/user/{task?.creator?.id}">
+                                        {task?.creator?.first_name}
+                                        {task?.creator?.last_name}
+                                    </Link>
+                                </p>
+                                <Separator class="my-1" />
+                                <h2 class="ml-auto text-xs text-muted-foreground">Description</h2>
+                                <span>
+                                    {task?.description}
+                                </span>
+                            </Card.Content>
+                        </Card.Root>
+                    {/each}
+                {:else}
+                    {#each $reports?.filter((r) => !r?.archived) as report}
+                        <p>{report?.id}</p>{/each}
+                {/if}
+            </Tabs.Content>
         </Tabs.Root>
     </div>
     <div>Panel 3</div>
