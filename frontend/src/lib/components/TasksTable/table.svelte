@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
     import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
     import { tasks } from '$stores';
     import {
@@ -21,6 +21,7 @@
         DTMachineCell,
         DTCreatorCell,
         DTExecutorsCell,
+        DTArchivedCell,
     } from './index.js';
 
     import * as Table from '$lib/components/ui/table/index.js';
@@ -126,6 +127,16 @@
             header: 'Executors',
             cell: ({ value }) => {
                 return createRender(DTExecutorsCell, {
+                    value,
+                });
+            },
+        }),
+        table.column({
+            accessor: 'archived',
+            id: 'archived',
+            header: 'Archived',
+            cell: ({ value }) => {
+                return createRender(DTArchivedCell, {
                     value,
                 });
             },
