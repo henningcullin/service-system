@@ -190,7 +190,7 @@
                         });
                     }
                 }
-                if (Object.keys(changedFields).length < 2) {
+                if (Object.keys(changedFields).length < 2 && executorsToUpdate?.length) {
                     await getOneTask($task?.id);
                     navigate('?edit=true');
                     loadFields();
